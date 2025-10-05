@@ -80,7 +80,14 @@ a{ color:var(--accent); }
 <script>const SEARCH_BASE = 'http://ykr.moe:11059/';
 
 function tokensHalf(v){return v.toLowerCase().trim().split(/ +/).filter(Boolean)}
-function qparam(name){ const m = location.search.match(new RegExp('[?&]'+name+'=([^&]+)')); return m ? decodeURIComponent(m[1]) : ''; }
+// 安全なクエリ取得（decode の例外を抑止 + "+" スペース対応）
+function qparam(name){
+  try{
+    const p = new URLSearchParams(window.location.search);
+    const raw = p.get(name) || '';
+    return raw ? decodeURIComponent(raw.replace(/\+/g,' ')) : '';
+  }catch(e){ return ''; }
+}
 
 // data-q → href 生成（軽量リンク化）
 document.addEventListener('DOMContentLoaded', ()=>{
@@ -89,6 +96,7 @@ document.addEventListener('DOMContentLoaded', ()=>{
       const q = a.getAttribute('data-q')||'';
       a.href = SEARCH_BASE + 'search.php?searchword=' + q;
       a.target = '_blank';
+      a.rel = 'noopener';
     }catch(e){}
   });
 });
@@ -144,13 +152,6 @@ function filterCardsAdv(listId, boxId, yearId){
   const cEl = document.getElementById('count-'+listId);
   if(cEl){ cEl.textContent = '表示件数: ' + vis; }
   if(q.length>0 || y!==''){ reorderByPriority(listId); } // ★全体検索のみ
-}
-
-function filterGrid(gridSel, boxId, countId){
-  const q = tokensHalf(document.getElementById(boxId).value);
-  const nodes = document.querySelectorAll(gridSel+' a');
-  let vis=0; nodes.forEach(a=>{ const hit=q.every(t=>a.innerText.toLowerCase().includes(t)); a.style.display=hit?'':'none'; if(hit) vis++; });
-  if(countId){ const el=document.getElementById(countId); if(el){ el.textContent='表示件数: '+vis; } }
 }</script>
 </head>
 <body>
@@ -1577,8 +1578,8 @@ function filterGrid(gridSel, boxId, countId){
 <script>
   const init = qparam('q').trim();
   if(init){
-    document.getElementById('q-list-year-1').value = init.replace(/\+/g,' ');
-    filterCards('list-year-1','q-list-year-1');
+    document.getElementById('q-list-year-1').value = init;
+    window.requestAnimationFrame(()=>{ filterCards('list-year-1','q-list-year-1'); });
   }else{
     document.getElementById('count-list-year-1').textContent = '表示件数: ' + document.querySelectorAll('#list-year-1 .card').length;
   }
