@@ -32,7 +32,7 @@ body{
 .wrap{ max-width:1100px; margin:24px auto; padding:12px; background:var(--panel); border:0; border-radius:0; box-shadow:none; overflow-x:auto; }
 
 h1{ display:inline-block; margin:0 0 14px 0; padding:4px 0; background:transparent; color:#0b1b2e; font-size:18px; font-weight:500 }
-h2{ margin:10px 0 8px; padding:0; color:#0b1b2e; font-size:18px; font-weight:500; background:transparent } /* ← h1と同サイズ */
+h2{ margin:10px 0 8px; padding:0; color:#0b1b2e; font-size:18px; font-weight:500; background:transparent }
 
 .back{ text-align:right; margin:-6px 0 6px 0 }
 .back a{ color:var(--accent); text-decoration:none; border-bottom:1px dotted var(--accent) }
@@ -40,7 +40,7 @@ h2{ margin:10px 0 8px; padding:0; color:#0b1b2e; font-size:18px; font-weight:500
 .section{margin:10px 0 18px}
 .search{display:flex; gap:8px; margin:8px 0 4px; align-items:center; justify-content:flex-start}
 .search select{ padding:8px 10px; font-size:14px; background:var(--panel); border:1px solid var(--ui-gray); border-radius:0; font-weight:400 }
-.search input[type=text]{ flex:0 0 260px; width:260px; padding:8px; font-size:14px; background:var(--panel); border:1px solid var(--ui-gray); border-radius:0; font-weight:400 }
+.search input[type=text]{ flex:0 0 420px; width:420px; padding:8px; font-size:14px; background:var(--panel); border:1px solid var(--ui-gray); border-radius:0; font-weight:400 }
 .search button{ padding:8px 12px; font-size:14px; color:#fff; background:var(--accent-90); border:1px solid var(--ui-gray); border-radius:0; cursor:pointer }
 .count{font-size:11px; color:#222; margin:4px 0 8px}
 a{ color:var(--accent); }
@@ -66,12 +66,7 @@ a{ color:var(--accent); }
 .meta{margin:3px 0; font-weight:400}
 .meta .label{display:inline-block; min-width:84px; color:#0b1b2e; font-weight:400}
 
-/* ページャ */
-.pager{display:flex; gap:6px; flex-wrap:wrap; margin:14px 0}
-.pager a,.pager span{padding:6px 10px; border:1px solid var(--border); text-decoration:none; color:#fff; background:var(--accent-70); font-weight:400}
-.pager .current{background:var(--accent-90); color:#fff}
-
-/* スクロール枠（search_all / 年別 / 新着 / 五十音） */
+/* スクロール枠（全ページ共通） */
 .list-container{max-height:900px; overflow-y:auto; border:1px solid var(--ui-gray); background:rgba(255,255,255,.35); padding:8px; box-shadow:0 4px 8px rgba(0,0,0,.06)}
 .stickybar{position:sticky; top:0; z-index:20; background:rgba(255,255,255,.6); border-bottom:1px solid var(--ui-gray); padding:8px; margin:-8px -8px 8px -8px}
 .stickybar.no-bg{background:transparent; border:none; padding:0; margin:0 0 8px 0}
@@ -79,11 +74,7 @@ a{ color:var(--accent); }
 @media (max-width:768px){
   body{ background-image:url('https://raw.githubusercontent.com/hachi515/yukari_list_001/main/Hasunosora_2.png'); font-size:13px }
   .search select, .search input[type=text], .search button{ font-size:13px; padding:7px 10px }
-  /* 入力幅をスマホではやや広めに */
   .search input[type=text]{ flex:0 0 56vw; width:56vw }
-  .list-container{ max-height:450px }
-}
-  .search select, .search input[type=text], .search button{ font-size:13px; padding:7px 10px }
   .list-container{ max-height:450px }
 }</style>
 <script>const SEARCH_BASE = 'http://ykr.moe:11059/';
@@ -91,7 +82,7 @@ a{ color:var(--accent); }
 function tokensHalf(v){return v.toLowerCase().trim().split(/ +/).filter(Boolean)}
 function qparam(name){ const m = location.search.match(new RegExp('[?&]'+name+'=([^&]+)')); return m ? decodeURIComponent(m[1]) : ''; }
 
-// 軽量リンク化：data-q を href に展開
+// data-q → href 生成（軽量リンク化）
 document.addEventListener('DOMContentLoaded', ()=>{
   document.querySelectorAll('a[data-q]').forEach(a=>{
     try{
@@ -115,9 +106,6 @@ function filterCards(listId, boxId){
   });
   const cEl = document.getElementById('count-'+listId);
   if(cEl){ cEl.textContent = '表示件数: ' + vis; }
-  const pager = document.getElementById('pager-'+listId);
-  const per = parseInt(list.dataset.per || '100',10);
-  if(pager){ if(q.length===0){ pager.style.display = ''; } else { pager.style.display = (vis<=per) ? 'none' : ''; } }
 }
 
 /* ===== 検索結果専用：表示中カードを「制作者優先度→日付」で並べ替え ===== */
@@ -149,16 +137,13 @@ function filterCardsAdv(listId, boxId, yearId){
     const okText = q.every(tok => c.innerText.toLowerCase().includes(tok));
     const band = (c.dataset.yearband||'');
     const yr = (c.dataset.year||'');
-    const okYear = (y==='' || yr===y || band===y);
-    const show = okText && okYear;
+    const show = okText && (y==='' || yr===y || band===y);
     c.style.display = show ? '' : 'none';
     if(show) vis++;
   });
   const cEl = document.getElementById('count-'+listId);
   if(cEl){ cEl.textContent = '表示件数: ' + vis; }
-
-  // ★検索（キーワード or 年帯）を使ったときだけ優先度並び替えを実施
-  if(q.length>0 || y!==''){ reorderByPriority(listId); }
+  if(q.length>0 || y!==''){ reorderByPriority(listId); } // ★全体検索のみ
 }
 
 function filterGrid(gridSel, boxId, countId){
@@ -181,115 +166,19 @@ function filterGrid(gridSel, boxId, countId){
   <div class='count' id='count-list-す'></div>
 
   <div class='list-container'>
-    <div class='prog-grid list-す'><a class='btn' href='search_all.html?q=+%e3%82%b9%e3%83%bc%e3%83%91%e3%83%bc%e3%83%ad%e3%83%9c%e3%83%83%e3%83%88%e5%a4%a7%e6%88%a630%e3%83%bbJAM+Project+(YOUTUBE%e5%8b%95%e7%94%bb%e4%bd%bf%e7%94%a8)'> スーパーロボット大戦30・JAM Project (YOUTUBE動画使用)</a>
-<a class='btn' href='search_all.html?q=+%e3%82%b9%e3%83%bc%e3%83%91%e3%83%bc%e3%83%ad%e3%83%9c%e3%83%83%e3%83%88%e5%a4%a7%e6%88%a630%e3%83%bb%e9%81%a0%e8%97%a4%e6%ad%a3%e6%98%8e'> スーパーロボット大戦30・遠藤正明</a>
-<a class='btn' href='search_all.html?q=+%e3%82%b9%e3%83%bc%e3%83%91%e3%83%bc%e3%83%ad%e3%83%9c%e3%83%83%e3%83%88%e5%a4%a7%e6%88%a630%e5%91%a8%e5%b9%b4%e8%a8%98%e5%bf%b5%e6%9b%b2%e3%83%bbJAM+Project+'> スーパーロボット大戦30周年記念曲・JAM Project </a>
-<a class='btn' href='search_all.html?q=+%e3%82%b9%e3%83%ac%e3%82%a4%e3%83%a4%e3%83%bc%e3%82%baTRY'> スレイヤーズTRY</a>
-<a class='btn' href='search_all.html?q=%e3%81%99%ef%bc%89SchoolDays'>す）SchoolDays</a>
+    <div class='prog-grid list-す'><a class='btn' href='search_all.html?q=%e3%81%99%ef%bc%89SchoolDays'>す）SchoolDays</a>
 <a class='btn' href='search_all.html?q=%e3%81%99%ef%bc%89%e3%82%b9%e3%82%bf%e3%83%bc%e3%82%b7%e3%83%83%e3%83%97%e3%83%bb%e3%82%aa%e3%83%9a%e3%83%ac%e3%83%bc%e3%82%bf%e3%83%bc'>す）スターシップ・オペレーター</a>
 <a class='btn' href='search_all.html?q=%e3%81%99%ef%bc%89%e3%82%b9%e3%83%91%e3%82%a4%e3%83%a9%e3%83%ab%ef%bc%8d%e6%8e%a8%e7%90%86%e3%81%ae%e7%b5%86%ef%bc%8d'>す）スパイラル－推理の絆－</a>
 <a class='btn' href='search_all.html?q=%e3%81%99%ef%bc%89%e3%82%b9%e3%83%94%e3%83%bc%e3%83%89%e3%82%b0%e3%83%a9%e3%83%95%e3%82%a1%e3%83%bc'>す）スピードグラファー</a>
 <a class='btn' href='search_all.html?q=%e3%81%99%ef%bc%89%e3%81%99%e3%82%82%e3%82%82%e3%82%82%e3%82%82%e3%82%82%e3%82%82%ef%bd%9e%e5%9c%b0%e4%b8%8a%e6%9c%80%e5%bc%b7%e3%81%ae%e3%83%a8%e3%83%a1%ef%bd%9e'>す）すもももももも～地上最強のヨメ～</a>
-<a class='btn' href='search_all.html?q=%e3%82%b9%e3%82%a4%e3%83%bc%e3%83%88%e3%83%97%e3%83%aa%e3%82%ad%e3%83%a5%e3%82%a2%e2%99%aa'>スイートプリキュア♪</a>
-<a class='btn' href='search_all.html?q=%e3%82%b9%e3%82%a4%e3%83%bc%e3%83%88%e3%83%9e%e3%82%b8%e3%83%83%e3%82%af+%ef%bc%8f%e3%83%af%e3%83%b3%e3%83%80%e3%83%bc%e3%83%a9%e3%83%b3%e3%82%ba%c3%97%e3%82%b7%e3%83%a7%e3%82%a6%e3%82%bf%e3%82%a4%e3%83%a0'>スイートマジック ／ワンダーランズ&#215;ショウタイム</a>
-<a class='btn' href='search_all.html?q=%e3%82%b9%e3%82%a4%e3%82%bb%e3%82%a4%e3%82%ae%e3%83%b3%e3%82%ab'>スイセイギンカ</a>
-<a class='btn' href='search_all.html?q=%e3%82%b9%e3%83%bc%e3%83%91%e3%83%bc%e3%82%ab%e3%83%96'>スーパーカブ</a>
-<a class='btn' href='search_all.html?q=%e3%82%b9%e3%83%bc%e3%83%91%e3%83%bc%e3%83%85%e3%82%ac%e3%83%b3'>スーパーヅガン</a>
-<a class='btn' href='search_all.html?q=%e3%82%b9%e3%83%bc%e3%83%91%e3%83%bc%e3%83%92%e3%83%bc%e3%83%ad%e3%83%bc%e3%82%b9%e3%83%94%e3%83%aa%e3%83%83%e3%83%842000%e5%a4%8f%e3%81%ae%e9%99%a3'>スーパーヒーロースピリッツ2000夏の陣</a>
-<a class='btn' href='search_all.html?q=%e3%82%b9%e3%83%bc%e3%83%91%e3%83%bc%e3%83%92%e3%83%bc%e3%83%ad%e3%83%bc%e3%83%9f%e3%83%a5%e3%83%bc%e3%82%b8%e3%83%83%e3%82%af%e3%82%b9%e3%82%bf%e3%82%b8%e3%82%aa+%e3%83%bbNoB(Project.R)'>スーパーヒーローミュージックスタジオ ・NoB(Project.R)</a>
-<a class='btn' href='search_all.html?q=%e3%82%b9%e3%83%bc%e3%83%91%e3%83%bc%e3%83%92%e3%83%bc%e3%83%ad%e3%83%bc%e4%bd%9c%e6%88%a6'>スーパーヒーロー作戦</a>
-<a class='btn' href='search_all.html?q=%e3%82%b9%e3%83%bc%e3%83%91%e3%83%bc%e3%83%95%e3%82%a3%e3%83%83%e3%82%b7%e3%83%b3%e3%82%b0+%e3%82%b0%e3%83%a9%e3%83%b3%e3%83%80%e3%83%bc%e6%ad%a6%e8%94%b5'>スーパーフィッシング グランダー武蔵</a>
 <a class='btn' href='search_all.html?q=%e3%82%b9%e3%83%bc%e3%83%91%e3%83%bc%e3%83%9e%e3%83%aa%e3%82%aa+3D%e3%83%af%e3%83%bc%e3%83%ab%e3%83%89+%ef%bc%8b+%e3%83%95%e3%83%a5%e3%83%bc%e3%83%aa%e3%83%bc%e3%83%af%e3%83%bc%e3%83%ab%e3%83%89'>スーパーマリオ 3Dワールド ＋ フューリーワールド</a>
-<a class='btn' href='search_all.html?q=%e3%82%b9%e3%83%bc%e3%83%91%e3%83%bc%e3%83%ad%e3%83%9c%e3%83%83%e3%83%88%e5%a4%a7%e6%88%a6'>スーパーロボット大戦</a>
-<a class='btn' href='search_all.html?q=%e3%82%b9%e3%83%bc%e3%83%91%e3%83%bc%e3%83%ad%e3%83%9c%e3%83%83%e3%83%88%e5%a4%a7%e6%88%a6+THE+ANIMATION'>スーパーロボット大戦 THE ANIMATION</a>
-<a class='btn' href='search_all.html?q=%e3%82%b9%e3%83%bc%e3%83%91%e3%83%bc%e3%83%ad%e3%83%9c%e3%83%83%e3%83%88%e5%a4%a7%e6%88%a6%e3%83%bb%e9%8b%bc%e9%89%84%e5%85%84%e5%bc%9f'>スーパーロボット大戦・鋼鉄兄弟</a>
-<a class='btn' href='search_all.html?q=%e3%82%b9%e3%83%bc%e3%83%91%e3%83%bc%e3%83%ad%e3%83%9c%e3%83%83%e3%83%88%e5%a4%a7%e6%88%a6%e3%83%bb%e6%b0%b4%e6%9c%a8%e4%b8%80%e9%83%8e%e3%80%81%e5%bd%b1%e5%b1%b1%e3%83%92%e3%83%ad%e3%83%8e%e3%83%96'>スーパーロボット大戦・水木一郎、影山ヒロノブ</a>
-<a class='btn' href='search_all.html?q=%e3%82%b9%e3%83%bc%e3%83%91%e3%83%bc%e3%83%ad%e3%83%9c%e3%83%83%e3%83%88%e5%a4%a7%e6%88%a630'>スーパーロボット大戦30</a>
-<a class='btn' href='search_all.html?q=%e3%82%b9%e3%83%bc%e3%83%91%e3%83%bc%e3%83%ad%e3%83%9c%e3%83%83%e3%83%88%e5%a4%a7%e6%88%a6BX%ef%bc%8f%e6%a9%9f%e5%8b%95%e6%88%a6%e5%a3%ab%e3%82%ac%e3%83%b3%e3%83%80%e3%83%a0AGE'>スーパーロボット大戦BX／機動戦士ガンダムAGE</a>
-<a class='btn' href='search_all.html?q=%e3%82%b9%e3%83%bc%e3%83%91%e3%83%bc%e3%83%ad%e3%83%9c%e3%83%83%e3%83%88%e5%a4%a7%e6%88%a6DD%e3%83%bbJAM+Prroject(YOUTUBE%e5%8b%95%e7%94%bb%e4%bd%bf%e7%94%a8)'>スーパーロボット大戦DD・JAM Prroject(YOUTUBE動画使用)</a>
-<a class='btn' href='search_all.html?q=%e3%82%b9%e3%83%bc%e3%83%91%e3%83%bc%e3%83%ad%e3%83%9c%e3%83%83%e3%83%88%e5%a4%a7%e6%88%a6F'>スーパーロボット大戦F</a>
-<a class='btn' href='search_all.html?q=%e3%82%b9%e3%83%bc%e3%83%91%e3%83%bc%e3%83%ad%e3%83%9c%e3%83%83%e3%83%88%e5%a4%a7%e6%88%a6IMPACT%e3%83%bb%e5%85%90%e7%8e%89+%e5%9b%bd%e5%ba%83+'>スーパーロボット大戦IMPACT・児玉 国広 </a>
-<a class='btn' href='search_all.html?q=%e3%82%b9%e3%83%bc%e3%83%91%e3%83%bc%e3%83%ad%e3%83%9c%e3%83%83%e3%83%88%e5%a4%a7%e6%88%a6MX'>スーパーロボット大戦MX</a>
-<a class='btn' href='search_all.html?q=%e3%82%b9%e3%83%bc%e3%83%91%e3%83%bc%e3%83%ad%e3%83%9c%e3%83%83%e3%83%88%e5%a4%a7%e6%88%a6OG'>スーパーロボット大戦OG</a>
-<a class='btn' href='search_all.html?q=%e3%82%b9%e3%83%bc%e3%83%91%e3%83%bc%e3%83%ad%e3%83%9c%e3%83%83%e3%83%88%e5%a4%a7%e6%88%a6OG+INFINITE+BATTLE'>スーパーロボット大戦OG INFINITE BATTLE</a>
-<a class='btn' href='search_all.html?q=%e3%82%b9%e3%83%bc%e3%83%91%e3%83%bc%e3%83%ad%e3%83%9c%e3%83%83%e3%83%88%e5%a4%a7%e6%88%a6OG+ORIGINAL+GENERATIONS'>スーパーロボット大戦OG ORIGINAL GENERATIONS</a>
-<a class='btn' href='search_all.html?q=%e3%82%b9%e3%83%bc%e3%83%91%e3%83%bc%e3%83%ad%e3%83%9c%e3%83%83%e3%83%88%e5%a4%a7%e6%88%a6OG+%e3%83%87%e3%82%a3%e3%83%90%e3%82%a4%e3%83%b3%e3%83%bb%e3%82%a6%e3%82%a9%e3%83%bc%e3%82%ba'>スーパーロボット大戦OG ディバイン・ウォーズ</a>
-<a class='btn' href='search_all.html?q=%e3%82%b9%e3%83%bc%e3%83%91%e3%83%bc%e3%83%ad%e3%83%9c%e3%83%83%e3%83%88%e5%a4%a7%e6%88%a6OG+%e3%83%a0%e3%83%bc%e3%83%b3%e3%83%bb%e3%83%87%e3%83%a5%e3%82%a8%e3%83%a9%e3%83%bc%e3%82%ba'>スーパーロボット大戦OG ムーン・デュエラーズ</a>
-<a class='btn' href='search_all.html?q=%e3%82%b9%e3%83%bc%e3%83%91%e3%83%bc%e3%83%ad%e3%83%9c%e3%83%83%e3%83%88%e5%a4%a7%e6%88%a6OG%e5%a4%96%e4%bc%9d'>スーパーロボット大戦OG外伝</a>
-<a class='btn' href='search_all.html?q=%e3%82%b9%e3%83%bc%e3%83%91%e3%83%bc%e3%83%ad%e3%83%9c%e3%83%83%e3%83%88%e5%a4%a7%e6%88%a6T'>スーパーロボット大戦T</a>
-<a class='btn' href='search_all.html?q=%e3%82%b9%e3%83%bc%e3%83%91%e3%83%bc%e3%83%ad%e3%83%9c%e3%83%83%e3%83%88%e5%a4%a7%e6%88%a6UX%ef%bc%8f%e8%92%bc%e7%a9%b9%e3%81%ae%e3%83%95%e3%82%a1%e3%83%95%e3%83%8a%e3%83%bc+HEAVEN%26EARTH'>スーパーロボット大戦UX／蒼穹のファフナー HEAVEN&amp;EARTH</a>
-<a class='btn' href='search_all.html?q=%e3%82%b9%e3%83%bc%e3%83%91%e3%83%bc%e3%83%ad%e3%83%9c%e3%83%83%e3%83%88%e5%a4%a7%e6%88%a6V'>スーパーロボット大戦V</a>
-<a class='btn' href='search_all.html?q=%e3%82%b9%e3%83%bc%e3%83%91%e3%83%bc%e3%83%ad%e3%83%9c%e3%83%83%e3%83%88%e5%a4%a7%e6%88%a6X'>スーパーロボット大戦X</a>
-<a class='btn' href='search_all.html?q=%e3%82%b9%e3%83%bc%e3%83%91%e3%83%bc%e3%83%ad%e3%83%9c%e3%83%83%e3%83%88%e5%a4%a7%e6%88%a6Y%e3%83%bbJAM+Project(%e3%83%8b%e3%82%b3%e3%82%ab%e3%83%a9)'>スーパーロボット大戦Y・JAM Project(ニコカラ)</a>
-<a class='btn' href='search_all.html?q=%e3%82%b9%e3%83%bc%e3%83%91%e3%83%bc%e3%83%ad%e3%83%9c%e3%83%83%e3%83%88%e5%a4%a7%e6%88%a6Z'>スーパーロボット大戦Z</a>
 <a class='btn' href='search_all.html?q=%e3%82%b9%e3%83%bc%e3%83%91%e3%83%bc%e3%83%ad%e3%83%9c%e3%83%83%e3%83%88%e5%a4%a7%e6%88%a6Z+ED'>スーパーロボット大戦Z ED</a>
-<a class='btn' href='search_all.html?q=%e3%82%b9%e3%83%bc%e3%83%91%e3%83%bc%e3%83%ad%e3%83%9c%e3%83%83%e3%83%88%e5%a4%a7%e6%88%a6%ce%b1'>スーパーロボット大戦α</a>
-<a class='btn' href='search_all.html?q=%e3%82%b9%e3%83%bc%e3%83%91%e3%83%bc%e3%83%ad%e3%83%9c%e3%83%83%e3%83%88%e5%a4%a7%e6%88%a6%ce%b1+ORIGINAL+STORY+D-3'>スーパーロボット大戦α ORIGINAL STORY D-3</a>
-<a class='btn' href='search_all.html?q=%e3%82%b9%e3%83%bc%e3%83%91%e3%83%bc%e3%83%ad%e3%83%9c%e3%83%83%e3%83%88%e5%a4%a7%e6%88%a6%ce%b1%e5%a4%96%e4%bc%9d'>スーパーロボット大戦α外伝</a>
-<a class='btn' href='search_all.html?q=%e3%82%b9%e3%83%bc%e3%83%91%e3%83%bc%e6%88%a6%e9%97%98+%e7%b4%94%e7%83%88%e3%82%b8%e3%83%a3%e3%83%bc%e3%83%bb%e7%b4%94%e7%83%88'>スーパー戦闘 純烈ジャー・純烈</a>
-<a class='btn' href='search_all.html?q=%e3%82%b9%e3%82%ab%e3%83%bc%e3%83%88'>スカート</a>
-<a class='btn' href='search_all.html?q=%e3%82%b9%e3%82%ab%e3%83%bc%e3%83%ac%e3%83%83%e3%83%89%e3%83%a9%e3%82%a4%e3%83%80%e3%83%bc%e3%82%bc%e3%82%af%e3%82%b9'>スカーレッドライダーゼクス</a>
-<a class='btn' href='search_all.html?q=%e3%82%b9%e3%82%ab%e3%83%bc%e3%83%ac%e3%83%83%e3%83%89%e3%83%a9%e3%82%a4%e3%83%80%e3%83%bc%e3%82%bc%e3%82%af%e3%82%b9+Rev.'>スカーレッドライダーゼクス Rev.</a>
-<a class='btn' href='search_all.html?q=%e3%82%b9%e3%82%ab%e3%83%bc%e3%83%ac%e3%83%83%e3%83%89%e3%83%a9%e3%82%a4%e3%83%80%e3%83%bc%e3%82%bc%e3%82%af%e3%82%b9+-STARDUST+LOVERS-'>スカーレッドライダーゼクス -STARDUST LOVERS-</a>
-<a class='btn' href='search_all.html?q=%e3%82%b9%e3%82%ab%e3%83%bc%e3%83%ac%e3%83%83%e3%83%89%e3%83%a9%e3%82%a4%e3%83%80%e3%83%bc%e3%82%bc%e3%82%af%e3%82%b91%ef%bc%8bFD+%e3%83%9d%e3%83%bc%e3%82%bf%e3%83%96%e3%83%ab'>スカーレッドライダーゼクス1＋FD ポータブル</a>
-<a class='btn' href='search_all.html?q=%e3%82%b9%e3%82%ab%e3%82%a4%e3%82%ac%e3%83%bc%e3%83%ab%e3%82%ba'>スカイガールズ</a>
-<a class='btn' href='search_all.html?q=%e3%82%b9%e3%82%ab%e3%82%a4%e3%82%ac%e3%83%b3%e3%83%8a%e3%83%bc'>スカイガンナー</a>
 <a class='btn' href='search_all.html?q=%e3%82%b9%e3%82%ab%e3%82%a4%e3%82%ad%e3%83%83%e3%83%89%e3%83%96%e3%83%a9%e3%83%83%e3%82%af%e9%ad%94%e7%8e%8b+OP+ED%e3%83%a1%e3%83%89%e3%83%ac%e3%83%bc'>スカイキッドブラック魔王 OP EDメドレー</a>
-<a class='btn' href='search_all.html?q=%e3%82%b9%e3%82%ab%e3%82%a4%e3%82%ad%e3%83%83%e3%83%89%e3%83%96%e3%83%a9%e3%83%83%e3%82%af%e9%ad%94%e7%8e%8b_%e5%a4%a7%e5%a1%9a%e5%91%a8%e5%a4%ab'>スカイキッドブラック魔王_大塚周夫</a>
-<a class='btn' href='search_all.html?q=%e3%82%b9%e3%82%ab%e3%82%a4%e3%82%af%e3%83%a9%e3%83%83%e3%83%89%e3%81%ae%e8%a6%b3%e6%b8%ac%e8%80%85%ef%bc%8f%e3%81%84%e3%81%a8%e3%81%86%e3%81%8b%e3%81%aa%e3%81%93'>スカイクラッドの観測者／いとうかなこ</a>
-<a class='btn' href='search_all.html?q=%e3%82%b9%e3%82%ac%e3%82%b7%e3%82%ab%e3%82%aa'>スガシカオ</a>
-<a class='btn' href='search_all.html?q=%e3%82%b9%e3%82%ad%e3%83%83%e3%83%97%e3%83%bb%e3%83%93%e3%83%bc%e3%83%88%ef%bc%81'>スキップ・ビート！</a>
-<a class='btn' href='search_all.html?q=%e3%82%b9%e3%82%ad%e3%83%83%e3%83%97%e3%81%a8%e3%83%ad%e3%83%bc%e3%83%95%e3%82%a1%e3%83%bc'>スキップとローファー</a>
 <a class='btn' href='search_all.html?q=%e3%82%b9%e3%82%ad%e3%83%83%e3%83%97%e3%81%a8%e3%83%ad%e3%83%bc%e3%83%95%e3%82%a1%e3%83%bc+OP'>スキップとローファー OP</a>
-<a class='btn' href='search_all.html?q=%e3%82%b9%e3%82%af%e3%83%bc%e3%83%ab%e3%82%ac%e3%83%bc%e3%83%ab%e3%82%b9%e3%83%88%e3%83%a9%e3%82%a4%e3%82%ab%e3%83%bc%e3%82%ba+Animation+Channel'>スクールガールストライカーズ Animation Channel</a>
 <a class='btn' href='search_all.html?q=%e3%82%b9%e3%82%af%e3%82%b9%e3%82%bfMV%e7%89%88'>スクスタMV版</a>
-<a class='btn' href='search_all.html?q=%e3%82%b9%e3%82%af%e3%83%a9%e3%82%a4%e3%83%89'>スクライド</a>
-<a class='btn' href='search_all.html?q=%e3%82%b9%e3%82%af%e3%83%a9%e3%83%83%e3%83%97%e3%83%89%e3%83%bb%e3%83%97%e3%83%aa%e3%83%b3%e3%82%bb%e3%82%b9'>スクラップド・プリンセス</a>
-<a class='btn' href='search_all.html?q=%e3%82%b9%e3%82%b1%e3%83%83%e3%83%81%e3%83%96%e3%83%83%e3%82%af+%ef%bd%9efull+color%27s%ef%bd%9e'>スケッチブック ～full color&#39;s～</a>
-<a class='btn' href='search_all.html?q=%e3%81%99%e3%81%93%e3%81%a3%e3%81%b7%ef%bc%bf%e5%88%9d%e9%9f%b3%e3%83%9f%e3%82%af'>すこっぷ＿初音ミク</a>
-<a class='btn' href='search_all.html?q=%e3%82%b9%e3%82%bf%e3%83%bc%e2%98%86%e3%83%88%e3%82%a5%e3%82%a4%e3%83%b3%e3%82%af%e3%83%ab%e3%83%97%e3%83%aa%e3%82%ad%e3%83%a5%e3%82%a2'>スター☆トゥインクルプリキュア</a>
-<a class='btn' href='search_all.html?q=%e3%82%b9%e3%82%bf%e3%83%bc%e3%82%aa%e3%83%bc%e3%82%b7%e3%83%a3%e3%83%b3+1+First+Departure'>スターオーシャン 1 First Departure</a>
-<a class='btn' href='search_all.html?q=%e3%82%b9%e3%82%bf%e3%83%bc%e3%82%aa%e3%83%bc%e3%82%b7%e3%83%a3%e3%83%b3+2+Second+Evolution'>スターオーシャン 2 Second Evolution</a>
-<a class='btn' href='search_all.html?q=%e3%82%b9%e3%82%bf%e3%83%bc%e3%82%aa%e3%83%bc%e3%82%b7%e3%83%a3%e3%83%b3%ef%bc%9a%e3%82%a2%e3%83%8a%e3%83%a0%e3%83%8d%e3%82%b7%e3%82%b9'>スターオーシャン：アナムネシス</a>
-<a class='btn' href='search_all.html?q=%e3%82%b9%e3%82%bf%e3%83%bc%e3%82%aa%e3%83%bc%e3%82%b7%e3%83%a3%e3%83%b33+%ef%bc%8dTill+the+End+of+Time'>スターオーシャン3 －Till the End of Time</a>
-<a class='btn' href='search_all.html?q=%e3%82%b9%e3%82%bf%e3%83%bc%e3%82%aa%e3%83%bc%e3%82%b7%e3%83%a3%e3%83%b3EX'>スターオーシャンEX</a>
-<a class='btn' href='search_all.html?q=%e3%82%b9%e3%82%bf%e3%83%bc%e3%83%80%e3%82%b9%e3%83%88%ef%bc%8f%e3%83%87%e3%82%a3%e3%83%b4%e3%82%a3%e3%83%bc%ef%bc%9dW%ef%bc%9d%e3%82%b8%e3%83%a7%e3%83%b3(CV%ef%bc%9a%e4%b8%89%e6%9c%a8%e7%9c%9e%e4%b8%80%e9%83%8e)'>スターダスト／ディヴィー＝W＝ジョン(CV：三木眞一郎)</a>
 <a class='btn' href='search_all.html?q=%e3%82%b9%e3%82%bf%e3%83%bc%e3%83%81%e3%83%a3%e3%82%a4%e3%83%ab%e3%83%89%e5%a2%97%e5%88%8a%e5%8f%b7'>スターチャイルド増刊号</a>
-<a class='btn' href='search_all.html?q=%e3%82%b9%e3%82%bf%e3%83%bc%e3%83%89%e3%83%a9%e3%82%a4%e3%83%90%e3%83%bc%e8%bc%9d%e3%81%8d%e3%81%ae%e3%82%bf%e3%82%af%e3%83%88+%e5%8a%87%e4%b8%ad%e6%ad%8c'>スタードライバー輝きのタクト 劇中歌</a>
 <a class='btn' href='search_all.html?q=%e3%81%99%e3%81%9f%e3%81%98%e3%81%8a%e3%81%bf%e3%82%8a%e3%81%99'>すたじおみりす</a>
 <a class='btn' href='search_all.html?q=%e3%81%99%e3%81%9f%e3%81%98%e3%81%8a%e7%b7%91%e8%8c%b6'>すたじお緑茶</a>
-<a class='btn' href='search_all.html?q=%e3%81%9a%e3%81%9f%e3%81%bc%e3%82%8d%e4%bb%a4%e5%ac%a2%e3%81%af%e5%a7%89%e3%81%ae%e5%85%83%e5%a9%9a%e7%b4%84%e8%80%85%e3%81%ab%e6%ba%ba%e6%84%9b%e3%81%95%e3%82%8c%e3%82%8b'>ずたぼろ令嬢は姉の元婚約者に溺愛される</a>
-<a class='btn' href='search_all.html?q=%e3%82%b9%e3%82%bf%e3%83%9f%e3%83%a5'>スタミュ</a>
-<a class='btn' href='search_all.html?q=%e3%82%b9%e3%82%bf%e3%83%9f%e3%83%a5(%e7%ac%ac2%e6%9c%9f)'>スタミュ(第2期)</a>
-<a class='btn' href='search_all.html?q=%e3%82%b9%e3%82%bf%e3%83%9f%e3%83%a5(%e7%ac%ac3%e6%9c%9f)'>スタミュ(第3期)</a>
-<a class='btn' href='search_all.html?q=%e3%82%b9%e3%82%bf%e3%83%b3%e3%83%89%e3%83%9e%e3%82%a4%e3%83%92%e3%83%bc%e3%83%ad%e3%83%bc%e3%82%ba+PIECE+OF+TRUTH'>スタンドマイヒーローズ PIECE OF TRUTH</a>
-<a class='btn' href='search_all.html?q=%e3%82%b9%e3%83%81%e3%83%bc%e3%83%a0%e3%83%97%e3%83%aa%e3%82%ba%e3%83%b3'>スチームプリズン</a>
-<a class='btn' href='search_all.html?q=%e3%81%9a%e3%81%a3%e3%81%a8%e7%9c%9f%e5%a4%9c%e4%b8%ad%e3%81%a7%e3%81%84%e3%81%84%e3%81%ae%e3%81%ab%e3%80%82'>ずっと真夜中でいいのに。</a>
-<a class='btn' href='search_all.html?q=%e3%81%9a%e3%81%a3%e3%81%a8%e7%9c%9f%e5%a4%9c%e4%b8%ad%e3%81%a7%e3%81%84%e3%81%84%e3%81%ae%e3%81%ab%e3%80%82+'>ずっと真夜中でいいのに。 </a>
-<a class='btn' href='search_all.html?q=%e3%82%b9%e3%83%86%e3%83%a9%e3%81%ae%e3%81%be%e3%81%bb%e3%81%86'>ステラのまほう</a>
-<a class='btn' href='search_all.html?q=%e3%82%b9%e3%83%86%e3%83%a9%e5%a5%b3%e5%ad%a6%e9%99%a2%e9%ab%98%e7%ad%89%e7%a7%91C3%e9%83%a8'>ステラ女学院高等科C3部</a>
-<a class='btn' href='search_all.html?q=%e3%82%b9%e3%83%86%e3%83%a9%e5%a5%b3%e5%ad%a6%e9%99%a2%e9%ab%98%e7%ad%89%e7%a7%91C%c2%b3%e9%83%a8'>ステラ女学院高等科C&#179;部</a>
-<a class='btn' href='search_all.html?q=%e3%82%b9%e3%83%88%e3%83%bc%e3%83%aa%e3%83%bc%e3%83%a9%e3%82%a4%e3%83%b3'>ストーリーライン</a>
-<a class='btn' href='search_all.html?q=%e3%82%b9%e3%83%88%e3%83%bc%e3%83%aa%e3%83%bc%e3%83%a9%e3%82%a4%e3%83%b3%e3%83%91%e3%83%bc%e3%83%88%e5%88%86%e3%81%91'>ストーリーラインパート分け</a>
-<a class='btn' href='search_all.html?q=%e3%81%99%e3%81%a8%e3%81%b7%e3%82%8a'>すとぷり</a>
-<a class='btn' href='search_all.html?q=%e3%82%b9%e3%83%88%e3%83%a9%e3%82%a4%e3%82%af%e3%83%bb%e3%82%b6%e3%83%bb%e3%83%96%e3%83%a9%e3%83%83%e3%83%89'>ストライク・ザ・ブラッド</a>
-<a class='btn' href='search_all.html?q=%e3%82%b9%e3%83%88%e3%83%a9%e3%82%a4%e3%82%af%e3%83%bb%e3%82%b6%e3%83%bb%e3%83%96%e3%83%a9%e3%83%83%e3%83%89%e2%85%a2'>ストライク・ザ・ブラッドⅢ</a>
-<a class='btn' href='search_all.html?q=%e3%82%b9%e3%83%88%e3%83%a9%e3%82%a4%e3%82%af%e3%83%bb%e3%82%b6%e3%83%bb%e3%83%96%e3%83%a9%e3%83%83%e3%83%89%e2%85%a3+OVA'>ストライク・ザ・ブラッドⅣ OVA</a>
-<a class='btn' href='search_all.html?q=%e3%82%b9%e3%83%88%e3%83%a9%e3%82%a4%e3%82%af%e3%82%a6%e3%82%a3%e3%83%83%e3%83%81%e3%83%bc%e3%82%ba'>ストライクウィッチーズ</a>
-<a class='btn' href='search_all.html?q=%e3%82%b9%e3%83%88%e3%83%a9%e3%82%a4%e3%82%af%e3%82%a6%e3%82%a3%e3%83%83%e3%83%81%e3%83%bc%e3%82%ba+501%e9%83%a8%e9%9a%8a%e7%99%ba%e9%80%b2%e3%81%97%e3%81%be%e3%81%99%e3%81%a3!'>ストライクウィッチーズ 501部隊発進しますっ!</a>
-<a class='btn' href='search_all.html?q=%e3%82%b9%e3%83%88%e3%83%a9%e3%82%a4%e3%82%af%e3%82%a6%e3%82%a3%e3%83%83%e3%83%81%e3%83%bc%e3%82%ba+501%e9%83%a8%e9%9a%8a%e7%99%ba%e9%80%b2%e3%81%97%e3%81%be%e3%81%99%e3%81%a3%ef%bc%81'>ストライクウィッチーズ 501部隊発進しますっ！</a>
-<a class='btn' href='search_all.html?q=%e3%82%b9%e3%83%88%e3%83%a9%e3%82%a4%e3%82%af%e3%82%a6%e3%82%a3%e3%83%83%e3%83%81%e3%83%bc%e3%82%ba+Operation+Victory+Arrow'>ストライクウィッチーズ Operation Victory Arrow</a>
-<a class='btn' href='search_all.html?q=%e3%82%b9%e3%83%88%e3%83%a9%e3%82%a4%e3%82%af%e3%82%a6%e3%82%a3%e3%83%83%e3%83%81%e3%83%bc%e3%82%ba+Operation+Victory+Arrow+'>ストライクウィッチーズ Operation Victory Arrow </a>
-<a class='btn' href='search_all.html?q=%e3%82%b9%e3%83%88%e3%83%a9%e3%82%a4%e3%82%af%e3%82%a6%e3%82%a3%e3%83%83%e3%83%81%e3%83%bc%e3%82%ba+Road+to+BELRIN'>ストライクウィッチーズ Road to BELRIN</a>
-<a class='btn' href='search_all.html?q=%e3%82%b9%e3%83%88%e3%83%a9%e3%82%a4%e3%82%af%e3%82%a6%e3%82%a3%e3%83%83%e3%83%81%e3%83%bc%e3%82%ba+ROAD+to+BERLIN'>ストライクウィッチーズ ROAD to BERLIN</a>
-<a class='btn' href='search_all.html?q=%e3%82%b9%e3%83%88%e3%83%a9%e3%82%a4%e3%82%af%e3%82%a6%e3%82%a3%e3%83%83%e3%83%81%e3%83%bc%e3%82%ba+%e8%92%bc%e7%a9%ba%e3%81%ae%e9%9b%bb%e6%92%83%e6%88%a6'>ストライクウィッチーズ 蒼空の電撃戦</a>
-<a class='btn' href='search_all.html?q=%e3%82%b9%e3%83%88%e3%83%a9%e3%82%a4%e3%82%af%e3%82%a6%e3%82%a3%e3%83%83%e3%83%81%e3%83%bc%e3%82%ba2'>ストライクウィッチーズ2</a>
-<a class='btn' href='search_all.html?q=%e3%82%b9%e3%83%88%e3%83%a9%e3%82%a4%e3%82%af%e3%82%a6%e3%82%a3%e3%83%83%e3%83%81%e3%83%bc%e3%82%ba%ef%bc%92'>ストライクウィッチーズ２</a>
-<a class='btn' href='search_all.html?q=%e3%82%b9%e3%83%88%e3%83%a9%e3%83%88%e3%82%b9%e3%83%bb%e3%83%95%e3%82%a9%e3%83%bc'>ストラトス・フォー</a>
-<a class='btn' href='search_all.html?q=%e3%82%b9%e3%83%88%e3%83%aa%e3%83%bc%e3%83%88%e3%83%95%e3%82%a1%e3%82%a4%e3%82%bf%e3%83%bc6'>ストリートファイター6</a>
-<a class='btn' href='search_all.html?q=%e3%82%b9%e3%83%88%e3%83%aa%e3%83%bc%e3%83%88%e3%83%95%e3%82%a1%e3%82%a4%e3%82%bf%e3%83%bcV'>ストリートファイターV</a>
-<a class='btn' href='search_all.html?q=%e3%82%b9%e3%83%88%e3%83%ac%e3%83%b3%e3%82%b8%e3%83%bb%e3%83%97%e3%83%a9%e3%82%b9'>ストレンジ・プラス</a>
-<a class='btn' href='search_all.html?q=%e3%82%b9%e3%83%88%e3%83%ad%e3%83%99%e3%83%aa%e3%83%bc%e3%83%bb%e3%83%91%e3%83%8b%e3%83%83%e3%82%af%ef%bc%81'>ストロベリー・パニック！</a>
 <a class='btn' href='search_all.html?q=%e3%82%b9%e3%83%8a%e3%83%83%e3%82%af%e3%83%90%e3%82%b9%e6%b1%9f+OP'>スナックバス江 OP</a>
 <a class='btn' href='search_all.html?q=%e3%82%b9%e3%83%8a%e3%83%83%e3%82%af%e3%83%90%e3%82%b9%e6%b1%9f+%e7%ac%ac10%e8%a9%b1ED'>スナックバス江 第10話ED</a>
 <a class='btn' href='search_all.html?q=%e3%82%b9%e3%83%8a%e3%83%83%e3%82%af%e3%83%90%e3%82%b9%e6%b1%9f+%e7%ac%ac11%e8%a9%b1ED'>スナックバス江 第11話ED</a>
@@ -304,63 +193,16 @@ function filterGrid(gridSel, boxId, countId){
 <a class='btn' href='search_all.html?q=%e3%82%b9%e3%83%8a%e3%83%83%e3%82%af%e3%83%90%e3%82%b9%e6%b1%9f+%e7%ac%ac7%e8%a9%b1ED'>スナックバス江 第7話ED</a>
 <a class='btn' href='search_all.html?q=%e3%82%b9%e3%83%8a%e3%83%83%e3%82%af%e3%83%90%e3%82%b9%e6%b1%9f+%e7%ac%ac8%e8%a9%b1ED'>スナックバス江 第8話ED</a>
 <a class='btn' href='search_all.html?q=%e3%82%b9%e3%83%8a%e3%83%83%e3%82%af%e3%83%90%e3%82%b9%e6%b1%9f+%e7%ac%ac9%e8%a9%b1ED'>スナックバス江 第9話ED</a>
-<a class='btn' href='search_all.html?q=%e3%81%99%e3%81%ae%e3%81%af%e3%82%89%e8%8d%98%e3%81%ae%e7%ae%a1%e7%90%86%e4%ba%ba%e3%81%95%e3%82%93'>すのはら荘の管理人さん</a>
-<a class='btn' href='search_all.html?q=%e3%82%b9%e3%83%91%e3%82%a4%e3%83%80%e3%83%bc%e3%81%a8milano'>スパイダーとmilano</a>
-<a class='btn' href='search_all.html?q=%e3%82%b9%e3%83%91%e3%82%a4%e3%83%80%e3%83%bc%e3%83%9e%e3%83%b3'>スパイダーマン</a>
-<a class='btn' href='search_all.html?q=%e3%82%b9%e3%83%91%e3%82%a4%e3%83%80%e3%83%bc%e3%83%9e%e3%83%b3%ef%bc%9a%e3%82%a2%e3%82%af%e3%83%ad%e3%82%b9%e3%83%bb%e3%82%b6%e3%83%bb%e3%82%b9%e3%83%91%e3%82%a4%e3%83%80%e3%83%bc%e3%83%90%e3%83%bc%e3%82%b9'>スパイダーマン：アクロス・ザ・スパイダーバース</a>
-<a class='btn' href='search_all.html?q=%e3%82%b9%e3%83%91%e3%82%a4%e3%83%80%e3%83%bc%e3%83%a9%e3%82%a4%e3%83%80%e3%83%bc%e3%82%ba+%e3%80%9c%e3%82%aa%e3%83%a9%e3%82%af%e3%83%ab%e3%81%ae%e5%8b%87%e8%80%85%e3%81%9f%e3%81%a1%e3%80%9c'>スパイダーライダーズ 〜オラクルの勇者たち〜</a>
-<a class='btn' href='search_all.html?q=%e3%82%b9%e3%83%91%e3%82%a4%e3%83%a9%e3%83%ab%ef%bd%9e%e6%8e%a8%e7%90%86%e3%81%ae%e7%b5%86%ef%bd%9e'>スパイラル～推理の絆～</a>
-<a class='btn' href='search_all.html?q=%e3%82%b9%e3%83%91%e3%83%83%e3%81%a8!%e3%82%b9%e3%83%91%e3%82%a4%26%e3%82%b9%e3%83%91%e3%82%a4%e3%82%b9%ef%bc%8f%e3%83%84%e3%82%ad%e3%82%ab%e3%82%b2'>スパッと!スパイ&amp;スパイス／ツキカゲ</a>
-<a class='btn' href='search_all.html?q=%e3%82%b9%e3%83%91%e3%83%ad%e3%83%9c25%e5%91%a8%e5%b9%b4MAD%ef%bc%8f%e7%ac%ac2%e6%ac%a1%e3%82%b9%e3%83%bc%e3%83%91%e3%83%bc%e3%83%ad%e3%83%9c%e3%83%83%e3%83%88%e5%a4%a7%e6%88%a6%ce%b1'>スパロボ25周年MAD／第2次スーパーロボット大戦α</a>
-<a class='btn' href='search_all.html?q=%e3%82%b9%e3%83%94%e3%83%a9%e3%83%bb%e3%82%b9%e3%83%94%e3%82%ab'>スピラ・スピカ</a>
-<a class='btn' href='search_all.html?q=%e3%82%b9%e3%83%94%e3%83%a9%e3%83%bb%e3%82%b9%e3%83%94%e3%82%ab+One-Man+Live+2020%e3%80%8e%e5%b1%8a%e3%81%91%e3%80%81%e3%82%a8%e3%83%bc%e3%83%ab%ef%bc%81%e3%80%8f'>スピラ・スピカ One-Man Live 2020『届け、エール！』</a>
-<a class='btn' href='search_all.html?q=%e3%82%b9%e3%83%94%e3%83%aa%e3%83%83%e3%83%84%ef%bc%8f%e3%83%9a%e3%83%9a%e3%82%b7%e3%83%a3%e3%83%bb%e3%82%a2%e3%83%b3%e3%83%89%e3%83%ac%e3%82%a2%e3%83%8e%e3%83%af(CV%ef%bc%9a%e8%83%bd%e7%99%bb%e9%ba%bb%e7%be%8e%e5%ad%90)'>スピリッツ／ペペシャ・アンドレアノワ(CV：能登麻美子)</a>
-<a class='btn' href='search_all.html?q=%e3%82%b9%e3%83%95%e3%82%a3%e3%82%a2+%e3%82%bf%e3%82%a4%e3%82%a2%e3%83%83%e3%83%97%e7%84%a1'>スフィア タイアップ無</a>
-<a class='btn' href='search_all.html?q=%e3%82%b9%e3%83%97%e3%83%bc%e3%83%b3%e3%81%8a%e3%81%b0%e3%81%95%e3%82%93'>スプーンおばさん</a>
 <a class='btn' href='search_all.html?q=%e3%82%b9%e3%83%97%e3%83%aa%e3%82%ac%e3%83%b3+OP'>スプリガン OP</a>
-<a class='btn' href='search_all.html?q=%e3%82%b9%e3%83%9a%e3%83%bc%e3%82%b9%e3%83%bb%e3%82%b9%e3%82%af%e3%83%af%e3%83%83%e3%83%89+%e3%82%ae%e3%83%a3%e3%83%90%e3%83%b3VS%e3%83%87%e3%82%ab%e3%83%ac%e3%83%b3%e3%82%b8%e3%83%a3%e3%83%bc%e3%83%bb%e6%bf%80%e7%aa%81%e5%85%84%e5%bc%9f(%e4%b8%b2%e7%94%b0%e3%82%a2%e3%82%ad%e3%83%a9%2c+YOFFY)'>スペース・スクワッド ギャバンVSデカレンジャー・激突兄弟(串田アキラ, YOFFY)</a>
-<a class='btn' href='search_all.html?q=%e3%82%b9%e3%83%9a%e3%83%bc%e3%82%b9%e2%98%86%e3%83%80%e3%83%b3%e3%83%87%e3%82%a3'>スペース☆ダンディ</a>
-<a class='btn' href='search_all.html?q=%e3%82%b9%e3%83%9a%e3%83%bc%e3%82%b9%e3%82%b3%e3%83%96%e3%83%a9'>スペースコブラ</a>
-<a class='btn' href='search_all.html?q=%e3%81%99%e3%81%b9%e3%81%a6%e3%81%8c%ef%bc%a6%e3%81%ab%e3%81%aa%e3%82%8b+THE+PERFECT+INSIDER'>すべてがＦになる THE PERFECT INSIDER</a>
-<a class='btn' href='search_all.html?q=%e3%82%b9%e3%83%9e%e3%82%a4%e3%83%ab%e3%83%97%e3%83%aa%e3%82%ad%e3%83%a5%e3%82%a2!'>スマイルプリキュア!</a>
-<a class='btn' href='search_all.html?q=%e3%82%b9%e3%83%9e%e3%82%b9%e3%83%ad+%e8%81%96%e6%88%a6%e5%a3%ab%e3%83%80%e3%83%b3%e3%83%90%e3%82%a4%e3%83%b3'>スマスロ 聖戦士ダンバイン</a>
-<a class='btn' href='search_all.html?q=%e3%81%99%e3%81%bf%e3%81%9f%e3%81%95%e3%82%93'>すみたさん</a>
-<a class='btn' href='search_all.html?q=%e3%81%99%e3%82%82%e3%82%82%e3%82%82%e3%82%82%e3%82%82%e3%82%82+%ef%bd%9e%e5%9c%b0%e4%b8%8a%e6%9c%80%e5%bc%b7%e3%81%ae%e3%83%a8%e3%83%a1%ef%bd%9e'>すもももももも ～地上最強のヨメ～</a>
 <a class='btn' href='search_all.html?q=%e3%81%99%e3%82%82%e3%82%82%e3%82%82%e3%82%82%e3%82%82%e3%82%82%ef%bd%9e%e5%9c%b0%e4%b8%8a%e6%9c%80%e5%bc%b7%e3%81%ae%e3%83%a8%e3%83%a1%ef%bd%9e+%e3%82%ad%e3%83%a3%e3%83%a9%e3%82%bd%e3%83%b3'>すもももももも～地上最強のヨメ～ キャラソン</a>
-<a class='btn' href='search_all.html?q=%e3%82%b9%e3%83%a9%e3%82%a4%e3%83%a0%e5%80%92%e3%81%97%e3%81%a6300%e5%b9%b4%e3%80%81%e7%9f%a5%e3%82%89%e3%81%aa%e3%81%84%e3%81%86%e3%81%a1%e3%81%ab%e3%83%ac%e3%83%99%e3%83%abMAX%e3%81%ab%e3%81%aa%e3%81%a3%e3%81%a6%e3%81%be%e3%81%97%e3%81%9f'>スライム倒して300年、知らないうちにレベルMAXになってました</a>
-<a class='btn' href='search_all.html?q=%e3%82%b9%e3%83%a9%e3%82%a4%e3%83%a0%e5%80%92%e3%81%97%e3%81%a6300%e5%b9%b4%e3%80%81%e7%9f%a5%e3%82%89%e3%81%aa%e3%81%84%e3%81%86%e3%81%a1%e3%81%ab%e3%83%ac%e3%83%99%e3%83%abMAX%e3%81%ab%e3%81%aa%e3%81%a3%e3%81%a6%e3%81%be%e3%81%97%e3%81%9f+%ef%bd%9e%e3%81%9d%e3%81%ae%e3%81%ab%ef%bd%9e'>スライム倒して300年、知らないうちにレベルMAXになってました ～そのに～</a>
 <a class='btn' href='search_all.html?q=%e3%82%b9%e3%83%a9%e3%82%a4%e3%83%a0%e5%80%92%e3%81%97%e3%81%a6300%e5%b9%b4%e3%80%81%e7%9f%a5%e3%82%89%e3%81%aa%e3%81%84%e3%81%86%e3%81%a1%e3%81%ab%e3%83%ac%e3%83%99%e3%83%abMAX%e3%81%ab%e3%81%aa%e3%81%a3%e3%81%a6%e3%81%be%e3%81%97%e3%81%9f+%ef%bd%9e%e3%81%9d%e3%81%ae%e3%81%ab%ef%bd%9e+ED'>スライム倒して300年、知らないうちにレベルMAXになってました ～そのに～ ED</a>
 <a class='btn' href='search_all.html?q=%e3%82%b9%e3%83%a9%e3%82%a4%e3%83%a0%e5%80%92%e3%81%97%e3%81%a6300%e5%b9%b4%e3%80%81%e7%9f%a5%e3%82%89%e3%81%aa%e3%81%84%e3%81%86%e3%81%a1%e3%81%ab%e3%83%ac%e3%83%99%e3%83%abMAX%e3%81%ab%e3%81%aa%e3%81%a3%e3%81%a6%e3%81%be%e3%81%97%e3%81%9f+%ef%bd%9e%e3%81%9d%e3%81%ae%e3%81%ab%ef%bd%9e+OP'>スライム倒して300年、知らないうちにレベルMAXになってました ～そのに～ OP</a>
-<a class='btn' href='search_all.html?q=%e3%82%b9%e3%83%a9%e3%82%a4%e3%83%a0%e5%80%92%e3%81%97%e3%81%a6300%e5%b9%b4%e3%80%81%e7%9f%a5%e3%82%89%e3%81%aa%e3%81%84%e3%81%86%e3%81%a1%e3%81%ab%e3%83%ac%e3%83%99%e3%83%abMAX%e3%81%ab%e3%81%aa%e3%81%a3%e3%81%a6%e3%81%be%e3%81%97%e3%81%9f+ED'>スライム倒して300年、知らないうちにレベルMAXになってました ED</a>
 <a class='btn' href='search_all.html?q=%e3%82%b9%e3%83%a9%e3%82%a4%e3%83%a0%e5%80%92%e3%81%97%e3%81%a6300%e5%b9%b4%e3%80%81%e7%9f%a5%e3%82%89%e3%81%aa%e3%81%84%e3%81%86%e3%81%a1%e3%81%ab%e3%83%ac%e3%83%99%e3%83%abMAX%e3%81%ab%e3%81%aa%e3%81%a3%e3%81%a6%e3%81%be%e3%81%97%e3%81%9f+OP'>スライム倒して300年、知らないうちにレベルMAXになってました OP</a>
-<a class='btn' href='search_all.html?q=%e3%82%b9%e3%83%a9%e3%83%a0%e3%83%80%e3%83%b3%e3%82%af'>スラムダンク</a>
-<a class='btn' href='search_all.html?q=%e3%81%99%e3%82%8a%e3%81%83'>すりぃ</a>
-<a class='btn' href='search_all.html?q=%e3%81%99%e3%82%8a%e3%81%83%ef%bc%bf%e9%8f%a1%e9%9f%b3%e3%83%aa%e3%83%b3%ef%bc%8f%e9%8f%a1%e9%9f%b3%e3%83%ac%e3%83%b3+'>すりぃ＿鏡音リン／鏡音レン </a>
-<a class='btn' href='search_all.html?q=%e3%81%99%e3%82%8b%e3%82%81%e3%81%84%e3%81%8b'>するめいか</a>
-<a class='btn' href='search_all.html?q=%e3%82%b9%e3%83%ac%e3%82%a4%e3%83%a4%e3%83%bc%e3%82%ba'>スレイヤーズ</a>
-<a class='btn' href='search_all.html?q=%e3%82%b9%e3%83%ac%e3%82%a4%e3%83%a4%e3%83%bc%e3%82%ba+EVOLUTION-R'>スレイヤーズ EVOLUTION-R</a>
-<a class='btn' href='search_all.html?q=%e3%82%b9%e3%83%ac%e3%82%a4%e3%83%a4%e3%83%bc%e3%82%ba+NEXT'>スレイヤーズ NEXT</a>
-<a class='btn' href='search_all.html?q=%e3%82%b9%e3%83%ac%e3%82%a4%e3%83%a4%e3%83%bc%e3%82%ba+REVOLUTION'>スレイヤーズ REVOLUTION</a>
-<a class='btn' href='search_all.html?q=%e3%82%b9%e3%83%ac%e3%82%a4%e3%83%a4%e3%83%bc%e3%82%ba+TRY'>スレイヤーズ TRY</a>
-<a class='btn' href='search_all.html?q=%e3%82%b9%e3%83%ac%e3%82%a4%e3%83%a4%e3%83%bc%e3%82%ba+%e3%82%ad%e3%83%a3%e3%83%a9%e3%82%bd%e3%83%b3'>スレイヤーズ キャラソン</a>
-<a class='btn' href='search_all.html?q=%e3%82%b9%e3%83%ac%e3%82%a4%e3%83%a4%e3%83%bc%e3%82%ba+%e5%ae%8c%e5%85%a8%e7%84%a1%e6%ac%a0%e7%89%88'>スレイヤーズ 完全無欠版</a>
-<a class='btn' href='search_all.html?q=%e3%82%b9%e3%83%ac%e3%82%a4%e3%83%a4%e3%83%bc%e3%82%ba+%e5%8a%87%e5%a0%b4%e7%89%88'>スレイヤーズ 劇場版</a>
-<a class='btn' href='search_all.html?q=%e3%82%b9%e3%83%ac%e3%82%a4%e3%83%a4%e3%83%bc%e3%82%baEX.'>スレイヤーズEX.</a>
-<a class='btn' href='search_all.html?q=%e3%82%b9%e3%83%ac%e3%82%a4%e3%83%a4%e3%83%bc%e3%82%baNEXT'>スレイヤーズNEXT</a>
-<a class='btn' href='search_all.html?q=%e3%82%b9%e3%83%ac%e3%82%a4%e3%83%a4%e3%83%bc%e3%82%baRETURN'>スレイヤーズRETURN</a>
-<a class='btn' href='search_all.html?q=%e3%82%b9%e3%83%ac%e3%82%a4%e3%83%a4%e3%83%bc%e3%82%baTRY'>スレイヤーズTRY</a>
-<a class='btn' href='search_all.html?q=%e3%82%b9%e3%83%ac%e3%82%a4%e3%83%a4%e3%83%bc%e3%82%ba%e3%81%90%e3%82%8c%e3%81%87%e3%81%a8'>スレイヤーズぐれぇと</a>
-<a class='btn' href='search_all.html?q=%e3%81%99%e3%82%8c%e9%81%95%e3%81%86%e5%85%84%e5%a6%b9%e3%81%ae%e5%a3%8a%e3%82%8c%e3%82%8b%e5%80%ab%e7%90%86%e8%a6%b3_OP'>すれ違う兄妹の壊れる倫理観_OP</a>
-<a class='btn' href='search_all.html?q=%e3%82%b9%e3%83%ad%e3%82%a6%e3%82%b9%e3%82%bf%e3%83%bc%e3%83%88'>スロウスタート</a>
-<a class='btn' href='search_all.html?q=%e3%82%b9%e3%83%ad%e3%83%bc%e3%83%ab%e3%83%bc%e3%83%97'>スローループ</a></div>
+<a class='btn' href='search_all.html?q=%e3%82%b9%e3%83%ac%e3%82%a4%e3%83%a4%e3%83%bc%e3%82%ba+%e3%82%ad%e3%83%a3%e3%83%a9%e3%82%bd%e3%83%b3'>スレイヤーズ キャラソン</a></div>
   </div>
 
   <script>
-    (function(){
-      const list=document.querySelectorAll('.list-す a');
-      const el=document.getElementById('count-list-す');
-      if(el){ el.textContent='表示件数: '+list.length; }
-    })();
+    (function(){ const list=document.querySelectorAll('.list-す a'); const el=document.getElementById('count-list-す'); if(el){ el.textContent='表示件数: '+list.length; } })();
   </script>
 </div>
 </div>

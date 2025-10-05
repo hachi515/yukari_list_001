@@ -32,7 +32,7 @@ body{
 .wrap{ max-width:1100px; margin:24px auto; padding:12px; background:var(--panel); border:0; border-radius:0; box-shadow:none; overflow-x:auto; }
 
 h1{ display:inline-block; margin:0 0 14px 0; padding:4px 0; background:transparent; color:#0b1b2e; font-size:18px; font-weight:500 }
-h2{ margin:10px 0 8px; padding:0; color:#0b1b2e; font-size:18px; font-weight:500; background:transparent } /* ← h1と同サイズ */
+h2{ margin:10px 0 8px; padding:0; color:#0b1b2e; font-size:18px; font-weight:500; background:transparent }
 
 .back{ text-align:right; margin:-6px 0 6px 0 }
 .back a{ color:var(--accent); text-decoration:none; border-bottom:1px dotted var(--accent) }
@@ -40,7 +40,7 @@ h2{ margin:10px 0 8px; padding:0; color:#0b1b2e; font-size:18px; font-weight:500
 .section{margin:10px 0 18px}
 .search{display:flex; gap:8px; margin:8px 0 4px; align-items:center; justify-content:flex-start}
 .search select{ padding:8px 10px; font-size:14px; background:var(--panel); border:1px solid var(--ui-gray); border-radius:0; font-weight:400 }
-.search input[type=text]{ flex:0 0 260px; width:260px; padding:8px; font-size:14px; background:var(--panel); border:1px solid var(--ui-gray); border-radius:0; font-weight:400 }
+.search input[type=text]{ flex:0 0 420px; width:420px; padding:8px; font-size:14px; background:var(--panel); border:1px solid var(--ui-gray); border-radius:0; font-weight:400 }
 .search button{ padding:8px 12px; font-size:14px; color:#fff; background:var(--accent-90); border:1px solid var(--ui-gray); border-radius:0; cursor:pointer }
 .count{font-size:11px; color:#222; margin:4px 0 8px}
 a{ color:var(--accent); }
@@ -66,12 +66,7 @@ a{ color:var(--accent); }
 .meta{margin:3px 0; font-weight:400}
 .meta .label{display:inline-block; min-width:84px; color:#0b1b2e; font-weight:400}
 
-/* ページャ */
-.pager{display:flex; gap:6px; flex-wrap:wrap; margin:14px 0}
-.pager a,.pager span{padding:6px 10px; border:1px solid var(--border); text-decoration:none; color:#fff; background:var(--accent-70); font-weight:400}
-.pager .current{background:var(--accent-90); color:#fff}
-
-/* スクロール枠（search_all / 年別 / 新着 / 五十音） */
+/* スクロール枠（全ページ共通） */
 .list-container{max-height:900px; overflow-y:auto; border:1px solid var(--ui-gray); background:rgba(255,255,255,.35); padding:8px; box-shadow:0 4px 8px rgba(0,0,0,.06)}
 .stickybar{position:sticky; top:0; z-index:20; background:rgba(255,255,255,.6); border-bottom:1px solid var(--ui-gray); padding:8px; margin:-8px -8px 8px -8px}
 .stickybar.no-bg{background:transparent; border:none; padding:0; margin:0 0 8px 0}
@@ -79,11 +74,7 @@ a{ color:var(--accent); }
 @media (max-width:768px){
   body{ background-image:url('https://raw.githubusercontent.com/hachi515/yukari_list_001/main/Hasunosora_2.png'); font-size:13px }
   .search select, .search input[type=text], .search button{ font-size:13px; padding:7px 10px }
-  /* 入力幅をスマホではやや広めに */
   .search input[type=text]{ flex:0 0 56vw; width:56vw }
-  .list-container{ max-height:450px }
-}
-  .search select, .search input[type=text], .search button{ font-size:13px; padding:7px 10px }
   .list-container{ max-height:450px }
 }</style>
 <script>const SEARCH_BASE = 'http://ykr.moe:11059/';
@@ -91,7 +82,7 @@ a{ color:var(--accent); }
 function tokensHalf(v){return v.toLowerCase().trim().split(/ +/).filter(Boolean)}
 function qparam(name){ const m = location.search.match(new RegExp('[?&]'+name+'=([^&]+)')); return m ? decodeURIComponent(m[1]) : ''; }
 
-// 軽量リンク化：data-q を href に展開
+// data-q → href 生成（軽量リンク化）
 document.addEventListener('DOMContentLoaded', ()=>{
   document.querySelectorAll('a[data-q]').forEach(a=>{
     try{
@@ -115,9 +106,6 @@ function filterCards(listId, boxId){
   });
   const cEl = document.getElementById('count-'+listId);
   if(cEl){ cEl.textContent = '表示件数: ' + vis; }
-  const pager = document.getElementById('pager-'+listId);
-  const per = parseInt(list.dataset.per || '100',10);
-  if(pager){ if(q.length===0){ pager.style.display = ''; } else { pager.style.display = (vis<=per) ? 'none' : ''; } }
 }
 
 /* ===== 検索結果専用：表示中カードを「制作者優先度→日付」で並べ替え ===== */
@@ -149,16 +137,13 @@ function filterCardsAdv(listId, boxId, yearId){
     const okText = q.every(tok => c.innerText.toLowerCase().includes(tok));
     const band = (c.dataset.yearband||'');
     const yr = (c.dataset.year||'');
-    const okYear = (y==='' || yr===y || band===y);
-    const show = okText && okYear;
+    const show = okText && (y==='' || yr===y || band===y);
     c.style.display = show ? '' : 'none';
     if(show) vis++;
   });
   const cEl = document.getElementById('count-'+listId);
   if(cEl){ cEl.textContent = '表示件数: ' + vis; }
-
-  // ★検索（キーワード or 年帯）を使ったときだけ優先度並び替えを実施
-  if(q.length>0 || y!==''){ reorderByPriority(listId); }
+  if(q.length>0 || y!==''){ reorderByPriority(listId); } // ★全体検索のみ
 }
 
 function filterGrid(gridSel, boxId, countId){
@@ -182,47 +167,14 @@ function filterGrid(gridSel, boxId, countId){
 
   <div class='list-container'>
     <div class='prog-grid list-に'><a class='btn' href='search_all.html?q=%e3%80%8e%e3%81%ab%e3%82%83%e3%82%93%e3%81%93%e5%a4%a7%e6%88%a6%e4%ba%89%e3%80%8f%e3%80%8e%e3%82%b7%e3%83%b3%e3%83%bb%e3%82%a8%e3%83%b4%e3%82%a1%e3%83%b3%e3%82%b2%e3%83%aa%e3%82%aa%e3%83%b3%e5%8a%87%e5%a0%b4%e7%89%88%e3%80%8f%e3%82%b3%e3%83%a9%e3%83%9c%e6%9b%b2'>『にゃんこ大戦争』『シン・エヴァンゲリオン劇場版』コラボ曲</a>
-<a class='btn' href='search_all.html?q=%e3%80%90%e3%83%8b%e3%82%b3%e3%82%ab%e3%83%a9%e3%80%91'>【ニコカラ】</a>
-<a class='btn' href='search_all.html?q=%e3%83%8b%e3%82%a4%e3%82%ab(CV%ef%bc%9a%e8%8f%b1%e5%b7%9d%e8%8a%b1%e8%8f%9c)'>ニイカ(CV：菱川花菜)</a>
-<a class='btn' href='search_all.html?q=%e3%83%8b%e3%83%bc%e3%83%88%e3%81%8f%e3%83%8e%e4%b8%80%e3%81%a8%e3%81%aa%e3%81%9c%e3%81%8b%e5%90%8c%e6%a3%b2%e3%81%af%e3%81%98%e3%82%81%e3%81%be%e3%81%97%e3%81%9f'>ニートくノ一となぜか同棲はじめました</a>
 <a class='btn' href='search_all.html?q=%e3%83%8b%e3%83%bc%e3%83%88%e3%81%8f%e3%83%8e%e4%b8%80%e3%81%a8%e3%81%aa%e3%81%9c%e3%81%8b%e5%90%8c%e6%a3%b2%e3%81%af%e3%81%98%e3%82%81%e3%81%be%e3%81%97%e3%81%9f+ED'>ニートくノ一となぜか同棲はじめました ED</a>
-<a class='btn' href='search_all.html?q=%e3%83%8b%e3%83%bc%e3%83%88%e3%81%8f%e3%83%8e%e4%b8%80%e3%81%a8%e3%81%aa%e3%81%9c%e3%81%8b%e5%90%8c%e6%a3%b2%e3%81%af%e3%81%98%e3%82%81%e3%81%be%e3%81%97%e3%81%9f%e3%80%8d'>ニートくノ一となぜか同棲はじめました」</a>
-<a class='btn' href='search_all.html?q=%e3%83%8b%e3%82%b0%e3%83%ac%e3%83%89%ef%bc%8f%e3%82%b7%e3%83%88'>ニグレド／シト</a>
 <a class='btn' href='search_all.html?q=%e3%83%8b%e3%82%b3%e3%82%ab%e3%83%a9'>ニコカラ</a>
-<a class='btn' href='search_all.html?q=%e3%83%8b%e3%82%b3%e3%82%ab%e3%83%a9%e3%83%a1%e3%83%bc%e3%82%ab%e3%83%bc2%e7%b7%b4%e7%bf%92%e5%8b%95%e7%94%bb'>ニコカラメーカー2練習動画</a>
 <a class='btn' href='search_all.html?q=%e3%83%8b%e3%82%b3%e3%83%8b%e3%82%b3%e5%8b%95%e7%94%bb'>ニコニコ動画</a>
-<a class='btn' href='search_all.html?q=%e3%81%ab%e3%81%98%e3%81%95%e3%82%93%e3%81%98'>にじさんじ</a>
-<a class='btn' href='search_all.html?q=%e3%81%ab%e3%81%98%e3%81%95%e3%82%93%e3%81%98+AR+STAGE+Light+up+tones'>にじさんじ AR STAGE Light up tones</a>
-<a class='btn' href='search_all.html?q=%e3%81%ab%e3%81%98%e3%81%95%e3%82%93%e3%81%98+JAPAN+TOUR+2020+Shout+in+the+Rainbow%ef%bc%81'>にじさんじ JAPAN TOUR 2020 Shout in the Rainbow！</a>
-<a class='btn' href='search_all.html?q=%e3%81%ab%e3%81%98%e3%81%95%e3%82%93%e3%81%98+NJU%e6%ad%8c%e8%ac%a1%e7%a5%ad2021'>にじさんじ NJU歌謡祭2021</a>
-<a class='btn' href='search_all.html?q=%e3%81%ab%e3%81%98%e3%81%95%e3%82%93%e3%81%98+Nornis+1st+LIVE+-+Transparent+Blue'>にじさんじ Nornis 1st LIVE - Transparent Blue</a>
-<a class='btn' href='search_all.html?q=%e3%81%ab%e3%81%98%e3%81%95%e3%82%93%e3%81%98+%e3%81%ab%e3%81%98Fes2021'>にじさんじ にじFes2021</a>
-<a class='btn' href='search_all.html?q=%e3%81%ab%e3%81%98%e3%81%95%e3%82%93%e3%81%98+%e6%a3%ae%e4%b8%ad%e8%8a%b1%e5%92%b2+1st+VR+LIVE+%e2%80%9d%e4%b8%8b%e5%89%8b%e4%b8%8a%e2%80%9d'>にじさんじ 森中花咲 1st VR LIVE ”下剋上”</a>
-<a class='btn' href='search_all.html?q=%e3%81%ab%e3%81%98%e3%81%95%e3%82%93%e3%81%98%e3%83%a6%e3%83%8b%e3%83%83%e3%83%88%e6%ad%8c%e8%ac%a1%e7%a5%ad2022'>にじさんじユニット歌謡祭2022</a>
-<a class='btn' href='search_all.html?q=%e3%81%ab%e3%81%97%e3%81%aa'>にしな</a>
-<a class='btn' href='search_all.html?q=%e3%81%ab%e3%81%98%e3%82%88%e3%82%93+%e3%81%82%e3%81%ab%e3%82%81%e3%83%bc%e3%81%97%e3%82%87%e3%82%93'>にじよん あにめーしょん</a>
-<a class='btn' href='search_all.html?q=%e3%83%8b%e3%82%bb%e3%82%b3%e3%82%a4'>ニセコイ</a>
-<a class='btn' href='search_all.html?q=%e3%83%8b%e3%82%bb%e3%82%b3%e3%82%a4+ED6'>ニセコイ ED6</a>
-<a class='btn' href='search_all.html?q=%e3%83%8b%e3%82%bb%e3%82%b3%e3%82%a4%ef%bc%9a'>ニセコイ：</a>
-<a class='btn' href='search_all.html?q=%e3%83%8b%e3%83%8b%e3%83%b3%e3%81%8c%e3%82%b7%e3%83%8e%e3%83%96%e4%bc%9d'>ニニンがシノブ伝</a>
-<a class='btn' href='search_all.html?q=%e3%83%8b%e3%83%8e%e3%83%9f%e3%83%a4%e3%83%a6%e3%82%a4'>ニノミヤユイ</a>
-<a class='btn' href='search_all.html?q=%e3%83%8b%e3%83%a3%e3%82%a4%e3%83%88%e3%83%bb%e3%82%aa%e3%83%96%e3%83%bb%e3%82%b6%e3%83%bb%e3%83%aa%e3%83%93%e3%83%b3%e3%82%b0%e3%82%ad%e3%83%a3%e3%83%83%e3%83%88'>ニャイト・オブ・ザ・リビングキャット</a>
-<a class='btn' href='search_all.html?q=%e3%81%ab%e3%82%83%e3%82%93%e3%81%93%e3%83%87%e3%82%a4%e3%82%ba'>にゃんこデイズ</a>
-<a class='btn' href='search_all.html?q=%e3%83%8b%e3%83%a5%e3%83%bc%e3%83%88%e3%83%b3%e3%81%a8%e6%9e%97%e6%aa%8e%e3%81%ae%e6%a8%b9'>ニュートンと林檎の樹</a>
-<a class='btn' href='search_all.html?q=%e3%83%8b%e3%83%a5%e3%83%bc%e3%83%88%e3%83%b3%e3%81%a8%e6%9e%97%e6%aa%8e%e3%81%ae%e6%a8%b9_OP'>ニュートンと林檎の樹_OP</a>
-<a class='btn' href='search_all.html?q=%e3%83%8b%e3%83%ab%e3%83%bb%e3%82%a2%e3%83%89%e3%83%9f%e3%83%a9%e3%83%aa%e3%81%ae%e5%a4%a9%e7%a7%a4'>ニル・アドミラリの天秤</a>
-<a class='btn' href='search_all.html?q=%e3%83%8b%e3%83%ab%e3%83%95%e3%82%a3%e3%83%8b%e3%83%86%e3%82%a3'>ニルフィニティ</a>
-<a class='btn' href='search_all.html?q=%e3%83%8b%e3%83%b3%e3%82%b8%e3%83%a3%e3%82%b9%e3%83%ac%e3%82%a4%e3%83%a4%e3%83%bc+%e3%83%95%e3%83%ad%e3%83%a0%e3%82%a2%e3%83%8b%e3%83%a1%e3%82%a4%e3%82%b7%e3%83%a8%e3%83%b3'>ニンジャスレイヤー フロムアニメイシヨン</a>
-<a class='btn' href='search_all.html?q=%e3%83%8b%e3%83%b3%e3%82%b8%e3%83%a3%e3%82%b9%e3%83%ac%e3%82%a4%e3%83%a4%e3%83%bc+%e3%83%95%e3%83%ad%e3%83%a0%e3%82%a2%e3%83%8b%e3%83%a1%e3%82%a4%e3%82%b7%e3%83%a8%e3%83%b3+%e3%82%b9%e3%83%9a%e3%82%b7%e3%83%a3%e3%83%ab%e3%83%bb%e3%82%a8%e3%83%87%e3%82%a3%e3%82%b7%e3%83%a8%e3%83%b3%e7%89%88'>ニンジャスレイヤー フロムアニメイシヨン スペシャル・エディシヨン版</a>
 <a class='btn' href='search_all.html?q=%e3%83%8b%e3%83%b3%e3%82%b8%e3%83%a3%e3%83%a9+ED'>ニンジャラ ED</a></div>
   </div>
 
   <script>
-    (function(){
-      const list=document.querySelectorAll('.list-に a');
-      const el=document.getElementById('count-list-に');
-      if(el){ el.textContent='表示件数: '+list.length; }
-    })();
+    (function(){ const list=document.querySelectorAll('.list-に a'); const el=document.getElementById('count-list-に'); if(el){ el.textContent='表示件数: '+list.length; } })();
   </script>
 </div>
 </div>

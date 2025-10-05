@@ -32,7 +32,7 @@ body{
 .wrap{ max-width:1100px; margin:24px auto; padding:12px; background:var(--panel); border:0; border-radius:0; box-shadow:none; overflow-x:auto; }
 
 h1{ display:inline-block; margin:0 0 14px 0; padding:4px 0; background:transparent; color:#0b1b2e; font-size:18px; font-weight:500 }
-h2{ margin:10px 0 8px; padding:0; color:#0b1b2e; font-size:18px; font-weight:500; background:transparent } /* ← h1と同サイズ */
+h2{ margin:10px 0 8px; padding:0; color:#0b1b2e; font-size:18px; font-weight:500; background:transparent }
 
 .back{ text-align:right; margin:-6px 0 6px 0 }
 .back a{ color:var(--accent); text-decoration:none; border-bottom:1px dotted var(--accent) }
@@ -40,7 +40,7 @@ h2{ margin:10px 0 8px; padding:0; color:#0b1b2e; font-size:18px; font-weight:500
 .section{margin:10px 0 18px}
 .search{display:flex; gap:8px; margin:8px 0 4px; align-items:center; justify-content:flex-start}
 .search select{ padding:8px 10px; font-size:14px; background:var(--panel); border:1px solid var(--ui-gray); border-radius:0; font-weight:400 }
-.search input[type=text]{ flex:0 0 260px; width:260px; padding:8px; font-size:14px; background:var(--panel); border:1px solid var(--ui-gray); border-radius:0; font-weight:400 }
+.search input[type=text]{ flex:0 0 420px; width:420px; padding:8px; font-size:14px; background:var(--panel); border:1px solid var(--ui-gray); border-radius:0; font-weight:400 }
 .search button{ padding:8px 12px; font-size:14px; color:#fff; background:var(--accent-90); border:1px solid var(--ui-gray); border-radius:0; cursor:pointer }
 .count{font-size:11px; color:#222; margin:4px 0 8px}
 a{ color:var(--accent); }
@@ -66,12 +66,7 @@ a{ color:var(--accent); }
 .meta{margin:3px 0; font-weight:400}
 .meta .label{display:inline-block; min-width:84px; color:#0b1b2e; font-weight:400}
 
-/* ページャ */
-.pager{display:flex; gap:6px; flex-wrap:wrap; margin:14px 0}
-.pager a,.pager span{padding:6px 10px; border:1px solid var(--border); text-decoration:none; color:#fff; background:var(--accent-70); font-weight:400}
-.pager .current{background:var(--accent-90); color:#fff}
-
-/* スクロール枠（search_all / 年別 / 新着 / 五十音） */
+/* スクロール枠（全ページ共通） */
 .list-container{max-height:900px; overflow-y:auto; border:1px solid var(--ui-gray); background:rgba(255,255,255,.35); padding:8px; box-shadow:0 4px 8px rgba(0,0,0,.06)}
 .stickybar{position:sticky; top:0; z-index:20; background:rgba(255,255,255,.6); border-bottom:1px solid var(--ui-gray); padding:8px; margin:-8px -8px 8px -8px}
 .stickybar.no-bg{background:transparent; border:none; padding:0; margin:0 0 8px 0}
@@ -79,11 +74,7 @@ a{ color:var(--accent); }
 @media (max-width:768px){
   body{ background-image:url('https://raw.githubusercontent.com/hachi515/yukari_list_001/main/Hasunosora_2.png'); font-size:13px }
   .search select, .search input[type=text], .search button{ font-size:13px; padding:7px 10px }
-  /* 入力幅をスマホではやや広めに */
   .search input[type=text]{ flex:0 0 56vw; width:56vw }
-  .list-container{ max-height:450px }
-}
-  .search select, .search input[type=text], .search button{ font-size:13px; padding:7px 10px }
   .list-container{ max-height:450px }
 }</style>
 <script>const SEARCH_BASE = 'http://ykr.moe:11059/';
@@ -91,7 +82,7 @@ a{ color:var(--accent); }
 function tokensHalf(v){return v.toLowerCase().trim().split(/ +/).filter(Boolean)}
 function qparam(name){ const m = location.search.match(new RegExp('[?&]'+name+'=([^&]+)')); return m ? decodeURIComponent(m[1]) : ''; }
 
-// 軽量リンク化：data-q を href に展開
+// data-q → href 生成（軽量リンク化）
 document.addEventListener('DOMContentLoaded', ()=>{
   document.querySelectorAll('a[data-q]').forEach(a=>{
     try{
@@ -115,9 +106,6 @@ function filterCards(listId, boxId){
   });
   const cEl = document.getElementById('count-'+listId);
   if(cEl){ cEl.textContent = '表示件数: ' + vis; }
-  const pager = document.getElementById('pager-'+listId);
-  const per = parseInt(list.dataset.per || '100',10);
-  if(pager){ if(q.length===0){ pager.style.display = ''; } else { pager.style.display = (vis<=per) ? 'none' : ''; } }
 }
 
 /* ===== 検索結果専用：表示中カードを「制作者優先度→日付」で並べ替え ===== */
@@ -149,16 +137,13 @@ function filterCardsAdv(listId, boxId, yearId){
     const okText = q.every(tok => c.innerText.toLowerCase().includes(tok));
     const band = (c.dataset.yearband||'');
     const yr = (c.dataset.year||'');
-    const okYear = (y==='' || yr===y || band===y);
-    const show = okText && okYear;
+    const show = okText && (y==='' || yr===y || band===y);
     c.style.display = show ? '' : 'none';
     if(show) vis++;
   });
   const cEl = document.getElementById('count-'+listId);
   if(cEl){ cEl.textContent = '表示件数: ' + vis; }
-
-  // ★検索（キーワード or 年帯）を使ったときだけ優先度並び替えを実施
-  if(q.length>0 || y!==''){ reorderByPriority(listId); }
+  if(q.length>0 || y!==''){ reorderByPriority(listId); } // ★全体検索のみ
 }
 
 function filterGrid(gridSel, boxId, countId){
@@ -187,128 +172,20 @@ function filterGrid(gridSel, boxId, countId){
 <a class='btn' href='search_all.html?q=%e3%81%94%ef%bc%89%e3%82%b4%e3%83%ab%e3%82%b4%ef%bc%91%ef%bc%93'>ご）ゴルゴ１３</a>
 <a class='btn' href='search_all.html?q=%e3%81%94%ef%bc%89%e6%a5%b5%e4%b8%8a%e7%94%9f%e5%be%92%e4%bc%9a'>ご）極上生徒会</a>
 <a class='btn' href='search_all.html?q=%e3%81%93%ef%bc%89%e6%94%bb%e6%ae%bb%e6%a9%9f%e5%8b%95%e9%9a%8a'>こ）攻殻機動隊</a>
-<a class='btn' href='search_all.html?q=%e3%82%b4%e3%82%a2%ef%bd%a5%e3%82%b9%e3%82%af%e3%83%aa%e3%83%bc%e3%83%9f%e3%83%b3%e3%82%b0%ef%bd%a5%e3%82%b7%e3%83%a7%e3%82%a6'>ゴア･スクリーミング･ショウ</a>
-<a class='btn' href='search_all.html?q=%e3%81%93%e3%81%82%e3%81%8f%e3%81%be%e3%81%a1%e3%82%83%e3%82%93%e3%81%ae%e8%aa%98%e6%83%91%e3%81%a3%ef%bc%81_OP'>こあくまちゃんの誘惑っ！_OP</a>
-<a class='btn' href='search_all.html?q=%e3%81%93%e3%81%84%e3%81%93%e3%81%847'>こいこい7</a>
-<a class='btn' href='search_all.html?q=%e3%81%93%e3%81%84%e3%81%a8%e3%82%8c%ef%bd%9eREN-AI+TRAINING%ef%bd%9e_OP'>こいとれ～REN-AI TRAINING～_OP</a>
-<a class='btn' href='search_all.html?q=%e3%82%b3%e3%82%a6%e3%82%ab%e3%83%90%e3%83%bcver.'>コウカバーver.</a>
-<a class='btn' href='search_all.html?q=%e3%82%b4%e3%83%bc%e3%82%b9%e3%83%88%e3%82%b9%e3%82%a4%e3%83%bc%e3%83%91%e3%83%bc%e7%be%8e%e7%a5%9e'>ゴーストスイーパー美神</a>
-<a class='btn' href='search_all.html?q=%e3%82%b3%e3%83%bc%e3%83%89%ef%bc%9a%e3%83%89%e3%83%a9%e3%82%b4%e3%83%b3%e3%83%96%e3%83%a9%e3%83%83%e3%83%89'>コード：ドラゴンブラッド</a>
-<a class='btn' href='search_all.html?q=%e3%82%b3%e3%83%bc%e3%83%89%e3%82%ae%e3%82%a2%e3%82%b9+Genesic+Re%3bCODE'>コードギアス Genesic Re;CODE</a>
-<a class='btn' href='search_all.html?q=%e3%82%b3%e3%83%bc%e3%83%89%e3%82%ae%e3%82%a2%e3%82%b9+%e5%a5%aa%e9%82%84%e3%81%ae%e3%83%ad%e3%82%bc'>コードギアス 奪還のロゼ</a>
-<a class='btn' href='search_all.html?q=%e3%82%b3%e3%83%bc%e3%83%89%e3%82%ae%e3%82%a2%e3%82%b9+%e5%8f%8d%e9%80%86%e3%81%ae%e3%83%ab%e3%83%ab%e3%83%bc%e3%82%b7%e3%83%a5'>コードギアス 反逆のルルーシュ</a>
 <a class='btn' href='search_all.html?q=%e3%82%b3%e3%83%bc%e3%83%89%e3%82%ae%e3%82%a2%e3%82%b9+%e5%8f%8d%e9%80%86%e3%81%ae%e3%83%ab%e3%83%ab%e3%83%bc%e3%82%b7%e3%83%a5+15%e5%91%a8%e5%b9%b4%e8%a8%98%e5%bf%b5+%e7%89%b9%e5%88%a5%e7%89%88'>コードギアス 反逆のルルーシュ 15周年記念 特別版</a>
-<a class='btn' href='search_all.html?q=%e3%82%b3%e3%83%bc%e3%83%89%e3%82%ae%e3%82%a2%e3%82%b9+%e5%8f%8d%e9%80%86%e3%81%ae%e3%83%ab%e3%83%ab%e3%83%bc%e3%82%b7%e3%83%a5+R2'>コードギアス 反逆のルルーシュ R2</a>
-<a class='btn' href='search_all.html?q=%e3%82%b3%e3%83%bc%e3%83%89%e3%82%ae%e3%82%a2%e3%82%b9+%e5%8f%8d%e9%80%86%e3%81%ae%e3%83%ab%e3%83%ab%e3%83%bc%e3%82%b7%e3%83%a5+R2+%e7%89%b9%e5%88%a5%e7%89%88'>コードギアス 反逆のルルーシュ R2 特別版</a>
 <a class='btn' href='search_all.html?q=%e3%82%b3%e3%83%bc%e3%83%89%e3%82%ae%e3%82%a2%e3%82%b9+%e5%8f%8d%e9%80%86%e3%81%ae%e3%83%ab%e3%83%ab%e3%83%bc%e3%82%b7%e3%83%a5+%e3%82%b3%e3%83%bc%e3%83%89%e3%82%ae%e3%82%a2%e3%82%b9%e5%8a%87%e5%a0%b43%e9%83%a8%e4%bd%9c'>コードギアス 反逆のルルーシュ コードギアス劇場3部作</a>
-<a class='btn' href='search_all.html?q=%e3%82%b3%e3%83%bc%e3%83%89%e3%82%ae%e3%82%a2%e3%82%b9+%e5%8f%8d%e9%80%86%e3%81%ae%e3%83%ab%e3%83%ab%e3%83%bc%e3%82%b7%e3%83%a5+%e3%83%ad%e3%82%b9%e3%83%88%e3%82%b9%e3%83%88%e3%83%bc%e3%83%aa%e3%83%bc%e3%82%ba'>コードギアス 反逆のルルーシュ ロストストーリーズ</a>
-<a class='btn' href='search_all.html?q=%e3%82%b3%e3%83%bc%e3%83%89%e3%82%ae%e3%82%a2%e3%82%b9+%e5%8f%8d%e9%80%86%e3%81%ae%e3%83%ab%e3%83%ab%e3%83%bc%e3%82%b7%e3%83%a5R2'>コードギアス 反逆のルルーシュR2</a>
 <a class='btn' href='search_all.html?q=%e3%82%b3%e3%83%bc%e3%83%89%e3%82%ae%e3%82%a2%e3%82%b9+%e5%be%a9%e6%b4%bb%e3%81%ae%e3%83%ab%e3%83%ab%e3%83%bc%e3%82%b7%e3%83%a5+Re%3bsurrection'>コードギアス 復活のルルーシュ Re;surrection</a>
-<a class='btn' href='search_all.html?q=%e3%82%b3%e3%83%bc%e3%83%89%e3%82%ae%e3%82%a2%e3%82%b9%e3%83%ad%e3%82%b9%e3%83%88%e3%82%b9%e3%83%88%e3%83%bc%e3%83%aa%e3%83%bc%e3%82%ba%e3%83%bbFLOW'>コードギアスロストストーリーズ・FLOW</a>
-<a class='btn' href='search_all.html?q=%e3%82%b3%e3%83%bc%e3%83%97%e3%82%b9%e3%83%91%e3%83%bc%e3%83%86%e3%82%a3'>コープスパーティ</a>
-<a class='btn' href='search_all.html?q=%e3%82%b3%e3%83%bc%e3%83%97%e3%82%b9%e3%83%91%e3%83%bc%e3%83%86%e3%82%a3%e3%83%bc+Tortured+Souls'>コープスパーティー Tortured Souls</a>
-<a class='btn' href='search_all.html?q=%e3%82%b4%e3%83%bc%e3%83%ab%e3%83%87%e3%83%b3%e3%82%ab%e3%83%a0%e3%82%a4'>ゴールデンカムイ</a>
 <a class='btn' href='search_all.html?q=%e3%82%b3%e3%83%bc%e3%83%ab%e7%b7%b4%e7%bf%92'>コール練習</a>
-<a class='btn' href='search_all.html?q=%e3%81%94%e3%81%8f%e3%81%8b%e3%81%ae!+%e3%80%9c%e3%82%bf%e3%83%9e%e3%81%a8%e3%82%89%e3%81%9b%e3%81%a6%e3%82%82%e3%82%89%e3%81%84%e3%81%be%e3%81%99!%e3%80%9c'>ごくかの! 〜タマとらせてもらいます!〜</a>
-<a class='btn' href='search_all.html?q=%e3%82%b4%e3%82%af%e3%83%89%e3%83%bc%e3%81%8f%e3%82%93%e6%bc%ab%e9%81%8a%e8%a8%98%e5%a4%96%e4%bc%9d'>ゴクドーくん漫遊記外伝</a>
-<a class='btn' href='search_all.html?q=%e3%82%b4%e3%82%b4%ef%bc%8fMotokiyo%ef%bc%bfHimehina'>ゴゴ／Motokiyo＿Himehina</a>
-<a class='btn' href='search_all.html?q=%e3%82%b4%e3%82%b4%ef%bc%8fSoma+Genda%ef%bc%86Dirty+Orange%ef%bc%86Gohgo%ef%bc%bfHimehina'>ゴゴ／Soma Genda＆Dirty Orange＆Gohgo＿Himehina</a>
-<a class='btn' href='search_all.html?q=%e3%81%93%e3%81%93%e3%81%af%e3%82%b0%e3%83%aa%e3%83%bc%e3%83%b3%e3%83%bb%e3%82%a6%e3%83%83%e3%83%89'>ここはグリーン・ウッド</a>
-<a class='btn' href='search_all.html?q=%e3%82%b3%e3%82%b3%e3%83%ad%e3%82%b3%e3%83%8d%e3%82%af%e3%83%88'>ココロコネクト</a>
-<a class='btn' href='search_all.html?q=%e3%82%b3%e3%82%b3%e3%83%ad%e3%81%ae%e3%82%ab%e3%82%bf%e3%83%81%e3%81%a8%e3%82%a4%e3%83%ad%e3%81%a8%e3%82%aa%e3%83%88_OP'>ココロのカタチとイロとオト_OP</a>
-<a class='btn' href='search_all.html?q=%e3%82%b3%e3%82%b3%e3%83%ad%e3%81%ae%e3%81%a1%e3%81%9a%ef%bc%8fBOYSTYLE'>ココロのちず／BOYSTYLE</a>
-<a class='btn' href='search_all.html?q=%e3%82%b3%e3%82%b3%e3%83%ad%e5%9b%b3%e6%9b%b8%e9%a4%a8'>ココロ図書館</a>
-<a class='btn' href='search_all.html?q=%e3%82%b4%e3%82%b8%e3%83%a9+S.P%ef%bc%9c%e3%82%b7%e3%83%b3%e3%82%ae%e3%83%a5%e3%83%a9%e3%83%9d%e3%82%a4%e3%83%b3%e3%83%88%ef%bc%9e%e3%82%a2%e3%83%8b%e3%83%a1MV+ver.'>ゴジラ S.P＜シンギュラポイント＞アニメMV ver.</a>
 <a class='btn' href='search_all.html?q=%e3%82%b4%e3%82%b8%e3%83%a9S.P%e3%82%b7%e3%83%b3%e3%82%ae%e3%83%a5%e3%83%a9%e3%83%9d%e3%82%a4%e3%83%b3%e3%83%88'>ゴジラS.Pシンギュラポイント</a>
-<a class='btn' href='search_all.html?q=%e3%82%b4%e3%82%b9%e3%83%87%e3%83%aa+-GOTHIC+DELUSION-'>ゴスデリ -GOTHIC DELUSION-</a>
-<a class='btn' href='search_all.html?q=%e3%82%b4%e3%82%b9%e3%83%9a%e3%83%a9%e3%83%bc%e3%82%ba+feat.+Anly'>ゴスペラーズ feat. Anly</a>
-<a class='btn' href='search_all.html?q=%e3%82%b3%e3%82%ba%e3%83%9f%e3%83%83%e3%82%af%e3%83%90%e3%83%88%e3%83%b3%e3%82%ac%e3%83%bc%e3%83%ab+%e3%82%b3%e3%83%a1%e3%83%83%e3%83%88%e3%81%95%e3%82%93'>コズミックバトンガール コメットさん</a>
-<a class='btn' href='search_all.html?q=%e3%82%b3%e3%82%ba%e3%83%9f%e3%83%83%e3%82%af%e3%83%90%e3%83%88%e3%83%b3%e3%82%ac%e3%83%bc%e3%83%ab+%e3%82%b3%e3%83%a1%e3%83%83%e3%83%88%e3%81%95%e3%82%93%ef%bc%81%e2%98%86'>コズミックバトンガール コメットさん！☆</a>
-<a class='btn' href='search_all.html?q=%e3%82%b3%e3%82%bc%e3%83%83%e3%83%88%e3%81%ae%e8%82%96%e5%83%8f'>コゼットの肖像</a>
-<a class='btn' href='search_all.html?q=%e3%82%b3%e3%82%bf%e3%83%ad%e3%83%bc%e3%81%af1%e4%ba%ba%e6%9a%ae%e3%82%89%e3%81%97'>コタローは1人暮らし</a>
-<a class='btn' href='search_all.html?q=%e3%81%93%e3%81%a1%e3%82%89%e8%91%9b%e9%a3%be%e5%8c%ba%e4%ba%80%e6%9c%89%e5%85%ac%e5%9c%92%e5%89%8d%e6%b4%be%e5%87%ba%e6%89%80%e3%83%bb%e5%bd%b1%e5%b1%b1%e3%83%92%e3%83%ad%e3%83%8e%e3%83%96(%e3%82%ab%e3%83%90%e3%83%bc)'>こちら葛飾区亀有公園前派出所・影山ヒロノブ(カバー)</a>
-<a class='btn' href='search_all.html?q=%e3%81%93%e3%81%a3%e3%81%a1%e3%81%ae%e3%81%91%e3%82%93%e3%81%a8'>こっちのけんと</a>
-<a class='btn' href='search_all.html?q=%e3%82%b3%e3%83%83%e3%83%9a%e3%83%aa%e3%82%aa%e3%83%b3'>コッペリオン</a>
-<a class='btn' href='search_all.html?q=%e3%81%93%e3%81%a8%e3%81%b6%e3%81%8d'>ことぶき</a>
-<a class='btn' href='search_all.html?q=%e3%81%93%e3%81%a9%e3%82%82%e3%81%ae%e3%81%8a%e3%82%82%e3%81%a1%e3%82%83'>こどものおもちゃ</a>
-<a class='btn' href='search_all.html?q=%e3%81%93%e3%81%a9%e3%82%82%e3%81%ae%e3%81%98%e3%81%8b%e3%82%93'>こどものじかん</a>
-<a class='btn' href='search_all.html?q=%e3%81%93%e3%81%a9%e3%82%82%e3%81%ae%e3%81%98%e3%81%8b%e3%82%93+%e4%ba%8c%e5%ad%a6%e6%9c%9f'>こどものじかん 二学期</a>
-<a class='btn' href='search_all.html?q=%e3%81%93%e3%81%aa%e3%81%9f%e3%82%88%e3%82%8a%e3%81%8b%e3%81%aa%e3%81%9f%e3%81%be%e3%81%a7'>こなたよりかなたまで</a>
-<a class='btn' href='search_all.html?q=%e3%81%93%e3%81%ae%e3%81%af%e3%81%aa%e5%a5%87%e8%ad%9a'>このはな奇譚</a>
-<a class='btn' href='search_all.html?q=%e3%81%93%e3%81%ae%e3%81%af%e3%81%aa%e7%b6%ba%e8%ad%9a'>このはな綺譚</a>
-<a class='btn' href='search_all.html?q=%e3%81%93%e3%81%ae%e3%83%92%e3%83%bc%e3%83%a9%e3%83%bc%e3%80%81%e3%82%81%e3%82%93%e3%81%a9%e3%81%8f%e3%81%95%e3%81%84OP'>このヒーラー、めんどくさいOP</a>
-<a class='btn' href='search_all.html?q=%e3%81%93%e3%81%ae%e9%9f%b3%e3%81%a8%e3%81%be%e3%82%8c%ef%bc%81'>この音とまれ！</a>
-<a class='btn' href='search_all.html?q=%e3%81%93%e3%81%ae%e4%bc%9a%e7%a4%be%e3%81%ab%e5%a5%bd%e3%81%8d%e3%81%aa%e4%ba%ba%e3%81%8c%e3%81%84%e3%81%be%e3%81%99'>この会社に好きな人がいます</a>
-<a class='btn' href='search_all.html?q=%e3%81%93%e3%81%ae%e9%86%9c%e3%81%84%e3%82%82%e7%be%8e%e3%81%97%e3%81%84%e4%b8%96%e7%95%8c'>この醜いも美しい世界</a>
-<a class='btn' href='search_all.html?q=%e3%81%93%e3%81%ae%e4%b8%96%e3%81%ae%e6%9e%9c%e3%81%a6%e3%81%a7%e6%81%8b%e3%82%92%e5%94%84%e3%81%86%e5%b0%91%e5%a5%b3+YU-NO'>この世の果てで恋を唄う少女 YU-NO</a>
-<a class='btn' href='search_all.html?q=%e3%81%93%e3%81%ae%e4%b8%96%e3%81%ae%e6%9e%9c%e3%81%a6%e3%81%a7%e6%81%8b%e3%82%92%e5%94%84%e3%81%86%e5%b0%91%e5%a5%b3YU-NO'>この世の果てで恋を唄う少女YU-NO</a>
-<a class='btn' href='search_all.html?q=%e3%81%93%e3%81%ae%e4%b8%96%e7%95%8c%e3%81%ae%e7%89%87%e9%9a%85%e3%81%ab'>この世界の片隅に</a>
-<a class='btn' href='search_all.html?q=%e3%81%93%e3%81%ae%e4%b8%96%e7%95%8c%e3%81%af%e4%b8%8d%e5%ae%8c%e5%85%a8%e3%81%99%e3%81%8e%e3%82%8b'>この世界は不完全すぎる</a>
 <a class='btn' href='search_all.html?q=%e3%81%93%e3%81%ae%e4%b8%96%e7%95%8c%e3%81%af%e4%b8%8d%e5%ae%8c%e5%85%a8%e3%81%99%e3%81%8e%e3%82%8b+ED'>この世界は不完全すぎる ED</a>
 <a class='btn' href='search_all.html?q=%e3%81%93%e3%81%ae%e4%b8%96%e7%95%8c%e3%81%af%e4%b8%8d%e5%ae%8c%e5%85%a8%e3%81%99%e3%81%8e%e3%82%8b+OP'>この世界は不完全すぎる OP</a>
-<a class='btn' href='search_all.html?q=%e3%81%93%e3%81%ae%e9%9d%92%e7%a9%ba%e3%81%ab%e7%b4%84%e6%9d%9f%e3%82%92%e2%80%95'>この青空に約束を―</a>
-<a class='btn' href='search_all.html?q=%e3%81%93%e3%81%ae%e7%b4%a0%e6%99%b4%e3%82%89%e3%81%97%e3%81%84%e4%b8%96%e7%95%8c%e3%81%ab%e7%a5%9d%e7%a6%8f%e3%82%92!'>この素晴らしい世界に祝福を!</a>
-<a class='btn' href='search_all.html?q=%e3%81%93%e3%81%ae%e7%b4%a0%e6%99%b4%e3%82%89%e3%81%97%e3%81%84%e4%b8%96%e7%95%8c%e3%81%ab%e7%a5%9d%e7%a6%8f%e3%82%92%ef%bc%81'>この素晴らしい世界に祝福を！</a>
-<a class='btn' href='search_all.html?q=%e3%81%93%e3%81%ae%e7%b4%a0%e6%99%b4%e3%82%89%e3%81%97%e3%81%84%e4%b8%96%e7%95%8c%e3%81%ab%e7%a5%9d%e7%a6%8f%e3%82%92!+%ef%bd%9e%e3%81%93%e3%81%ae%e6%ac%b2%e6%9c%9b%e3%81%ae%e8%a1%a3%e8%a3%85%e3%81%ab%e5%af%b5%e6%84%9b%e3%82%92!%ef%bd%9e'>この素晴らしい世界に祝福を! ～この欲望の衣装に寵愛を!～</a>
-<a class='btn' href='search_all.html?q=%e3%81%93%e3%81%ae%e7%b4%a0%e6%99%b4%e3%82%89%e3%81%97%e3%81%84%e4%b8%96%e7%95%8c%e3%81%ab%e7%a5%9d%e7%a6%8f%e3%82%92!+2'>この素晴らしい世界に祝福を! 2</a>
-<a class='btn' href='search_all.html?q=%e3%81%93%e3%81%ae%e7%b4%a0%e6%99%b4%e3%82%89%e3%81%97%e3%81%84%e4%b8%96%e7%95%8c%e3%81%ab%e7%a5%9d%e7%a6%8f%e3%82%92%ef%bc%81%ef%bc%92'>この素晴らしい世界に祝福を！２</a>
-<a class='btn' href='search_all.html?q=%e3%81%93%e3%81%ae%e7%b4%a0%e6%99%b4%e3%82%89%e3%81%97%e3%81%84%e4%b8%96%e7%95%8c%e3%81%ab%e7%a5%9d%e7%a6%8f%e3%82%92!3'>この素晴らしい世界に祝福を!3</a>
-<a class='btn' href='search_all.html?q=%e3%81%93%e3%81%ae%e7%b4%a0%e6%99%b4%e3%82%89%e3%81%97%e3%81%84%e4%b8%96%e7%95%8c%e3%81%ab%e7%a5%9d%e7%a6%8f%e3%82%92%ef%bc%813'>この素晴らしい世界に祝福を！3</a>
-<a class='btn' href='search_all.html?q=%e3%81%93%e3%81%ae%e7%b4%a0%e6%99%b4%e3%82%89%e3%81%97%e3%81%84%e4%b8%96%e7%95%8c%e3%81%ab%e7%a5%9d%e7%a6%8f%e3%82%92%ef%bc%81%ef%bc%93'>この素晴らしい世界に祝福を！３</a>
-<a class='btn' href='search_all.html?q=%e3%81%93%e3%81%ae%e7%b4%a0%e6%99%b4%e3%82%89%e3%81%97%e3%81%84%e4%b8%96%e7%95%8c%e3%81%ab%e7%a5%9d%e7%a6%8f%e3%82%92%ef%bc%81%e7%b4%85%e4%bc%9d%e8%aa%ac'>この素晴らしい世界に祝福を！紅伝説</a>
-<a class='btn' href='search_all.html?q=%e3%81%93%e3%81%ae%e4%b8%ad%e3%81%ab1%e4%ba%ba%e3%80%81%e5%a6%b9%e3%81%8c%e3%81%84%e3%82%8b!'>この中に1人、妹がいる!</a>
-<a class='btn' href='search_all.html?q=%e3%81%93%e3%81%ae%e4%b8%ad%e3%81%ab1%e4%ba%ba%e3%80%81%e5%a6%b9%e3%81%8c%e3%81%84%e3%82%8b%ef%bc%81'>この中に1人、妹がいる！</a>
-<a class='btn' href='search_all.html?q=%e3%81%93%e3%81%ae%e7%be%8e%e8%a1%93%e9%83%a8%e3%81%ab%e3%81%af%e5%95%8f%e9%a1%8c%e3%81%8c%e3%81%82%e3%82%8b!'>この美術部には問題がある!</a>
-<a class='btn' href='search_all.html?q=%e3%81%93%e3%81%b0%e3%81%a8%e3%80%82'>こばと。</a>
-<a class='btn' href='search_all.html?q=%e3%81%93%e3%81%af%e3%81%aa%e3%82%89%e3%82%80'>こはならむ</a>
-<a class='btn' href='search_all.html?q=%e3%81%93%e3%81%af%e3%81%aa%e3%82%89%e3%82%80%ef%bc%8f%e3%81%84%e3%81%a4%e3%81%8b%e8%a6%8b%e3%81%9f%e7%a9%ba%e3%81%ae%e8%89%b2'>こはならむ／いつか見た空の色</a>
-<a class='btn' href='search_all.html?q=%e3%81%93%e3%81%af%e3%82%8b%e3%81%b3%e3%82%88%e3%82%8a'>こはるびより</a>
-<a class='btn' href='search_all.html?q=%e3%82%b4%e3%83%96%e3%83%aa%e3%83%b3%e3%82%b9%e3%83%ac%e3%82%a4%e3%83%a4%e3%83%bc'>ゴブリンスレイヤー</a>
 <a class='btn' href='search_all.html?q=%e3%82%b4%e3%83%96%e3%83%aa%e3%83%b3%e3%82%b9%e3%83%ac%e3%82%a4%e3%83%a4%e3%83%bc%e2%85%a1+ED'>ゴブリンスレイヤーⅡ ED</a>
-<a class='btn' href='search_all.html?q=%e3%82%b4%e3%83%9b%e3%82%a6%e3%83%93'>ゴホウビ</a>
-<a class='btn' href='search_all.html?q=%e3%81%93%e3%81%bf%e3%81%a3%e3%81%8f%e3%81%8c%e3%83%bc%e3%82%8b%e3%81%9a'>こみっくがーるず</a>
-<a class='btn' href='search_all.html?q=%e3%81%93%e3%81%bf%e3%81%a3%e3%81%8f%e3%83%91%e3%83%bc%e3%83%86%e3%82%a3%e3%83%bc'>こみっくパーティー</a>
-<a class='btn' href='search_all.html?q=%e3%81%93%e3%81%bf%e3%81%a3%e3%81%8f%e3%83%91%e3%83%bc%e3%83%86%e3%82%a3%e3%83%bc+Revolution'>こみっくパーティー Revolution</a>
-<a class='btn' href='search_all.html?q=%e3%81%93%e3%81%bf%e3%81%a3%e3%81%8f%e3%83%91%e3%83%bc%e3%83%86%e3%82%a3%e3%83%bcRevolution'>こみっくパーティーRevolution</a>
-<a class='btn' href='search_all.html?q=%e3%82%b3%e3%83%9f%e3%83%a5-%e9%bb%92%e3%81%84%e7%ab%9c%e3%81%a8%e5%84%aa%e3%81%97%e3%81%84%e7%8e%8b%e5%9b%bd-'>コミュ-黒い竜と優しい王国-</a>
-<a class='btn' href='search_all.html?q=%e3%82%b3%e3%83%a1%e3%83%83%e3%83%88%e3%83%bb%e3%83%ab%e3%82%b7%e3%83%95%e3%82%a1%e3%83%bc'>コメット・ルシファー</a>
 <a class='btn' href='search_all.html?q=%e3%82%b3%e3%83%a1%e3%83%83%e3%83%88%e3%81%95%e3%82%93+OP'>コメットさん OP</a>
-<a class='btn' href='search_all.html?q=%e3%82%b3%e3%83%a9%e3%83%9c%e3%82%ab%e3%83%90%e3%83%bc%e6%9b%b2%e3%80%81%e3%83%91%e3%83%bc%e3%83%88%e5%88%86%e3%81%91'>コラボカバー曲、パート分け</a>
-<a class='btn' href='search_all.html?q=%e3%82%b4%e3%83%aa%e3%83%a9%e3%81%ae%e7%a5%9e%e3%81%8b%e3%82%89%e5%8a%a0%e8%ad%b7%e3%81%95%e3%82%8c%e3%81%9f%e4%bb%a4%e5%ac%a2%e3%81%af%e7%8e%8b%e7%ab%8b%e9%a8%8e%e5%a3%ab%e5%9b%a3%e3%81%a7%e5%8f%af%e6%84%9b%e3%81%8c%e3%82%89%e3%82%8c%e3%82%8b'>ゴリラの神から加護された令嬢は王立騎士団で可愛がられる</a>
-<a class='btn' href='search_all.html?q=%e3%82%b4%e3%83%ab%e3%82%b413'>ゴルゴ13</a>
-<a class='btn' href='search_all.html?q=%e3%82%b4%e3%83%ab%e3%82%b4%ef%bc%91%ef%bc%93'>ゴルゴ１３</a>
-<a class='btn' href='search_all.html?q=%e3%82%b4%e3%83%ab%e3%82%b413+%e7%ac%ac%e4%b8%80%e7%ab%a0+%e7%a5%9e%e3%80%85%e3%81%ae%e9%bb%84%e6%98%8f(off%e3%81%ae%e3%81%bf)'>ゴルゴ13 第一章 神々の黄昏(offのみ)</a>
-<a class='btn' href='search_all.html?q=%e3%81%93%e3%82%8c%e3%81%8c%e7%a7%81%e3%81%ae%e5%be%a1%e4%b8%bb%e4%ba%ba%e6%a7%98'>これが私の御主人様</a>
-<a class='btn' href='search_all.html?q=%e3%82%b3%e3%83%ac%e3%82%b5%e3%83%af'>コレサワ</a>
-<a class='btn' href='search_all.html?q=%e3%81%93%e3%82%8c%e3%81%af%e3%82%be%e3%83%b3%e3%83%93%e3%81%a7%e3%81%99%e3%81%8b%ef%bc%9f'>これはゾンビですか？</a>
-<a class='btn' href='search_all.html?q=%e3%81%93%e3%82%8c%e3%81%af%e3%82%bd%e3%83%b3%e3%83%93%e3%81%a7%e3%81%99%e3%81%8b%ef%bc%9f+OF+THE+DEAD'>これはソンビですか？ OF THE DEAD</a>
-<a class='btn' href='search_all.html?q=%e3%81%93%e3%82%8c%e3%81%af%e3%82%be%e3%83%b3%e3%83%93%e3%81%a7%e3%81%99%e3%81%8b%ef%bc%9f+OF+THE+DEAD'>これはゾンビですか？ OF THE DEAD</a>
-<a class='btn' href='search_all.html?q=%e3%82%b3%e3%83%ad%e3%83%8a%e3%83%bb%e3%83%96%e3%83%ad%e3%83%83%e3%82%b5%e3%83%a0+Corona+Blossom'>コロナ・ブロッサム Corona Blossom</a>
-<a class='btn' href='search_all.html?q=%e3%82%b3%e3%83%ad%e3%83%a0%e3%83%93%e3%82%a2%e7%89%88'>コロムビア版</a>
-<a class='btn' href='search_all.html?q=%e3%82%b4%e3%83%af%e3%83%83%e3%83%91%e3%83%bc5+%e3%82%b4%e3%83%bc%e3%83%80%e3%83%a0'>ゴワッパー5 ゴーダム</a>
-<a class='btn' href='search_all.html?q=%e3%82%b3%e3%83%b3%e3%82%af%e3%83%aa%e3%83%bc%e3%83%88%e3%83%bb%e3%83%ac%e3%83%9c%e3%83%ab%e3%83%86%e3%82%a3%e3%82%aa+%ef%bd%9e%e8%b6%85%e4%ba%ba%e5%b9%bb%e6%83%b3%ef%bd%9e'>コンクリート・レボルティオ ～超人幻想～</a>
-<a class='btn' href='search_all.html?q=%e3%82%b3%e3%83%b3%e3%82%af%e3%83%aa%e3%83%bc%e3%83%88%e3%83%bb%e3%83%ac%e3%83%9c%e3%83%ab%e3%83%86%e3%82%a3%e3%82%aa+%ef%bd%9e%e8%b6%85%e4%ba%ba%e5%b9%bb%e6%83%b3%ef%bd%9e+THE+LAST+SONG'>コンクリート・レボルティオ ～超人幻想～ THE LAST SONG</a>
-<a class='btn' href='search_all.html?q=%e3%81%93%e3%82%93%e3%81%ab%e3%81%a1%e3%81%af%e8%b0%b7%e7%94%b0%e3%81%95%e3%82%93'>こんにちは谷田さん</a>
-<a class='btn' href='search_all.html?q=%e3%81%94%e6%84%81%e5%82%b7%e3%81%95%e3%81%be%e4%ba%8c%e3%83%8e%e5%ae%ae%e3%81%8f%e3%82%93'>ご愁傷さま二ノ宮くん</a>
-<a class='btn' href='search_all.html?q=%e3%81%94%e6%b3%a8%e6%96%87%e3%81%af%e3%81%86%e3%81%95%e3%81%8e%e3%81%a7%e3%81%99%e3%81%8b%ef%bc%9f'>ご注文はうさぎですか？</a>
-<a class='btn' href='search_all.html?q=%e3%81%94%e6%b3%a8%e6%96%87%e3%81%af%e3%81%86%e3%81%95%e3%81%8e%e3%81%a7%e3%81%99%e3%81%8b%ef%bc%9f+BLOOM'>ご注文はうさぎですか？ BLOOM</a>
-<a class='btn' href='search_all.html?q=%e3%81%94%e6%b3%a8%e6%96%87%e3%81%af%e3%81%86%e3%81%95%e3%81%8e%e3%81%a7%e3%81%99%e3%81%8b%ef%bc%9f+%e3%82%ad%e3%83%a3%e3%83%a9%e3%82%af%e3%82%bf%e3%83%bc%e3%82%bd%e3%83%b3%e3%82%b0'>ご注文はうさぎですか？ キャラクターソング</a>
-<a class='btn' href='search_all.html?q=%e3%81%94%e6%b3%a8%e6%96%87%e3%81%af%e3%81%86%e3%81%95%e3%81%8e%e3%81%a7%e3%81%99%e3%81%8b%ef%bc%9f%ef%bc%9f'>ご注文はうさぎですか？？</a>
-<a class='btn' href='search_all.html?q=%e3%81%94%e6%b3%a8%e6%96%87%e3%81%af%e3%81%86%e3%81%95%e3%81%8e%e3%81%a7%e3%81%99%e3%81%8b%ef%bc%9f%ef%bc%9f+%ef%bd%9eDear+My+Sister%ef%bd%9e'>ご注文はうさぎですか？？ ～Dear My Sister～</a>
-<a class='btn' href='search_all.html?q=%e3%81%94%e6%b3%a8%e6%96%87%e3%81%af%e3%81%86%e3%81%95%e3%81%8e%e3%81%a7%e3%81%99%e3%81%8b%ef%bc%9f%ef%bc%9f%ef%bd%9eSing+For+You%ef%bd%9e'>ご注文はうさぎですか？？～Sing For You～</a>
-<a class='btn' href='search_all.html?q=%e3%81%94%e6%b3%a8%e6%96%87%e3%81%af%e3%81%86%e3%81%95%e3%81%8e%e3%81%a7%e3%81%99%e3%81%8b%ef%bc%9fBLOOM'>ご注文はうさぎですか？BLOOM</a>
-<a class='btn' href='search_all.html?q=%e3%81%94%e6%9c%ac%e4%ba%ba%e3%81%a8%e3%82%b3%e3%83%a9%e3%83%9c'>ご本人とコラボ</a>
-<a class='btn' href='search_all.html?q=%e3%81%94%e6%9c%ac%e4%ba%ba%e3%81%a8%e3%82%b3%e3%83%a9%e3%83%9cSP'>ご本人とコラボSP</a>
-<a class='btn' href='search_all.html?q=%e3%81%94%e6%9c%ac%e4%ba%ba%e9%99%8d%e8%87%a8!'>ご本人降臨!</a>
-<a class='btn' href='search_all.html?q=%e3%81%94%e6%9c%ac%e4%ba%ba%e7%99%bb%e5%a0%b4%ef%bc%81'>ご本人登場！</a></div>
+<a class='btn' href='search_all.html?q=%e3%82%b3%e3%83%a9%e3%83%9c%e3%82%ab%e3%83%90%e3%83%bc%e6%9b%b2%e3%80%81%e3%83%91%e3%83%bc%e3%83%88%e5%88%86%e3%81%91'>コラボカバー曲、パート分け</a></div>
   </div>
 
   <script>
-    (function(){
-      const list=document.querySelectorAll('.list-こ a');
-      const el=document.getElementById('count-list-こ');
-      if(el){ el.textContent='表示件数: '+list.length; }
-    })();
+    (function(){ const list=document.querySelectorAll('.list-こ a'); const el=document.getElementById('count-list-こ'); if(el){ el.textContent='表示件数: '+list.length; } })();
   </script>
 </div>
 </div>

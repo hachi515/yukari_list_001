@@ -32,7 +32,7 @@ body{
 .wrap{ max-width:1100px; margin:24px auto; padding:12px; background:var(--panel); border:0; border-radius:0; box-shadow:none; overflow-x:auto; }
 
 h1{ display:inline-block; margin:0 0 14px 0; padding:4px 0; background:transparent; color:#0b1b2e; font-size:18px; font-weight:500 }
-h2{ margin:10px 0 8px; padding:0; color:#0b1b2e; font-size:18px; font-weight:500; background:transparent } /* ← h1と同サイズ */
+h2{ margin:10px 0 8px; padding:0; color:#0b1b2e; font-size:18px; font-weight:500; background:transparent }
 
 .back{ text-align:right; margin:-6px 0 6px 0 }
 .back a{ color:var(--accent); text-decoration:none; border-bottom:1px dotted var(--accent) }
@@ -40,7 +40,7 @@ h2{ margin:10px 0 8px; padding:0; color:#0b1b2e; font-size:18px; font-weight:500
 .section{margin:10px 0 18px}
 .search{display:flex; gap:8px; margin:8px 0 4px; align-items:center; justify-content:flex-start}
 .search select{ padding:8px 10px; font-size:14px; background:var(--panel); border:1px solid var(--ui-gray); border-radius:0; font-weight:400 }
-.search input[type=text]{ flex:0 0 260px; width:260px; padding:8px; font-size:14px; background:var(--panel); border:1px solid var(--ui-gray); border-radius:0; font-weight:400 }
+.search input[type=text]{ flex:0 0 420px; width:420px; padding:8px; font-size:14px; background:var(--panel); border:1px solid var(--ui-gray); border-radius:0; font-weight:400 }
 .search button{ padding:8px 12px; font-size:14px; color:#fff; background:var(--accent-90); border:1px solid var(--ui-gray); border-radius:0; cursor:pointer }
 .count{font-size:11px; color:#222; margin:4px 0 8px}
 a{ color:var(--accent); }
@@ -66,12 +66,7 @@ a{ color:var(--accent); }
 .meta{margin:3px 0; font-weight:400}
 .meta .label{display:inline-block; min-width:84px; color:#0b1b2e; font-weight:400}
 
-/* ページャ */
-.pager{display:flex; gap:6px; flex-wrap:wrap; margin:14px 0}
-.pager a,.pager span{padding:6px 10px; border:1px solid var(--border); text-decoration:none; color:#fff; background:var(--accent-70); font-weight:400}
-.pager .current{background:var(--accent-90); color:#fff}
-
-/* スクロール枠（search_all / 年別 / 新着 / 五十音） */
+/* スクロール枠（全ページ共通） */
 .list-container{max-height:900px; overflow-y:auto; border:1px solid var(--ui-gray); background:rgba(255,255,255,.35); padding:8px; box-shadow:0 4px 8px rgba(0,0,0,.06)}
 .stickybar{position:sticky; top:0; z-index:20; background:rgba(255,255,255,.6); border-bottom:1px solid var(--ui-gray); padding:8px; margin:-8px -8px 8px -8px}
 .stickybar.no-bg{background:transparent; border:none; padding:0; margin:0 0 8px 0}
@@ -79,11 +74,7 @@ a{ color:var(--accent); }
 @media (max-width:768px){
   body{ background-image:url('https://raw.githubusercontent.com/hachi515/yukari_list_001/main/Hasunosora_2.png'); font-size:13px }
   .search select, .search input[type=text], .search button{ font-size:13px; padding:7px 10px }
-  /* 入力幅をスマホではやや広めに */
   .search input[type=text]{ flex:0 0 56vw; width:56vw }
-  .list-container{ max-height:450px }
-}
-  .search select, .search input[type=text], .search button{ font-size:13px; padding:7px 10px }
   .list-container{ max-height:450px }
 }</style>
 <script>const SEARCH_BASE = 'http://ykr.moe:11059/';
@@ -91,7 +82,7 @@ a{ color:var(--accent); }
 function tokensHalf(v){return v.toLowerCase().trim().split(/ +/).filter(Boolean)}
 function qparam(name){ const m = location.search.match(new RegExp('[?&]'+name+'=([^&]+)')); return m ? decodeURIComponent(m[1]) : ''; }
 
-// 軽量リンク化：data-q を href に展開
+// data-q → href 生成（軽量リンク化）
 document.addEventListener('DOMContentLoaded', ()=>{
   document.querySelectorAll('a[data-q]').forEach(a=>{
     try{
@@ -115,9 +106,6 @@ function filterCards(listId, boxId){
   });
   const cEl = document.getElementById('count-'+listId);
   if(cEl){ cEl.textContent = '表示件数: ' + vis; }
-  const pager = document.getElementById('pager-'+listId);
-  const per = parseInt(list.dataset.per || '100',10);
-  if(pager){ if(q.length===0){ pager.style.display = ''; } else { pager.style.display = (vis<=per) ? 'none' : ''; } }
 }
 
 /* ===== 検索結果専用：表示中カードを「制作者優先度→日付」で並べ替え ===== */
@@ -149,16 +137,13 @@ function filterCardsAdv(listId, boxId, yearId){
     const okText = q.every(tok => c.innerText.toLowerCase().includes(tok));
     const band = (c.dataset.yearband||'');
     const yr = (c.dataset.year||'');
-    const okYear = (y==='' || yr===y || band===y);
-    const show = okText && okYear;
+    const show = okText && (y==='' || yr===y || band===y);
     c.style.display = show ? '' : 'none';
     if(show) vis++;
   });
   const cEl = document.getElementById('count-'+listId);
   if(cEl){ cEl.textContent = '表示件数: ' + vis; }
-
-  // ★検索（キーワード or 年帯）を使ったときだけ優先度並び替えを実施
-  if(q.length>0 || y!==''){ reorderByPriority(listId); }
+  if(q.length>0 || y!==''){ reorderByPriority(listId); } // ★全体検索のみ
 }
 
 function filterGrid(gridSel, boxId, countId){
@@ -182,54 +167,12 @@ function filterGrid(gridSel, boxId, countId){
 
   <div class='list-container'>
     <div class='prog-grid list-つ'><a class='btn' href='search_all.html?q=%e3%81%a4%ef%bc%89%e6%9c%88%e8%a9%a0'>つ）月詠</a>
-<a class='btn' href='search_all.html?q=%e3%81%a4%e3%81%84%e3%81%a7%e3%81%ab%e3%81%a8%e3%82%93%e3%81%a1%e3%82%93%e3%81%8b%e3%82%93'>ついでにとんちんかん</a>
 <a class='btn' href='search_all.html?q=%e3%83%84%e3%82%a4%e3%83%b3%e3%82%ba%e3%81%b2%e3%81%aa%e3%81%b2%e3%81%be+ED'>ツインズひなひま ED</a>
-<a class='btn' href='search_all.html?q=%e3%83%84%e3%82%a4%e3%83%b3%e3%82%ba%e3%81%b2%e3%81%aa%e3%81%b2%e3%81%be+OP'>ツインズひなひま OP</a>
-<a class='btn' href='search_all.html?q=%e3%83%84%e3%82%a4%e3%83%b3%e3%82%ba%e3%81%b2%e3%81%aa%e3%81%b2%e3%81%be_2%e4%ba%ba%e3%83%91%e3%83%bc%e3%83%88%e5%88%86%e3%81%91'>ツインズひなひま_2人パート分け</a>
-<a class='btn' href='search_all.html?q=%e3%83%84%e3%82%a4%e3%83%b3%e3%83%93%e3%83%bcPARADISE'>ツインビーPARADISE</a>
-<a class='btn' href='search_all.html?q=%e3%83%84%e3%82%a4%e3%83%b3%e3%83%93%e3%83%bcRPG'>ツインビーRPG</a>
-<a class='btn' href='search_all.html?q=%e3%83%84%e3%83%b4%e3%82%a1%e3%82%a4%e3%83%88%e3%83%aa%e3%82%ac%e3%83%bc'>ツヴァイトリガー</a>
-<a class='btn' href='search_all.html?q=%e3%83%84%e3%83%b4%e3%82%a1%e3%82%a4%e3%83%88%e3%83%aa%e3%82%ac%e3%83%bc_OP'>ツヴァイトリガー_OP</a>
-<a class='btn' href='search_all.html?q=%e3%83%84%e3%83%b4%e3%82%a1%e3%82%a4%e3%83%88%e3%83%aa%e3%82%ac%e3%83%bc_TRUE_ED'>ツヴァイトリガー_TRUE_ED</a>
-<a class='btn' href='search_all.html?q=%e3%83%84%e3%83%b4%e3%82%a1%e3%82%a4%e3%83%88%e3%83%aa%e3%82%ac%e3%83%bc_%e3%81%8b%e3%81%aa%e3%82%81%e3%83%ab%e3%83%bc%e3%83%88_ED'>ツヴァイトリガー_かなめルート_ED</a>
-<a class='btn' href='search_all.html?q=%e3%83%84%e3%83%b4%e3%82%a1%e3%82%a4%e3%83%88%e3%83%aa%e3%82%ac%e3%83%bc_%e8%97%a4%e8%8a%b1%e3%83%ab%e3%83%bc%e3%83%88_ED'>ツヴァイトリガー_藤花ルート_ED</a>
-<a class='btn' href='search_all.html?q=%e3%83%84%e3%83%b4%e3%82%a1%e3%82%a4%e3%83%88%e3%83%aa%e3%82%ac%e3%83%bc_%e7%94%b1%e9%82%a3%e3%83%ab%e3%83%bc%e3%83%88_ED'>ツヴァイトリガー_由那ルート_ED</a>
-<a class='btn' href='search_all.html?q=%e3%81%a4%e3%81%86%e3%81%8b%e3%81%82'>つうかあ</a>
-<a class='btn' href='search_all.html?q=%e3%83%84%e3%82%ad%e3%82%a6%e3%82%bf%e3%80%82+THE+ANIMATION'>ツキウタ。 THE ANIMATION</a>
-<a class='btn' href='search_all.html?q=%e3%83%84%e3%82%ad%e3%83%8e%e3%82%ad%e3%82%aa%e3%82%af%ef%bc%8fSana'>ツキノキオク／Sana</a>
-<a class='btn' href='search_all.html?q=%e3%83%84%e3%82%ae%e3%83%8f%e3%82%ae%e3%82%81%e3%81%84%e3%81%8f%e3%81%b4%e3%83%bc%e3%81%99%ef%bc%81-pretending%c3%97friendship-_2ndOP'>ツギハギめいくぴーす！-pretending&#215;friendship-_2ndOP</a>
-<a class='btn' href='search_all.html?q=%e3%83%84%e3%82%ae%e3%83%8f%e3%82%ae%e3%82%81%e3%81%84%e3%81%8f%e3%81%b4%e3%83%bc%e3%81%99%ef%bc%81-pretending%c3%97friendship-_%e7%b6%be%e7%80%ac%e5%b7%9d%e7%b6%be%e7%80%ac_%e3%82%ad%e3%83%a3%e3%83%a9%e3%82%af%e3%82%bf%e3%83%bc%e3%82%bd%e3%83%b3%e3%82%b0'>ツギハギめいくぴーす！-pretending&#215;friendship-_綾瀬川綾瀬_キャラクターソング</a>
-<a class='btn' href='search_all.html?q=%e3%83%84%e3%82%ae%e3%83%8f%e3%82%ae%e3%82%81%e3%81%84%e3%81%8f%e3%81%b4%e3%83%bc%e3%81%99%ef%bc%81-pretending%c3%97friendship-_%e9%81%a0%e9%87%8e%e5%b8%8c_%e3%82%ad%e3%83%a3%e3%83%a9%e3%82%af%e3%82%bf%e3%83%bc%e3%82%bd%e3%83%b3%e3%82%b0'>ツギハギめいくぴーす！-pretending&#215;friendship-_遠野希_キャラクターソング</a>
-<a class='btn' href='search_all.html?q=%e3%83%84%e3%82%ae%e3%83%8f%e3%82%ae%e3%82%81%e3%81%84%e3%81%8f%e3%81%b4%e3%83%bc%e3%81%99%ef%bc%81-pretending%c3%97friendship-_%e8%8a%b1%e5%b0%8f%e8%b7%af%e3%81%84%e3%82%8d%e3%81%af_%e3%82%ad%e3%83%a3%e3%83%a9%e3%82%af%e3%82%bf%e3%83%bc%e3%82%bd%e3%83%b3%e3%82%b0'>ツギハギめいくぴーす！-pretending&#215;friendship-_花小路いろは_キャラクターソング</a>
-<a class='btn' href='search_all.html?q=%e3%83%84%e3%82%ae%e3%83%8f%e3%82%ae%e3%82%81%e3%81%84%e3%81%8f%e3%81%b4%e3%83%bc%e3%81%99%ef%bc%81-pretending%c3%97friendship-_%e8%8c%b6%e5%b1%8b%e5%8e%9f%e5%88%9d%e9%9f%b3_%e3%82%ad%e3%83%a3%e3%83%a9%e3%82%af%e3%82%bf%e3%83%bc%e3%82%bd%e3%83%b3%e3%82%b0'>ツギハギめいくぴーす！-pretending&#215;friendship-_茶屋原初音_キャラクターソング</a>
-<a class='btn' href='search_all.html?q=%e3%81%a4%e3%81%8f%e3%81%a8%e3%82%8a'>つくとり</a>
-<a class='btn' href='search_all.html?q=%e3%81%a4%e3%81%90%e3%82%82%e3%82%82'>つぐもも</a>
-<a class='btn' href='search_all.html?q=%e3%83%84%e3%82%b4%e3%82%a6%e3%83%8e%e3%82%a4%e3%82%a4%e3%82%a2%e3%82%a4%e3%83%89%e3%83%ab_%e6%96%8e%e8%97%a4%e7%be%8e%e7%a9%82%e3%83%94%e3%83%a5%e3%82%a2%e2%88%9a_ED'>ツゴウノイイアイドル_斎藤美穂ピュア√_ED</a>
-<a class='btn' href='search_all.html?q=%e3%83%84%e3%82%b4%e3%82%a6%e3%83%8e%e3%82%a4%e3%82%a4%e3%82%a2%e3%82%a4%e3%83%89%e3%83%ab_%e5%8d%97%e9%87%8e%e4%bb%8a%e6%97%a5%e5%ad%90%e3%83%80%e3%83%bc%e3%82%af%e2%88%9a_ED'>ツゴウノイイアイドル_南野今日子ダーク√_ED</a>
-<a class='btn' href='search_all.html?q=%e3%83%84%e3%82%b4%e3%82%a6%e3%83%8e%e3%82%a4%e3%82%a4%e3%82%a2%e3%82%a4%e3%83%89%e3%83%ab_%e5%8d%97%e9%87%8e%e4%bb%8a%e6%97%a5%e5%ad%90%e3%83%94%e3%83%a5%e3%82%a2%e2%88%9a_ED'>ツゴウノイイアイドル_南野今日子ピュア√_ED</a>
-<a class='btn' href='search_all.html?q=%e3%83%84%e3%83%90%e3%82%b5+TOKYO+REVELATIONS'>ツバサ TOKYO REVELATIONS</a>
-<a class='btn' href='search_all.html?q=%e3%83%84%e3%83%90%e3%82%b5+%e6%98%a5%e9%9b%b7%e8%a8%98'>ツバサ 春雷記</a>
-<a class='btn' href='search_all.html?q=%e3%81%a4%e3%81%b0%e3%81%95_%e7%99%bd%e9%b3%a5%e5%ba%a7'>つばさ_白鳥座</a>
-<a class='btn' href='search_all.html?q=%e3%83%84%e3%83%90%e3%82%b5%e3%83%bb%e3%82%af%e3%83%ad%e3%83%8b%e3%82%af%e3%83%ab'>ツバサ・クロニクル</a>
-<a class='btn' href='search_all.html?q=%e3%81%a4%e3%81%b0%e3%81%95-%e3%82%ad%e3%83%a3%e3%83%b3%e3%83%87%e3%82%a3%e3%83%bc%e3%82%ba'>つばさ-キャンディーズ</a>
-<a class='btn' href='search_all.html?q=%e3%83%84%e3%83%9f%e3%82%ad'>ツミキ</a>
-<a class='btn' href='search_all.html?q=%e3%81%a4%e3%82%88%e3%81%8d%e3%81%99'>つよきす</a>
-<a class='btn' href='search_all.html?q=%e3%81%a4%e3%82%88%e3%81%8d%e3%81%99+Cool%c3%97Sweet'>つよきす Cool&#215;Sweet</a>
-<a class='btn' href='search_all.html?q=%e3%81%a4%e3%82%88%e3%81%8d%e3%81%992%e5%ad%a6%e6%9c%9f'>つよきす2学期</a>
-<a class='btn' href='search_all.html?q=%e3%81%a4%e3%82%88%e3%81%8d%e3%81%993%e5%ad%a6%e6%9c%9f'>つよきす3学期</a>
-<a class='btn' href='search_all.html?q=%e3%81%a4%e3%82%8a%e7%90%83'>つり球</a>
-<a class='btn' href='search_all.html?q=%e3%83%84%e3%83%ab%e3%82%b7%e3%83%9e%e3%82%a2%e3%83%b3%e3%83%8a'>ツルシマアンナ</a>
-<a class='btn' href='search_all.html?q=%e3%83%84%e3%83%ab%e3%83%8d+-%e3%81%a4%e3%81%aa%e3%81%8c%e3%82%8a%e3%81%ae%e4%b8%80%e5%b0%84-'>ツルネ -つながりの一射-</a>
-<a class='btn' href='search_all.html?q=%e3%83%84%e3%83%ab%e3%83%8d+-%e9%a2%a8%e8%88%9e%e9%ab%98%e6%a0%a1%e5%bc%93%e9%81%93%e9%83%a8-'>ツルネ -風舞高校弓道部-</a>
-<a class='btn' href='search_all.html?q=%e3%83%84%e3%83%b3%e3%83%87%e3%83%ac%e6%82%aa%e5%bd%b9%e4%bb%a4%e5%ac%a2%e3%83%aa%e3%83%bc%e3%82%bc%e3%83%ad%e3%83%83%e3%83%86%e3%81%a8%e5%ae%9f%e6%b3%81%e3%81%ae%e9%81%a0%e8%97%a4%e3%81%8f%e3%82%93%e3%81%a8%e8%a7%a3%e8%aa%ac%e3%81%ae%e5%b0%8f%e6%9e%97%e3%81%95%e3%82%93'>ツンデレ悪役令嬢リーゼロッテと実況の遠藤くんと解説の小林さん</a></div>
+<a class='btn' href='search_all.html?q=%e3%83%84%e3%82%a4%e3%83%b3%e3%82%ba%e3%81%b2%e3%81%aa%e3%81%b2%e3%81%be+OP'>ツインズひなひま OP</a></div>
   </div>
 
   <script>
-    (function(){
-      const list=document.querySelectorAll('.list-つ a');
-      const el=document.getElementById('count-list-つ');
-      if(el){ el.textContent='表示件数: '+list.length; }
-    })();
+    (function(){ const list=document.querySelectorAll('.list-つ a'); const el=document.getElementById('count-list-つ'); if(el){ el.textContent='表示件数: '+list.length; } })();
   </script>
 </div>
 </div>

@@ -32,7 +32,7 @@ body{
 .wrap{ max-width:1100px; margin:24px auto; padding:12px; background:var(--panel); border:0; border-radius:0; box-shadow:none; overflow-x:auto; }
 
 h1{ display:inline-block; margin:0 0 14px 0; padding:4px 0; background:transparent; color:#0b1b2e; font-size:18px; font-weight:500 }
-h2{ margin:10px 0 8px; padding:0; color:#0b1b2e; font-size:18px; font-weight:500; background:transparent } /* ← h1と同サイズ */
+h2{ margin:10px 0 8px; padding:0; color:#0b1b2e; font-size:18px; font-weight:500; background:transparent }
 
 .back{ text-align:right; margin:-6px 0 6px 0 }
 .back a{ color:var(--accent); text-decoration:none; border-bottom:1px dotted var(--accent) }
@@ -40,7 +40,7 @@ h2{ margin:10px 0 8px; padding:0; color:#0b1b2e; font-size:18px; font-weight:500
 .section{margin:10px 0 18px}
 .search{display:flex; gap:8px; margin:8px 0 4px; align-items:center; justify-content:flex-start}
 .search select{ padding:8px 10px; font-size:14px; background:var(--panel); border:1px solid var(--ui-gray); border-radius:0; font-weight:400 }
-.search input[type=text]{ flex:0 0 260px; width:260px; padding:8px; font-size:14px; background:var(--panel); border:1px solid var(--ui-gray); border-radius:0; font-weight:400 }
+.search input[type=text]{ flex:0 0 420px; width:420px; padding:8px; font-size:14px; background:var(--panel); border:1px solid var(--ui-gray); border-radius:0; font-weight:400 }
 .search button{ padding:8px 12px; font-size:14px; color:#fff; background:var(--accent-90); border:1px solid var(--ui-gray); border-radius:0; cursor:pointer }
 .count{font-size:11px; color:#222; margin:4px 0 8px}
 a{ color:var(--accent); }
@@ -66,12 +66,7 @@ a{ color:var(--accent); }
 .meta{margin:3px 0; font-weight:400}
 .meta .label{display:inline-block; min-width:84px; color:#0b1b2e; font-weight:400}
 
-/* ページャ */
-.pager{display:flex; gap:6px; flex-wrap:wrap; margin:14px 0}
-.pager a,.pager span{padding:6px 10px; border:1px solid var(--border); text-decoration:none; color:#fff; background:var(--accent-70); font-weight:400}
-.pager .current{background:var(--accent-90); color:#fff}
-
-/* スクロール枠（search_all / 年別 / 新着 / 五十音） */
+/* スクロール枠（全ページ共通） */
 .list-container{max-height:900px; overflow-y:auto; border:1px solid var(--ui-gray); background:rgba(255,255,255,.35); padding:8px; box-shadow:0 4px 8px rgba(0,0,0,.06)}
 .stickybar{position:sticky; top:0; z-index:20; background:rgba(255,255,255,.6); border-bottom:1px solid var(--ui-gray); padding:8px; margin:-8px -8px 8px -8px}
 .stickybar.no-bg{background:transparent; border:none; padding:0; margin:0 0 8px 0}
@@ -79,11 +74,7 @@ a{ color:var(--accent); }
 @media (max-width:768px){
   body{ background-image:url('https://raw.githubusercontent.com/hachi515/yukari_list_001/main/Hasunosora_2.png'); font-size:13px }
   .search select, .search input[type=text], .search button{ font-size:13px; padding:7px 10px }
-  /* 入力幅をスマホではやや広めに */
   .search input[type=text]{ flex:0 0 56vw; width:56vw }
-  .list-container{ max-height:450px }
-}
-  .search select, .search input[type=text], .search button{ font-size:13px; padding:7px 10px }
   .list-container{ max-height:450px }
 }</style>
 <script>const SEARCH_BASE = 'http://ykr.moe:11059/';
@@ -91,7 +82,7 @@ a{ color:var(--accent); }
 function tokensHalf(v){return v.toLowerCase().trim().split(/ +/).filter(Boolean)}
 function qparam(name){ const m = location.search.match(new RegExp('[?&]'+name+'=([^&]+)')); return m ? decodeURIComponent(m[1]) : ''; }
 
-// 軽量リンク化：data-q を href に展開
+// data-q → href 生成（軽量リンク化）
 document.addEventListener('DOMContentLoaded', ()=>{
   document.querySelectorAll('a[data-q]').forEach(a=>{
     try{
@@ -115,9 +106,6 @@ function filterCards(listId, boxId){
   });
   const cEl = document.getElementById('count-'+listId);
   if(cEl){ cEl.textContent = '表示件数: ' + vis; }
-  const pager = document.getElementById('pager-'+listId);
-  const per = parseInt(list.dataset.per || '100',10);
-  if(pager){ if(q.length===0){ pager.style.display = ''; } else { pager.style.display = (vis<=per) ? 'none' : ''; } }
 }
 
 /* ===== 検索結果専用：表示中カードを「制作者優先度→日付」で並べ替え ===== */
@@ -149,16 +137,13 @@ function filterCardsAdv(listId, boxId, yearId){
     const okText = q.every(tok => c.innerText.toLowerCase().includes(tok));
     const band = (c.dataset.yearband||'');
     const yr = (c.dataset.year||'');
-    const okYear = (y==='' || yr===y || band===y);
-    const show = okText && okYear;
+    const show = okText && (y==='' || yr===y || band===y);
     c.style.display = show ? '' : 'none';
     if(show) vis++;
   });
   const cEl = document.getElementById('count-'+listId);
   if(cEl){ cEl.textContent = '表示件数: ' + vis; }
-
-  // ★検索（キーワード or 年帯）を使ったときだけ優先度並び替えを実施
-  if(q.length>0 || y!==''){ reorderByPriority(listId); }
+  if(q.length>0 || y!==''){ reorderByPriority(listId); } // ★全体検索のみ
 }
 
 function filterGrid(gridSel, boxId, countId){
@@ -183,103 +168,20 @@ function filterGrid(gridSel, boxId, countId){
   <div class='list-container'>
     <div class='prog-grid list-ほ'><a class='btn' href='search_all.html?q=%e3%81%bb%ef%bc%89WHITE+ALBUM'>ほ）WHITE ALBUM</a>
 <a class='btn' href='search_all.html?q=%e3%81%bb%ef%bc%89xxxHOLiC'>ほ）xxxHOLiC</a>
-<a class='btn' href='search_all.html?q=%e3%83%9c%e3%83%bc%e3%82%a4%e3%83%95%e3%83%ac%e3%83%b3%e3%83%89(%e4%bb%ae)'>ボーイフレンド(仮)</a>
-<a class='btn' href='search_all.html?q=%e3%83%9c%e3%83%bc%e3%82%a4%e3%83%95%e3%83%ac%e3%83%b3%e3%83%89(%e4%bb%ae)+%e3%81%8d%e3%82%89%e3%82%81%e3%81%8d%e2%98%86%e3%83%8e%e3%83%bc%e3%83%88'>ボーイフレンド(仮) きらめき☆ノート</a>
-<a class='btn' href='search_all.html?q=%e3%83%9d%e3%83%bc%e3%82%b7%e3%83%a7%e3%83%b3%e9%a0%bc%e3%81%bf%e3%81%a7%e7%94%9f%e3%81%8d%e5%bb%b6%e3%81%b3%e3%81%be%e3%81%99%ef%bc%81'>ポーション頼みで生き延びます！</a>
 <a class='btn' href='search_all.html?q=%e3%83%9d%e3%83%bc%e3%82%b7%e3%83%a7%e3%83%b3%e9%a0%bc%e3%81%bf%e3%81%a7%e7%94%9f%e3%81%8d%e5%bb%b6%e3%81%b3%e3%81%be%e3%81%99%ef%bc%81+OP'>ポーション頼みで生き延びます！ OP</a>
-<a class='btn' href='search_all.html?q=%e3%83%9c%e3%83%bc%e3%83%ab%e3%83%91%e3%83%bc%e3%82%af%e3%81%a7%e3%81%a4%e3%81%8b%e3%81%be%e3%81%88%e3%81%a6%ef%bc%81'>ボールパークでつかまえて！</a>
 <a class='btn' href='search_all.html?q=%e3%83%9d%e3%83%bc%e3%83%ab%e3%83%97%e3%83%aa%e3%83%b3%e3%82%bb%e3%82%b9!!+%e3%82%ad%e3%83%a3%e3%83%a9%e3%82%bd%e3%83%b3'>ポールプリンセス!! キャラソン</a>
-<a class='btn' href='search_all.html?q=%e3%83%9c%e3%83%bc%e3%83%ab%e3%83%ab%e3%83%bc%e3%83%a0%e3%81%b8%e3%82%88%e3%81%86%e3%81%93%e3%81%9d'>ボールルームへようこそ</a>
-<a class='btn' href='search_all.html?q=%e3%83%9c%e3%82%ab%e3%83%ad'>ボカロ</a>
-<a class='btn' href='search_all.html?q=%e3%81%bc%e3%81%8f%e3%81%9f%e3%81%a1%e3%81%ae%e3%83%aa%e3%83%a1%e3%82%a4%e3%82%af'>ぼくたちのリメイク</a>
 <a class='btn' href='search_all.html?q=%e3%81%bc%e3%81%8f%e3%81%9f%e3%81%a1%e3%81%ae%e3%83%aa%e3%83%a1%e3%82%a4%e3%82%af+%e7%ac%ac5%e8%a9%b1%e6%8c%bf%e5%85%a5%e6%ad%8c'>ぼくたちのリメイク 第5話挿入歌</a>
-<a class='btn' href='search_all.html?q=%e3%81%bc%e3%81%8f%e3%81%9f%e3%81%a1%e3%81%af%e5%8b%89%e5%bc%b7%e3%81%8c%e3%81%a7%e3%81%8d%e3%81%aa%e3%81%84'>ぼくたちは勉強ができない</a>
-<a class='btn' href='search_all.html?q=%e3%81%bc%e3%81%8f%e3%81%9f%e3%81%a1%e3%81%af%e5%8b%89%e5%bc%b7%e3%81%8c%e3%81%a7%e3%81%8d%e3%81%aa%e3%81%84!'>ぼくたちは勉強ができない!</a>
-<a class='btn' href='search_all.html?q=%e3%81%bc%e3%81%8f%e3%81%9f%e3%81%a1%e3%81%af%e5%8b%89%e5%bc%b7%e3%81%8c%e3%81%a7%e3%81%8d%e3%81%aa%e3%81%84%ef%bc%81'>ぼくたちは勉強ができない！</a>
-<a class='btn' href='search_all.html?q=%e3%83%9c%e3%82%af%e3%81%a8%e5%bd%bc%e5%a5%b3(%e5%a5%b3%e5%8c%bb)%e3%81%ae%e8%a8%ba%e5%af%9f%e6%97%a5%e8%aa%8c'>ボクと彼女(女医)の診察日誌</a>
-<a class='btn' href='search_all.html?q=%e3%83%9c%e3%82%af%e3%81%ae%c3%97%c3%97%e3%81%af%e5%af%ae%e7%94%9f%e3%81%9f%e3%81%a1%e3%81%ae%e7%89%b9%e6%a8%a9%e3%81%a7%e3%81%99%ef%bc%81_OP'>ボクの&#215;&#215;は寮生たちの特権です！_OP</a>
-<a class='btn' href='search_all.html?q=%e3%81%bc%e3%81%8f%e3%81%ae%e4%b8%80%e4%ba%ba%e6%88%a6%e4%ba%89'>ぼくの一人戦争</a>
-<a class='btn' href='search_all.html?q=%e3%81%bc%e3%81%8f%e3%81%ae%e5%9c%b0%e7%90%83%e3%82%92%e5%ae%88%e3%81%a3%e3%81%a6'>ぼくの地球を守って</a>
-<a class='btn' href='search_all.html?q=%e3%81%bc%e3%81%8f%e3%82%89%e3%81%ae'>ぼくらの</a>
-<a class='btn' href='search_all.html?q=%e3%81%bc%e3%81%8f%e3%82%89%e3%83%99%e3%82%a2%e3%83%99%e3%82%a2%e3%83%bc%e3%82%ba'>ぼくらベアベアーズ</a>
-<a class='btn' href='search_all.html?q=%e3%83%9d%e3%82%b1%e3%83%83%e3%83%88%e3%83%a2%e3%83%b3%e3%82%b9%e3%82%bf%e3%83%bc'>ポケットモンスター</a>
-<a class='btn' href='search_all.html?q=%e3%83%9d%e3%82%b1%e3%83%83%e3%83%88%e3%83%a2%e3%83%b3%e3%82%b9%e3%82%bf%e3%83%bc+%e3%82%a2%e3%83%89%e3%83%90%e3%83%b3%e3%82%b9%e3%82%b8%e3%82%a7%e3%83%8d%e3%83%ac%e3%83%bc%e3%82%b7%e3%83%a7%e3%83%b3'>ポケットモンスター アドバンスジェネレーション</a>
-<a class='btn' href='search_all.html?q=%e3%83%9d%e3%82%b1%e3%83%83%e3%83%88%e3%83%a2%e3%83%b3%e3%82%b9%e3%82%bf%e3%83%bc+%e3%82%b5%e3%83%b3%26%e3%83%a0%e3%83%bc%e3%83%b3'>ポケットモンスター サン&amp;ムーン</a>
-<a class='btn' href='search_all.html?q=%e3%83%9d%e3%82%b1%e3%83%83%e3%83%88%e3%83%a2%e3%83%b3%e3%82%b9%e3%82%bf%e3%83%bc+%e3%82%b5%e3%83%b3%ef%bc%86%e3%83%a0%e3%83%bc%e3%83%b3'>ポケットモンスター サン＆ムーン</a>
-<a class='btn' href='search_all.html?q=%e3%83%9d%e3%82%b1%e3%83%83%e3%83%88%e3%83%a2%e3%83%b3%e3%82%b9%e3%82%bf%e3%83%bc+%e3%82%b5%e3%83%b3%26%e3%83%a0%e3%83%bc%e3%83%b3%e3%83%bb%e5%b2%a1%e5%b4%8e%e4%bd%93%e8%82%b2'>ポケットモンスター サン&amp;ムーン・岡崎体育</a>
-<a class='btn' href='search_all.html?q=%e3%83%9d%e3%82%b1%e3%83%83%e3%83%88%e3%83%a2%e3%83%b3%e3%82%b9%e3%82%bf%e3%83%bc+%e3%82%b5%e3%83%b3%26%e3%83%a0%e3%83%bc%e3%83%b3%e3%83%bb%e4%b8%ad%e5%b7%9d%e7%bf%94%e5%ad%90'>ポケットモンスター サン&amp;ムーン・中川翔子</a>
-<a class='btn' href='search_all.html?q=%e3%83%9d%e3%82%b1%e3%83%83%e3%83%88%e3%83%a2%e3%83%b3%e3%82%b9%e3%82%bf%e3%83%bc+%e3%83%80%e3%82%a4%e3%83%a4%e3%83%a2%e3%83%b3%e3%83%89%e3%83%bb%e3%83%91%e3%83%bc%e3%83%ab'>ポケットモンスター ダイヤモンド・パール</a>
-<a class='btn' href='search_all.html?q=%e3%83%9d%e3%82%b1%e3%83%83%e3%83%88%e3%83%a2%e3%83%b3%e3%82%b9%e3%82%bf%e3%83%bc+%e3%82%81%e3%81%96%e3%81%9b%e3%83%9d%e3%82%b1%e3%83%a2%e3%83%b3%e3%83%9e%e3%82%b9%e3%82%bf%e3%83%bc%e3%83%bb%e3%82%b5%e3%83%88%e3%82%b7(%e6%9d%be%e6%9c%ac%e6%a2%a8%e9%a6%99)'>ポケットモンスター めざせポケモンマスター・サトシ(松本梨香)</a>
-<a class='btn' href='search_all.html?q=%e3%83%9d%e3%82%b1%e3%83%83%e3%83%88%e3%83%a2%e3%83%b3%e3%82%b9%e3%82%bf%e3%83%bc(2019)'>ポケットモンスター(2019)</a>
-<a class='btn' href='search_all.html?q=%e3%83%9d%e3%82%b1%e3%83%83%e3%83%88%e3%83%a2%e3%83%b3%e3%82%b9%e3%82%bf%e3%83%bc(2023)'>ポケットモンスター(2023)</a>
-<a class='btn' href='search_all.html?q=%e3%83%9d%e3%82%b1%e3%83%83%e3%83%88%e3%83%a2%e3%83%b3%e3%82%b9%e3%82%bf%e3%83%bcAG'>ポケットモンスターAG</a>
-<a class='btn' href='search_all.html?q=%e3%83%9d%e3%82%b1%e3%83%83%e3%83%88%e3%83%a2%e3%83%b3%e3%82%b9%e3%82%bf%e3%83%bcXY'>ポケットモンスターXY</a>
-<a class='btn' href='search_all.html?q=%e3%83%9d%e3%82%b1%e3%83%83%e3%83%88%e3%83%a2%e3%83%b3%e3%82%b9%e3%82%bf%e3%83%bcXY%26Z'>ポケットモンスターXY&amp;Z</a>
-<a class='btn' href='search_all.html?q=%e3%83%9d%e3%82%b1%e3%83%a2%e3%83%b3+feat.+%e5%88%9d%e9%9f%b3%e3%83%9f%e3%82%af+Project+VOLTAGE+18(cosMo%40%e6%9a%b4%e8%b5%b0P+)%e3%83%8b%e3%82%b3%e3%82%ab%e3%83%a9%e4%bd%bf%e7%94%a8'>ポケモン feat. 初音ミク Project VOLTAGE 18(cosMo@暴走P )ニコカラ使用</a>
-<a class='btn' href='search_all.html?q=%e3%83%9d%e3%82%b1%e3%83%a2%e3%83%b3+feat.+%e5%88%9d%e9%9f%b3%e3%83%9f%e3%82%af+Project+VOLTAGE+18(DECO27+)%e3%83%8b%e3%82%b3%e3%82%ab%e3%83%a9%e4%bd%bf%e7%94%a8'>ポケモン feat. 初音ミク Project VOLTAGE 18(DECO27 )ニコカラ使用</a>
-<a class='btn' href='search_all.html?q=%e3%83%9d%e3%82%b1%e3%83%a2%e3%83%b3+feat.+%e5%88%9d%e9%9f%b3%e3%83%9f%e3%82%af+Project+VOLTAGE+18(Eve+)%e3%83%8b%e3%82%b3%e3%82%ab%e3%83%a9%e4%bd%bf%e7%94%a8'>ポケモン feat. 初音ミク Project VOLTAGE 18(Eve )ニコカラ使用</a>
-<a class='btn' href='search_all.html?q=%e3%83%9d%e3%82%b1%e3%83%a2%e3%83%b3+feat.+%e5%88%9d%e9%9f%b3%e3%83%9f%e3%82%af+Project+VOLTAGE+18(Giga+)%e3%83%8b%e3%82%b3%e3%82%ab%e3%83%a9%e4%bd%bf%e7%94%a8'>ポケモン feat. 初音ミク Project VOLTAGE 18(Giga )ニコカラ使用</a>
-<a class='btn' href='search_all.html?q=%e3%83%9d%e3%82%b1%e3%83%a2%e3%83%b3+feat.+%e5%88%9d%e9%9f%b3%e3%83%9f%e3%82%af+Project+VOLTAGE+18(Mitchie+M+)%e3%83%8b%e3%82%b3%e3%82%ab%e3%83%a9%e4%bd%bf%e7%94%a8'>ポケモン feat. 初音ミク Project VOLTAGE 18(Mitchie M )ニコカラ使用</a>
-<a class='btn' href='search_all.html?q=%e3%83%9d%e3%82%b1%e3%83%a2%e3%83%b3+feat.+%e5%88%9d%e9%9f%b3%e3%83%9f%e3%82%af+Project+VOLTAGE+18(Orangestar+)%e3%83%8b%e3%82%b3%e3%82%ab%e3%83%a9%e4%bd%bf%e7%94%a8'>ポケモン feat. 初音ミク Project VOLTAGE 18(Orangestar )ニコカラ使用</a>
-<a class='btn' href='search_all.html?q=%e3%83%9d%e3%82%b1%e3%83%a2%e3%83%b3+feat.+%e5%88%9d%e9%9f%b3%e3%83%9f%e3%82%af+Project+VOLTAGE+18(sasakure.%e2%80%8cUK+)%e3%83%8b%e3%82%b3%e3%82%ab%e3%83%a9%e4%bd%bf%e7%94%a8'>ポケモン feat. 初音ミク Project VOLTAGE 18(sasakure.‌UK )ニコカラ使用</a>
-<a class='btn' href='search_all.html?q=%e3%83%9d%e3%82%b1%e3%83%a2%e3%83%b3+feat.+%e5%88%9d%e9%9f%b3%e3%83%9f%e3%82%af+Project+VOLTAGE+18(syudou+)%e3%83%8b%e3%82%b3%e3%82%ab%e3%83%a9%e4%bd%bf%e7%94%a8'>ポケモン feat. 初音ミク Project VOLTAGE 18(syudou )ニコカラ使用</a>
-<a class='btn' href='search_all.html?q=%e3%83%9d%e3%82%b1%e3%83%a2%e3%83%b3+feat.+%e5%88%9d%e9%9f%b3%e3%83%9f%e3%82%af+Project+VOLTAGE+18(%e3%81%84%e3%82%88%e3%82%8f+)%e3%83%8b%e3%82%b3%e3%82%ab%e3%83%a9%e4%bd%bf%e7%94%a8'>ポケモン feat. 初音ミク Project VOLTAGE 18(いよわ )ニコカラ使用</a>
-<a class='btn' href='search_all.html?q=%e3%83%9d%e3%82%b1%e3%83%a2%e3%83%b3+feat.+%e5%88%9d%e9%9f%b3%e3%83%9f%e3%82%af+Project+VOLTAGE+18(%e3%81%8b%e3%81%84%e3%82%8a%e3%81%8d%e3%83%99%e3%82%a2+)%e3%83%8b%e3%82%b3%e3%82%ab%e3%83%a9%e4%bd%bf%e7%94%a8'>ポケモン feat. 初音ミク Project VOLTAGE 18(かいりきベア )ニコカラ使用</a>
-<a class='btn' href='search_all.html?q=%e3%83%9d%e3%82%b1%e3%83%a2%e3%83%b3+feat.+%e5%88%9d%e9%9f%b3%e3%83%9f%e3%82%af+Project+VOLTAGE+18(%e3%81%98%e3%82%93)%e3%83%8b%e3%82%b3%e3%82%ab%e3%83%a9%e4%bd%bf%e7%94%a8'>ポケモン feat. 初音ミク Project VOLTAGE 18(じん)ニコカラ使用</a>
-<a class='btn' href='search_all.html?q=%e3%83%9d%e3%82%b1%e3%83%a2%e3%83%b3+feat.+%e5%88%9d%e9%9f%b3%e3%83%9f%e3%82%af+Project+VOLTAGE+18(%e3%83%8a%e3%83%a6%e3%82%bf%e3%83%b3%e6%98%9f%e4%ba%ba+)%e3%83%8b%e3%82%b3%e3%82%ab%e3%83%a9%e4%bd%bf%e7%94%a8'>ポケモン feat. 初音ミク Project VOLTAGE 18(ナユタン星人 )ニコカラ使用</a>
-<a class='btn' href='search_all.html?q=%e3%83%9d%e3%82%b1%e3%83%a2%e3%83%b3+feat.+%e5%88%9d%e9%9f%b3%e3%83%9f%e3%82%af+Project+VOLTAGE+18(%e3%83%94%e3%83%8e%e3%82%ad%e3%82%aaP+)%e3%83%8b%e3%82%b3%e3%82%ab%e3%83%a9%e4%bd%bf%e7%94%a8'>ポケモン feat. 初音ミク Project VOLTAGE 18(ピノキオP )ニコカラ使用</a>
-<a class='btn' href='search_all.html?q=%e3%83%9d%e3%82%b1%e3%83%a2%e3%83%b3+feat.+%e5%88%9d%e9%9f%b3%e3%83%9f%e3%82%af+Project+VOLTAGE+18(%e3%81%be%e3%82%89%e3%81%97%e3%81%83+)%e3%83%8b%e3%82%b3%e3%82%ab%e3%83%a9%e4%bd%bf%e7%94%a8'>ポケモン feat. 初音ミク Project VOLTAGE 18(まらしぃ )ニコカラ使用</a>
-<a class='btn' href='search_all.html?q=%e3%83%9d%e3%82%b1%e3%83%a2%e3%83%b3+feat.+%e5%88%9d%e9%9f%b3%e3%83%9f%e3%82%af+Project+VOLTAGE+18(%e3%83%af%e3%83%b3%e3%83%80%e3%83%95%e3%83%ab%e2%98%86%e3%82%aa%e3%83%9d%e3%83%81%e3%83%a5%e3%83%8b%e3%83%86%e3%82%a3%ef%bc%81+)%e3%83%8b%e3%82%b3%e3%82%ab%e3%83%a9%e4%bd%bf%e7%94%a8'>ポケモン feat. 初音ミク Project VOLTAGE 18(ワンダフル☆オポチュニティ！ )ニコカラ使用</a>
-<a class='btn' href='search_all.html?q=%e3%83%9d%e3%82%b1%e3%83%a2%e3%83%b3+feat.+%e5%88%9d%e9%9f%b3%e3%83%9f%e3%82%af+Project+VOLTAGE+18(%e7%a8%b2%e8%91%89%e6%9b%87+)%e3%83%8b%e3%82%b3%e3%82%ab%e3%83%a9%e4%bd%bf%e7%94%a8'>ポケモン feat. 初音ミク Project VOLTAGE 18(稲葉曇 )ニコカラ使用</a>
-<a class='btn' href='search_all.html?q=%e3%83%9d%e3%82%b1%e3%83%a2%e3%83%b3+feat.+%e5%88%9d%e9%9f%b3%e3%83%9f%e3%82%af+Project+VOLTAGE+18(%e6%a0%97%e5%b1%b1%e5%a4%95%e7%92%83+)%e3%83%8b%e3%82%b3%e3%82%ab%e3%83%a9%e4%bd%bf%e7%94%a8'>ポケモン feat. 初音ミク Project VOLTAGE 18(栗山夕璃 )ニコカラ使用</a>
-<a class='btn' href='search_all.html?q=%e3%83%9d%e3%82%b1%e3%83%a2%e3%83%b3+feat.+%e5%88%9d%e9%9f%b3%e3%83%9f%e3%82%af+Project+VOLTAGE+18(%e5%82%98%e6%9d%91%e3%83%88%e3%83%bc%e3%82%bf+)%e3%83%8b%e3%82%b3%e3%82%ab%e3%83%a9%e4%bd%bf%e7%94%a8'>ポケモン feat. 初音ミク Project VOLTAGE 18(傘村トータ )ニコカラ使用</a>
-<a class='btn' href='search_all.html?q=%e3%83%9d%e3%82%b1%e3%83%a2%e3%83%b3+feat.+%e5%88%9d%e9%9f%b3%e3%83%9f%e3%82%af+Project+VOLTAGE+18(%e5%85%ab%e7%8e%8b%e5%ad%90P+)%e3%83%8b%e3%82%b3%e3%82%ab%e3%83%a9%e4%bd%bf%e7%94%a8'>ポケモン feat. 初音ミク Project VOLTAGE 18(八王子P )ニコカラ使用</a>
-<a class='btn' href='search_all.html?q=%e3%83%9d%e3%82%b1%e3%83%a2%e3%83%b3+Kids+TV'>ポケモン Kids TV</a>
-<a class='btn' href='search_all.html?q=%e3%83%9d%e3%82%b1%e3%83%a2%e3%83%b3+%e3%83%97%e3%83%ad%e3%82%b8%e3%82%a7%e3%82%af%e3%83%88%e3%82%ab%e3%83%93%e3%82%b4%e3%83%b3'>ポケモン プロジェクトカビゴン</a>
 <a class='btn' href='search_all.html?q=%e3%83%9d%e3%82%b1%e3%83%a2%e3%83%b3%c3%97%e9%ac%bc%e6%bb%85%e3%81%ae%e5%88%83'>ポケモン&#215;鬼滅の刃</a>
-<a class='btn' href='search_all.html?q=%e3%83%9d%e3%82%b1%e3%83%a2%e3%83%b3%e3%83%bb%e3%82%b6%e3%83%bb%e3%83%a0%e3%83%bc%e3%83%93%e3%83%bcXY+%e7%a0%b4%e5%a3%8a%e3%81%ae%e7%b9%ad%e3%81%a8%e3%83%87%e3%82%a3%e3%82%a2%e3%83%b3%e3%82%b7%e3%83%bc'>ポケモン・ザ・ムービーXY 破壊の繭とディアンシー</a>
-<a class='btn' href='search_all.html?q=%e3%83%9d%e3%82%b1%e3%83%a2%e3%83%b3%e3%83%bb%e3%82%b6%e3%83%bb%e3%83%a0%e3%83%bc%e3%83%93%e3%83%bcXY%26Z+%e3%83%9c%e3%83%ab%e3%82%b1%e3%83%8b%e3%82%aa%e3%83%b3%e3%81%a8%e6%a9%9f%e5%b7%a7%e3%81%ae%e3%83%9e%e3%82%ae%e3%82%a2%e3%83%8a'>ポケモン・ザ・ムービーXY&amp;Z ボルケニオンと機巧のマギアナ</a>
 <a class='btn' href='search_all.html?q=%e3%83%9d%e3%82%b1%e3%83%a2%e3%83%b3%e8%a4%87%e5%90%88MAD'>ポケモン複合MAD</a>
-<a class='btn' href='search_all.html?q=%e3%83%9d%e3%83%81%e3%81%a3%e3%81%a8%e7%99%ba%e6%98%8e+%e3%83%94%e3%82%ab%e3%81%a1%e3%82%93%e3%82%ad%e3%83%83%e3%83%88'>ポチっと発明 ピカちんキット</a>
-<a class='btn' href='search_all.html?q=%e3%81%bc%e3%81%a3%e3%81%a1%e3%83%bb%e3%81%96%e3%83%bb%e3%82%8d%e3%81%a3%e3%81%8f!'>ぼっち・ざ・ろっく!</a>
-<a class='btn' href='search_all.html?q=%e3%81%bc%e3%81%a3%e3%81%a1%e3%83%bb%e3%81%96%e3%83%bb%e3%82%8d%e3%81%a3%e3%81%8f%ef%bc%81'>ぼっち・ざ・ろっく！</a>
-<a class='btn' href='search_all.html?q=%e3%81%bc%e3%81%a3%e3%81%a1%e3%81%bc%e3%81%a1%e3%81%be%e3%82%8b'>ぼっちぼちまる</a>
-<a class='btn' href='search_all.html?q=%e3%83%9d%e3%83%83%e3%83%94%e3%83%b3Q'>ポッピンQ</a>
-<a class='btn' href='search_all.html?q=%e3%83%9d%e3%83%83%e3%83%97%e3%81%97%e3%81%aa%e3%81%aa%e3%81%84%e3%81%a7'>ポップしなないで</a>
-<a class='btn' href='search_all.html?q=%e3%81%bd%e3%81%a3%e3%81%b7%e3%82%8b%e3%83%a1%e3%82%a4%e3%83%ab'>ぽっぷるメイル</a>
-<a class='btn' href='search_all.html?q=%e3%81%bd%e3%81%a6'>ぽて</a>
-<a class='btn' href='search_all.html?q=%e3%81%bd%e3%81%a6%e3%81%be%e3%82%88'>ぽてまよ</a>
-<a class='btn' href='search_all.html?q=%e3%81%bc%e3%81%ae%e3%81%bc%e3%81%ae'>ぼのぼの</a>
-<a class='btn' href='search_all.html?q=%e3%83%9d%e3%83%97%e3%83%86%e3%83%94%e3%83%94%e3%83%83%e3%82%af'>ポプテピピック</a>
-<a class='btn' href='search_all.html?q=%e3%83%9d%e3%83%97%e3%83%86%e3%83%94%e3%83%94%e3%83%83%e3%82%af(%e7%ac%ac2%e3%82%b7%e3%83%aa%e3%83%bc%e3%82%ba)'>ポプテピピック(第2シリーズ)</a>
-<a class='btn' href='search_all.html?q=%e3%83%9d%e3%83%97%e5%ad%90+%e3%83%94%e3%83%94%e7%be%8e'>ポプ子 ピピ美</a>
-<a class='btn' href='search_all.html?q=%e3%81%bb%e3%81%bcP%ef%bc%bf%e5%88%9d%e9%9f%b3%e3%83%9f%e3%82%af'>ほぼP＿初音ミク</a>
-<a class='btn' href='search_all.html?q=%e3%81%bd%e3%81%bd%e3%81%9f%e3%82%93'>ぽぽたん</a>
-<a class='btn' href='search_all.html?q=%e3%83%9c%e3%83%9c%e3%83%9c%e3%83%bc%e3%83%9c%e3%83%bb%e3%83%9c%e3%83%bc%e3%83%9c%e3%83%9c+%e3%83%8f%e3%82%b8%e3%81%91%e7%a5%ad%e3%83%bb%e6%b0%b4%e6%9c%a8%e4%b8%80%e9%83%8e'>ボボボーボ・ボーボボ ハジけ祭・水木一郎</a>
 <a class='btn' href='search_all.html?q=%e3%83%9d%e3%83%9d%e3%83%ad%e3%82%af%e3%83%ad%e3%82%a4%e3%82%b9++ED1'>ポポロクロイス  ED1</a>
 <a class='btn' href='search_all.html?q=%e3%83%9d%e3%83%9d%e3%83%ad%e3%82%af%e3%83%ad%e3%82%a4%e3%82%b9%e7%89%a9%e8%aa%9e+%e7%ac%ac11%e8%a9%b1%e6%8c%bf%e5%85%a5%e6%ad%8c'>ポポロクロイス物語 第11話挿入歌</a>
 <a class='btn' href='search_all.html?q=%e3%81%bd%e3%81%bd%e3%82%8d%e3%82%93%ef%bc%88CV%ef%bc%9a%e4%bd%90%e3%80%85%e6%9c%a8%e6%9d%8e%e5%ad%90%ef%bc%89'>ぽぽろん（CV：佐々木李子）</a>
-<a class='btn' href='search_all.html?q=%e3%83%9d%e3%83%aa%e3%82%b9%e3%83%94%e3%82%ab%e3%83%87%e3%83%aa%e3%83%bc'>ポリスピカデリー</a>
-<a class='btn' href='search_all.html?q=%e3%83%9b%e3%83%aa%e3%83%9f%e3%83%a4'>ホリミヤ</a>
-<a class='btn' href='search_all.html?q=%e3%83%9b%e3%83%aa%e3%83%9f%e3%83%a4+-piece-'>ホリミヤ -piece-</a>
-<a class='btn' href='search_all.html?q=%e3%83%9d%e3%83%ab%e3%82%ab%e3%83%89%e3%83%83%e3%83%88%e3%82%b9%e3%83%86%e3%82%a3%e3%83%b3%e3%82%b0%e3%83%ac%e3%82%a4'>ポルカドットスティングレイ</a>
-<a class='btn' href='search_all.html?q=%e3%83%9d%e3%83%ab%e3%83%8e%e3%82%b0%e3%83%a9%e3%83%95%e3%82%a3%e3%83%86%e3%82%a3+5th+Anniversary'>ポルノグラフィティ 5th Anniversary</a>
-<a class='btn' href='search_all.html?q=%e3%83%9b%e3%83%ad%e3%82%a2%e3%83%bc%e3%82%b9'>ホロアース</a>
-<a class='btn' href='search_all.html?q=%e3%83%9b%e3%83%ad%e3%82%b9%e3%82%bf%e3%83%bc%e3%82%ba'>ホロスターズ</a>
-<a class='btn' href='search_all.html?q=%e3%83%9b%e3%83%ad%e3%83%a9%e3%82%a4%e3%83%96'>ホロライブ</a>
 <a class='btn' href='search_all.html?q=%e3%83%9b%e3%83%ad%e3%83%a9%e3%82%a4%e3%83%96+%e3%81%a8%e3%81%8d%e3%81%ae%e3%81%9d%e3%82%89%e3%81%8c%e6%ad%8c%e3%81%a3%e3%81%a6%e3%81%bf%e3%81%9f'>ホロライブ ときのそらが歌ってみた</a>
-<a class='btn' href='search_all.html?q=%e3%83%9b%e3%83%ad%e3%83%a9%e3%82%a4%e3%83%96+%e6%97%a5%e6%b8%85%e9%a3%9f%e5%93%81presents+%e3%82%ab%e3%83%ac%e3%83%bc%e3%83%a1%e3%82%b7%e3%82%b9%e3%83%91%e3%82%a4%e3%82%b9%e3%83%a9%e3%82%a4%e3%83%96'>ホロライブ 日清食品presents カレーメシスパイスライブ</a>
-<a class='btn' href='search_all.html?q=%e3%83%9b%e3%83%ad%e3%83%a9%e3%82%a4%e3%83%96MAD'>ホロライブMAD</a>
-<a class='btn' href='search_all.html?q=%e3%81%bd%e3%82%8f%e3%81%bd%e3%82%8fP'>ぽわぽわP</a>
-<a class='btn' href='search_all.html?q=%e3%81%bd%e3%82%93%e3%81%ae%e3%81%bf%e3%81%a1'>ぽんのみち</a></div>
+<a class='btn' href='search_all.html?q=%e3%83%9b%e3%83%ad%e3%83%a9%e3%82%a4%e3%83%96MAD'>ホロライブMAD</a></div>
   </div>
 
   <script>
-    (function(){
-      const list=document.querySelectorAll('.list-ほ a');
-      const el=document.getElementById('count-list-ほ');
-      if(el){ el.textContent='表示件数: '+list.length; }
-    })();
+    (function(){ const list=document.querySelectorAll('.list-ほ a'); const el=document.getElementById('count-list-ほ'); if(el){ el.textContent='表示件数: '+list.length; } })();
   </script>
 </div>
 </div>

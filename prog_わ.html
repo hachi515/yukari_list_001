@@ -32,7 +32,7 @@ body{
 .wrap{ max-width:1100px; margin:24px auto; padding:12px; background:var(--panel); border:0; border-radius:0; box-shadow:none; overflow-x:auto; }
 
 h1{ display:inline-block; margin:0 0 14px 0; padding:4px 0; background:transparent; color:#0b1b2e; font-size:18px; font-weight:500 }
-h2{ margin:10px 0 8px; padding:0; color:#0b1b2e; font-size:18px; font-weight:500; background:transparent } /* ← h1と同サイズ */
+h2{ margin:10px 0 8px; padding:0; color:#0b1b2e; font-size:18px; font-weight:500; background:transparent }
 
 .back{ text-align:right; margin:-6px 0 6px 0 }
 .back a{ color:var(--accent); text-decoration:none; border-bottom:1px dotted var(--accent) }
@@ -40,7 +40,7 @@ h2{ margin:10px 0 8px; padding:0; color:#0b1b2e; font-size:18px; font-weight:500
 .section{margin:10px 0 18px}
 .search{display:flex; gap:8px; margin:8px 0 4px; align-items:center; justify-content:flex-start}
 .search select{ padding:8px 10px; font-size:14px; background:var(--panel); border:1px solid var(--ui-gray); border-radius:0; font-weight:400 }
-.search input[type=text]{ flex:0 0 260px; width:260px; padding:8px; font-size:14px; background:var(--panel); border:1px solid var(--ui-gray); border-radius:0; font-weight:400 }
+.search input[type=text]{ flex:0 0 420px; width:420px; padding:8px; font-size:14px; background:var(--panel); border:1px solid var(--ui-gray); border-radius:0; font-weight:400 }
 .search button{ padding:8px 12px; font-size:14px; color:#fff; background:var(--accent-90); border:1px solid var(--ui-gray); border-radius:0; cursor:pointer }
 .count{font-size:11px; color:#222; margin:4px 0 8px}
 a{ color:var(--accent); }
@@ -66,12 +66,7 @@ a{ color:var(--accent); }
 .meta{margin:3px 0; font-weight:400}
 .meta .label{display:inline-block; min-width:84px; color:#0b1b2e; font-weight:400}
 
-/* ページャ */
-.pager{display:flex; gap:6px; flex-wrap:wrap; margin:14px 0}
-.pager a,.pager span{padding:6px 10px; border:1px solid var(--border); text-decoration:none; color:#fff; background:var(--accent-70); font-weight:400}
-.pager .current{background:var(--accent-90); color:#fff}
-
-/* スクロール枠（search_all / 年別 / 新着 / 五十音） */
+/* スクロール枠（全ページ共通） */
 .list-container{max-height:900px; overflow-y:auto; border:1px solid var(--ui-gray); background:rgba(255,255,255,.35); padding:8px; box-shadow:0 4px 8px rgba(0,0,0,.06)}
 .stickybar{position:sticky; top:0; z-index:20; background:rgba(255,255,255,.6); border-bottom:1px solid var(--ui-gray); padding:8px; margin:-8px -8px 8px -8px}
 .stickybar.no-bg{background:transparent; border:none; padding:0; margin:0 0 8px 0}
@@ -79,11 +74,7 @@ a{ color:var(--accent); }
 @media (max-width:768px){
   body{ background-image:url('https://raw.githubusercontent.com/hachi515/yukari_list_001/main/Hasunosora_2.png'); font-size:13px }
   .search select, .search input[type=text], .search button{ font-size:13px; padding:7px 10px }
-  /* 入力幅をスマホではやや広めに */
   .search input[type=text]{ flex:0 0 56vw; width:56vw }
-  .list-container{ max-height:450px }
-}
-  .search select, .search input[type=text], .search button{ font-size:13px; padding:7px 10px }
   .list-container{ max-height:450px }
 }</style>
 <script>const SEARCH_BASE = 'http://ykr.moe:11059/';
@@ -91,7 +82,7 @@ a{ color:var(--accent); }
 function tokensHalf(v){return v.toLowerCase().trim().split(/ +/).filter(Boolean)}
 function qparam(name){ const m = location.search.match(new RegExp('[?&]'+name+'=([^&]+)')); return m ? decodeURIComponent(m[1]) : ''; }
 
-// 軽量リンク化：data-q を href に展開
+// data-q → href 生成（軽量リンク化）
 document.addEventListener('DOMContentLoaded', ()=>{
   document.querySelectorAll('a[data-q]').forEach(a=>{
     try{
@@ -115,9 +106,6 @@ function filterCards(listId, boxId){
   });
   const cEl = document.getElementById('count-'+listId);
   if(cEl){ cEl.textContent = '表示件数: ' + vis; }
-  const pager = document.getElementById('pager-'+listId);
-  const per = parseInt(list.dataset.per || '100',10);
-  if(pager){ if(q.length===0){ pager.style.display = ''; } else { pager.style.display = (vis<=per) ? 'none' : ''; } }
 }
 
 /* ===== 検索結果専用：表示中カードを「制作者優先度→日付」で並べ替え ===== */
@@ -149,16 +137,13 @@ function filterCardsAdv(listId, boxId, yearId){
     const okText = q.every(tok => c.innerText.toLowerCase().includes(tok));
     const band = (c.dataset.yearband||'');
     const yr = (c.dataset.year||'');
-    const okYear = (y==='' || yr===y || band===y);
-    const show = okText && okYear;
+    const show = okText && (y==='' || yr===y || band===y);
     c.style.display = show ? '' : 'none';
     if(show) vis++;
   });
   const cEl = document.getElementById('count-'+listId);
   if(cEl){ cEl.textContent = '表示件数: ' + vis; }
-
-  // ★検索（キーワード or 年帯）を使ったときだけ優先度並び替えを実施
-  if(q.length>0 || y!==''){ reorderByPriority(listId); }
+  if(q.length>0 || y!==''){ reorderByPriority(listId); } // ★全体検索のみ
 }
 
 function filterGrid(gridSel, boxId, countId){
@@ -181,27 +166,12 @@ function filterGrid(gridSel, boxId, countId){
   <div class='count' id='count-list-わ'></div>
 
   <div class='list-container'>
-    <div class='prog-grid list-わ'><a class='btn' href='search_all.html?q=%e3%83%af%e3%83%bc%e3%83%ab%e3%83%89+%e3%82%aa%e3%83%96+%e3%83%95%e3%82%a1%e3%82%a4%e3%83%8a%e3%83%ab%e3%83%95%e3%82%a1%e3%83%b3%e3%82%bf%e3%82%b8%e3%83%bc'>ワールド オブ ファイナルファンタジー</a>
-<a class='btn' href='search_all.html?q=%e3%83%af%e3%83%bc%e3%83%ab%e3%83%89%e3%83%bb%e3%82%a8%e3%83%b3%e3%83%89%e3%83%bb%e3%82%a8%e3%82%b3%e3%83%8e%e3%83%9f%e3%82%ab'>ワールド・エンド・エコノミカ</a>
-<a class='btn' href='search_all.html?q=%e3%83%af%e3%83%bc%e3%83%ab%e3%83%89%e3%83%bb%e3%82%a8%e3%83%b3%e3%83%89%e3%83%bb%e3%82%a8%e3%82%b3%e3%83%8e%e3%83%9f%e3%82%ab+episode.02'>ワールド・エンド・エコノミカ episode.02</a>
-<a class='btn' href='search_all.html?q=%e3%83%af%e3%83%bc%e3%83%ab%e3%83%89%e3%82%a6%e3%82%a3%e3%83%83%e3%83%81%e3%83%bc%e3%82%ba%e7%99%ba%e9%80%b2%e3%81%97%e3%81%be%e3%81%99%e3%81%a3!'>ワールドウィッチーズ発進しますっ!</a>
-<a class='btn' href='search_all.html?q=%e3%83%af%e3%83%bc%e3%83%ab%e3%83%89%e3%83%80%e3%82%a4%e3%82%b9%e3%82%bf%e3%83%bc'>ワールドダイスター</a>
+    <div class='prog-grid list-わ'><a class='btn' href='search_all.html?q=%e3%83%af%e3%83%bc%e3%83%ab%e3%83%89%e3%83%80%e3%82%a4%e3%82%b9%e3%82%bf%e3%83%bc'>ワールドダイスター</a>
 <a class='btn' href='search_all.html?q=%e3%83%af%e3%83%bc%e3%83%ab%e3%83%89%e3%83%80%e3%82%a4%e3%82%b9%e3%82%bf%e3%83%bc+%e6%9c%80%e7%b5%8212%e8%a9%b1%e5%8a%87%e4%b8%ad%e6%ad%8c_%e3%83%91%e3%83%bc%e3%83%88%e5%88%86%e3%81%91'>ワールドダイスター 最終12話劇中歌_パート分け</a>
 <a class='btn' href='search_all.html?q=%e3%83%af%e3%83%bc%e3%83%ab%e3%83%89%e3%83%80%e3%82%a4%e3%82%b9%e3%82%bf%e3%83%bc+%e7%ac%ac2%e8%a9%b1%e5%8a%87%e4%b8%ad%e6%ad%8c'>ワールドダイスター 第2話劇中歌</a>
-<a class='btn' href='search_all.html?q=%e3%83%af%e3%83%bc%e3%83%ab%e3%83%89%e3%83%80%e3%82%a4%e3%82%b9%e3%82%bf%e3%83%bc+%e5%a4%a2%e3%81%ae%e3%82%b9%e3%83%86%e3%83%a9%e3%83%aa%e3%82%a6%e3%83%a0'>ワールドダイスター 夢のステラリウム</a>
 <a class='btn' href='search_all.html?q=%e3%83%af%e3%83%bc%e3%83%ab%e3%83%89%e3%83%88%e3%83%aa%e3%82%ac%e3%83%bc'>ワールドトリガー</a>
 <a class='btn' href='search_all.html?q=%e3%83%af%e3%83%bc%e3%83%ab%e3%83%89%e3%83%88%e3%83%aa%e3%82%ac%e3%83%bc+3rd%e3%82%b7%e3%83%bc%e3%82%ba%e3%83%b3'>ワールドトリガー 3rdシーズン</a>
-<a class='btn' href='search_all.html?q=%e3%83%af%e3%83%bc%e3%83%ab%e3%83%89%e3%83%95%e3%83%bc%e3%83%ab%e3%83%8b%e3%83%a5%e3%83%bc%e3%82%b9'>ワールドフールニュース</a>
-<a class='btn' href='search_all.html?q=%e3%83%af%e3%82%a4%e3%83%ab%e3%83%89%e3%82%a2%e3%83%bc%e3%83%a0%e3%82%ba+%e3%83%9f%e3%83%aa%e3%82%aa%e3%83%b3%e3%83%a1%e3%83%a2%e3%83%aa%e3%83%bc%e3%82%ba'>ワイルドアームズ ミリオンメモリーズ</a>
-<a class='btn' href='search_all.html?q=%e3%82%8f%e3%81%8b+from+STAR%e2%98%86ANIS'>わか from STAR☆ANIS</a>
-<a class='btn' href='search_all.html?q=%e3%83%af%e3%82%ab%e3%82%b3%e9%85%92'>ワカコ酒</a>
-<a class='btn' href='search_all.html?q=%e3%82%8f%e3%81%8b%e3%81%b0%ef%bc%8a%e3%82%ac%e3%83%bc%e3%83%ab'>わかば＊ガール</a>
-<a class='btn' href='search_all.html?q=%e3%83%af%e3%82%ab%e3%83%90P'>ワカバP</a>
 <a class='btn' href='search_all.html?q=%e3%82%8f%e3%81%8c%e3%81%be%e3%81%be%e2%98%86%e3%83%95%e3%82%a7%e3%82%a2%e3%83%aa%e3%83%bc%e3%83%9f%e3%83%ab%e3%83%a2%e3%81%a7%e3%83%9d%e3%83%b3!%e3%81%a1%e3%82%83%e3%81%82%e3%81%bf%e3%82%93%e3%81%90+ED'>わがまま☆フェアリーミルモでポン!ちゃあみんぐ ED</a>
-<a class='btn' href='search_all.html?q=%e3%83%af%e3%82%ac%e3%83%9e%e3%83%9e%e3%83%8f%e3%82%a4%e3%82%b9%e3%83%9a%e3%83%83%e3%82%af'>ワガママハイスペック</a>
-<a class='btn' href='search_all.html?q=%e3%82%8f%e3%81%96%e3%81%a8%e3%81%82%e3%81%96%e3%81%a8%e3%82%a8%e3%82%ad%e3%82%b9%e3%83%91%e3%83%bc%e3%83%88%ef%bc%8f%e3%81%95%e3%81%8f%e3%82%89%e3%81%bf%e3%81%93%ef%bc%86%e6%a1%83%e9%88%b4%e3%81%ad%e3%81%ad'>わざとあざとエキスパート／さくらみこ＆桃鈴ねね</a>
-<a class='btn' href='search_all.html?q=%e3%82%8f%e3%81%9f%e3%81%97%e3%81%8c%e6%81%8b%e4%ba%ba%e3%81%ab%e3%81%aa%e3%82%8c%e3%82%8b%e3%82%8f%e3%81%91%e3%81%aa%e3%81%84%e3%81%98%e3%82%83%e3%82%93%e3%80%81%e3%83%a0%e3%83%aa%e3%83%a0%e3%83%aa!%ef%bc%88%e2%80%bb%e3%83%a0%e3%83%aa%e3%81%98%e3%82%83%e3%81%aa%e3%81%8b%e3%81%a3%e3%81%9f!%ef%bc%89'>わたしが恋人になれるわけないじゃん、ムリムリ!（※ムリじゃなかった!）</a>
-<a class='btn' href='search_all.html?q=%e3%82%8f%e3%81%9f%e3%81%97%e3%81%8c%e6%81%8b%e4%ba%ba%e3%81%ab%e3%81%aa%e3%82%8c%e3%82%8b%e3%82%8f%e3%81%91%e3%81%aa%e3%81%84%e3%81%98%e3%82%83%e3%82%93%e3%80%81%e3%83%a0%e3%83%aa%e3%83%a0%e3%83%aa%ef%bc%81%ef%bc%88%e2%80%bb%e3%83%a0%e3%83%aa%e3%81%98%e3%82%83%e3%81%aa%e3%81%8b%e3%81%a3%e3%81%9f%ef%bc%81%ef%bc%9f%ef%bc%89'>わたしが恋人になれるわけないじゃん、ムリムリ！（※ムリじゃなかった！？）</a>
 <a class='btn' href='search_all.html?q=%e3%82%8f%e3%81%9f%e3%81%97%e3%81%8c%e6%81%8b%e4%ba%ba%e3%81%ab%e3%81%aa%e3%82%8c%e3%82%8b%e3%82%8f%e3%81%91%e3%81%aa%e3%81%84%e3%81%98%e3%82%83%e3%82%93%e3%80%81%e3%83%a0%e3%83%aa%e3%83%a0%e3%83%aa%ef%bc%81(%e2%80%bb%e3%83%a0%e3%83%aa%e3%81%98%e3%82%83%e3%81%aa%e3%81%8b%e3%81%a3%e3%81%9f%ef%bc%81%ef%bc%9f)++OP'>わたしが恋人になれるわけないじゃん、ムリムリ！(※ムリじゃなかった！？)  OP</a>
 <a class='btn' href='search_all.html?q=%e3%82%8f%e3%81%9f%e3%81%97%e3%81%8c%e6%81%8b%e4%ba%ba%e3%81%ab%e3%81%aa%e3%82%8c%e3%82%8b%e3%82%8f%e3%81%91%e3%81%aa%e3%81%84%e3%81%98%e3%82%83%e3%82%93%e3%80%81%e3%83%a0%e3%83%aa%e3%83%a0%e3%83%aa%ef%bc%81(%e2%80%bb%e3%83%a0%e3%83%aa%e3%81%98%e3%82%83%e3%81%aa%e3%81%8b%e3%81%a3%e3%81%9f%ef%bc%81%ef%bc%9f)+ED'>わたしが恋人になれるわけないじゃん、ムリムリ！(※ムリじゃなかった！？) ED</a>
 <a class='btn' href='search_all.html?q=%e3%82%8f%e3%81%9f%e3%81%97%e3%81%ae%e5%b9%b8%e3%81%9b%e3%81%aa%e7%b5%90%e5%a9%9a'>わたしの幸せな結婚</a>
@@ -210,32 +180,12 @@ function filterGrid(gridSel, boxId, countId){
 <a class='btn' href='search_all.html?q=%e3%82%8f%e3%81%9f%e3%81%97%e3%81%ae%e5%b9%b8%e3%81%9b%e3%81%aa%e7%b5%90%e5%a9%9a+2nd+Season+%e7%ac%ac24%e8%a9%b1%e6%8c%bf%e5%85%a5%e6%ad%8c'>わたしの幸せな結婚 2nd Season 第24話挿入歌</a>
 <a class='btn' href='search_all.html?q=%e3%82%8f%e3%81%9f%e3%81%97%e3%81%ae%e5%b9%b8%e3%81%9b%e3%81%aa%e7%b5%90%e5%a9%9a+ED'>わたしの幸せな結婚 ED</a>
 <a class='btn' href='search_all.html?q=%e3%82%8f%e3%81%9f%e3%81%97%e3%81%ae%e5%b9%b8%e3%81%9b%e3%81%aa%e7%b5%90%e5%a9%9a+OP'>わたしの幸せな結婚 OP</a>
-<a class='btn' href='search_all.html?q=%e3%82%8f%e3%81%9f%e3%81%97%e3%82%87'>わたしょ</a>
-<a class='btn' href='search_all.html?q=%e3%83%af%e3%83%ab%e3%82%ad%e3%83%a5%e3%83%bc%e3%83%ac%e3%83%ad%e3%83%9e%e3%83%b3%e3%83%84%e3%82%a7'>ワルキューレロマンツェ</a>
-<a class='btn' href='search_all.html?q=%e3%83%af%e3%83%ab%e3%82%ad%e3%83%a5%e3%83%bc%e3%83%ac%e3%83%ad%e3%83%9e%e3%83%b3%e3%83%84%e3%82%a7+Re%ef%bc%9atell'>ワルキューレロマンツェ Re：tell</a>
-<a class='btn' href='search_all.html?q=%e3%83%af%e3%83%b3%e3%82%aa%e3%83%9d'>ワンオポ</a>
-<a class='btn' href='search_all.html?q=%e3%82%8f%e3%82%93%e3%81%93%e3%81%ae%e5%ab%81%e5%85%a5%e3%82%8a+%ef%bd%9e%e3%82%88%e3%81%86%e3%81%93%e3%81%9d%ef%bc%81+%e3%81%84%e3%81%ac%e3%81%ae%e3%81%97%e3%81%a3%e3%81%bd%e3%81%b8%ef%bd%9e_OP'>わんこの嫁入り ～ようこそ！ いぬのしっぽへ～_OP</a>
 <a class='btn' href='search_all.html?q=%e3%83%af%e3%83%b3%e3%83%80%e3%83%bc%e3%82%a8%e3%83%83%e3%82%b0%e3%83%bb%e3%83%97%e3%83%a9%e3%82%a4%e3%82%aa%e3%83%aa%e3%83%86%e3%82%a3'>ワンダーエッグ・プライオリティ</a>
-<a class='btn' href='search_all.html?q=%e3%83%af%e3%83%b3%e3%83%80%e3%83%bc%e3%83%a2%e3%83%a2%ef%bc%8f%e5%a4%aa%e9%bc%93%e3%81%ae%e9%81%94%e4%ba%ba'>ワンダーモモ／太鼓の達人</a>
-<a class='btn' href='search_all.html?q=%e3%82%8f%e3%82%93%e3%81%a0%e3%81%b5%e3%82%8b%e3%81%b7%e3%82%8a%e3%81%8d%e3%82%85%e3%81%82!'>わんだふるぷりきゅあ!</a>
-<a class='btn' href='search_all.html?q=%e3%82%8f%e3%82%93%e3%81%a0%e3%81%b5%e3%82%8b%e3%81%b7%e3%82%8a%e3%81%8d%e3%82%85%e3%81%82%ef%bc%81%e3%83%bb%e7%8a%ac%e9%a3%bc%e3%81%84%e3%82%8d%e3%81%af(%e7%a8%ae%ef%a8%91%e6%95%a6%e7%be%8e)(YOUTUBE%e5%8b%95%e7%94%bb%e4%bd%bf%e7%94%a8)'>わんだふるぷりきゅあ！・犬飼いろは(種﨑敦美)(YOUTUBE動画使用)</a>
-<a class='btn' href='search_all.html?q=%e3%82%8f%e3%82%93%e3%81%a0%e3%81%b5%e3%82%8b%e3%81%b7%e3%82%8a%e3%81%8d%e3%82%85%e3%81%82%ef%bc%81%e3%83%bb%e7%8a%ac%e9%a3%bc%e3%81%93%e3%82%80%e3%81%8e(%e9%95%b7%e7%b8%84%e3%81%be%e3%82%8a%e3%81%82)(YOUTUBE%e5%8b%95%e7%94%bb%e4%bd%bf%e7%94%a8)'>わんだふるぷりきゅあ！・犬飼こむぎ(長縄まりあ)(YOUTUBE動画使用)</a>
-<a class='btn' href='search_all.html?q=%e3%82%8f%e3%82%93%e3%81%a0%e3%81%b5%e3%82%8b%e3%81%b7%e3%82%8a%e3%81%8d%e3%82%85%e3%81%82%ef%bc%81%e3%83%bb%e7%8c%ab%e5%b1%8b%e6%95%b7%e3%81%be%e3%82%86(%e4%b8%8a%e7%94%b0%e9%ba%97%e5%a5%88)(YOUTUBE%e5%8b%95%e7%94%bb%e4%bd%bf%e7%94%a8)'>わんだふるぷりきゅあ！・猫屋敷まゆ(上田麗奈)(YOUTUBE動画使用)</a>
-<a class='btn' href='search_all.html?q=%e3%82%8f%e3%82%93%e3%81%a0%e3%81%b5%e3%82%8b%e3%81%b7%e3%82%8a%e3%81%8d%e3%82%85%e3%81%82%ef%bc%81%e3%83%bb%e7%8c%ab%e5%b1%8b%e6%95%b7%e3%83%a6%e3%82%ad(%e6%9d%be%e7%94%b0%e9%a2%af%e6%b0%b4)(YOUTUBE%e5%8b%95%e7%94%bb%e4%bd%bf%e7%94%a8)'>わんだふるぷりきゅあ！・猫屋敷ユキ(松田颯水)(YOUTUBE動画使用)</a>
-<a class='btn' href='search_all.html?q=%e3%83%af%e3%83%b3%e3%83%80%e3%83%a9%e3%83%bc%e3%82%ba+%e3%83%95%e3%83%ad%e3%83%a0+%e3%82%a4%e3%83%bc%e3%82%b9'>ワンダラーズ フロム イース</a>
-<a class='btn' href='search_all.html?q=%e3%83%af%e3%83%b3%e3%83%89+%e3%82%aa%e3%83%96+%e3%83%95%e3%82%a9%e3%83%bc%e3%83%81%e3%83%a5%e3%83%b3'>ワンド オブ フォーチュン</a>
-<a class='btn' href='search_all.html?q=%e3%83%af%e3%83%b3%e3%83%91%e3%83%b3%e3%83%9e%e3%83%b3'>ワンパンマン</a>
-<a class='btn' href='search_all.html?q=%e3%83%af%e3%83%b3%e3%83%ab%e3%83%bc%e3%83%a0%e3%80%81%e6%97%a5%e5%bd%93%e3%81%9f%e3%82%8a%e6%99%ae%e9%80%9a%e3%80%81%e5%a4%a9%e4%bd%bf%e3%81%a4%e3%81%8d%e3%80%82'>ワンルーム、日当たり普通、天使つき。</a>
-<a class='btn' href='search_all.html?q=%e3%83%af%e3%83%b3%e3%83%ab%e3%83%bc%e3%83%a0%e5%a4%a9%e4%bd%bf%e3%80%81%e6%97%a5%e5%bd%93%e3%81%9f%e3%82%8a%e6%99%ae%e9%80%9a%e3%80%81%e5%a4%a9%e4%bd%bf%e3%81%a4%e3%81%8d%e3%80%82'>ワンルーム天使、日当たり普通、天使つき。</a>
-<a class='btn' href='search_all.html?q=%e3%82%8f%e8%a1%8c'>わ行</a></div>
+<a class='btn' href='search_all.html?q=%e3%83%af%e3%83%b3%e3%83%ab%e3%83%bc%e3%83%a0%e5%a4%a9%e4%bd%bf%e3%80%81%e6%97%a5%e5%bd%93%e3%81%9f%e3%82%8a%e6%99%ae%e9%80%9a%e3%80%81%e5%a4%a9%e4%bd%bf%e3%81%a4%e3%81%8d%e3%80%82'>ワンルーム天使、日当たり普通、天使つき。</a></div>
   </div>
 
   <script>
-    (function(){
-      const list=document.querySelectorAll('.list-わ a');
-      const el=document.getElementById('count-list-わ');
-      if(el){ el.textContent='表示件数: '+list.length; }
-    })();
+    (function(){ const list=document.querySelectorAll('.list-わ a'); const el=document.getElementById('count-list-わ'); if(el){ el.textContent='表示件数: '+list.length; } })();
   </script>
 </div>
 </div>
