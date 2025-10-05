@@ -1,0 +1,1406 @@
+﻿<!DOCTYPE html>
+<html lang='ja'>
+<head>
+<meta charset='UTF-8'>
+<title>年別：2019〜2015</title>
+<meta name='viewport' content='width=device-width, initial-scale=1.0'>
+<meta property='og:title' content='つぼはち・オフライン検索'>
+<meta property='og:description' content='ゆかりのオフライン時に検索可能のサイトです'>
+<meta property='og:image' content='https://raw.githubusercontent.com/hachi515/yukari_list_001/main/Hasunosora_3.png'>
+<meta property='og:url' content=''>
+<meta name='twitter:card' content='summary_large_image'>
+<meta name='twitter:title' content='つぼはち・オフライン検索'>
+<meta name='twitter:description' content='ゆかりのオフライン時に検索可能のサイトです'>
+<meta name='twitter:image' content='https://raw.githubusercontent.com/hachi515/yukari_list_001/main/Hasunosora_3.png'>
+<style>:root{
+  --accent:#1B64C2;
+  --accent-50: rgba(27,100,194,.50);
+  --accent-70: rgba(27,100,194,.70);
+  --accent-90: rgba(27,100,194,.90);
+  --border:#1B64C2;
+  --panel:rgba(255,255,255,.55);
+  --panel-strong:rgba(255,255,255,.60);
+  --ui-gray:#a1a1a1;
+}
+*{box-sizing:border-box}
+html,body{width:100%}
+body{
+  font-family:'ヒラギノ角ゴ ProN W3','Hiragino Kaku Gothic ProN','Hiragino Sans','ヒラギノ角ゴシック','Yu Gothic','メイリオ',Meiryo,Arial,sans-serif;
+  font-size:14px; color:#222; background:#eef2f5; font-weight:400;
+  background-image:url('https://raw.githubusercontent.com/hachi515/yukari_list_001/main/Hasunosora_1.png'); background-size:cover; background-attachment:fixed; background-position:center; margin:0;
+}
+.wrap{ max-width:1100px; margin:24px auto; padding:12px; background:var(--panel); border:0; border-radius:0; box-shadow:none; overflow-x:auto; }
+
+h1{ display:inline-block; margin:0 0 14px 0; padding:4px 0; background:transparent; color:#0b1b2e; font-size:18px; font-weight:500 }
+h2{ margin:10px 0 8px; padding:0; color:#0b1b2e; font-size:18px; font-weight:500; background:transparent } /* ← h1と同サイズ */
+
+.back{ text-align:right; margin:-6px 0 6px 0 }
+.back a{ color:var(--accent); text-decoration:none; border-bottom:1px dotted var(--accent) }
+
+.section{margin:10px 0 18px}
+.search{display:flex; gap:8px; margin:8px 0 4px; align-items:center; justify-content:flex-start}
+.search select{ padding:8px 10px; font-size:14px; background:var(--panel); border:1px solid var(--ui-gray); border-radius:0; font-weight:400 }
+.search input[type=text]{ flex:0 0 260px; width:260px; padding:8px; font-size:14px; background:var(--panel); border:1px solid var(--ui-gray); border-radius:0; font-weight:400 }
+.search button{ padding:8px 12px; font-size:14px; color:#fff; background:var(--accent-90); border:1px solid var(--ui-gray); border-radius:0; cursor:pointer }
+.count{font-size:12px; color:#222; margin:4px 0 8px}
+a{ color:var(--accent); }
+
+.btn{display:inline-block; padding:8px 10px; background:var(--accent-70); color:#fff; text-decoration:none; border:1px solid var(--border); border-radius:0; font-weight:400 }
+.btn-outline{background:var(--panel); color:#1b1b1b; border:1px solid var(--border)}
+.year-buttons,.new-buttons{display:flex; flex-wrap:wrap; gap:8px}
+
+.kana-row{display:flex; gap:24px; margin-bottom:8px}
+.kana-group{display:flex; gap:6px}
+.kana-btn{display:inline-block; padding:6px 10px; background:var(--accent-70); color:#fff; text-decoration:none; border:1px solid var(--border); border-radius:0; font-size:14px; font-weight:400}
+.kana-btn.disabled{opacity:.35; pointer-events:none}
+
+/* 作品名グリッド：1行2個 */
+.prog-grid{display:grid; grid-template-columns:repeat(2, minmax(0,1fr)); gap:8px}
+.prog-grid a{display:block}
+
+/* カード */
+.card{margin:12px 0; border:0; background:transparent}
+.card-title{padding:0; background:transparent}
+.card-title a{display:block; padding:8px 10px; background:var(--accent-70); color:#fff; text-decoration:none; white-space:normal; font-weight:500}
+.card-body{padding:10px; background:var(--panel-strong)}
+.meta{margin:3px 0; font-weight:400}
+.meta .label{display:inline-block; min-width:84px; color:#0b1b2e; font-weight:400}
+
+/* ページャ */
+.pager{display:flex; gap:6px; flex-wrap:wrap; margin:14px 0}
+.pager a,.pager span{padding:6px 10px; border:1px solid var(--border); text-decoration:none; color:#fff; background:var(--accent-70); font-weight:400}
+.pager .current{background:var(--accent-90); color:#fff}
+
+/* スクロール枠（search_all / 年別 / 新着 / 五十音） */
+.list-container{max-height:900px; overflow-y:auto; border:1px solid var(--ui-gray); background:rgba(255,255,255,.35); padding:8px; box-shadow:0 4px 8px rgba(0,0,0,.06)}
+.stickybar{position:sticky; top:0; z-index:20; background:rgba(255,255,255,.6); border-bottom:1px solid var(--ui-gray); padding:8px; margin:-8px -8px 8px -8px}
+.stickybar.no-bg{background:transparent; border:none; padding:0; margin:0 0 8px 0}
+
+@media (max-width:768px){
+  body{ background-image:url('https://raw.githubusercontent.com/hachi515/yukari_list_001/main/Hasunosora_2.png'); font-size:13px }
+  .search select, .search input[type=text], .search button{ font-size:13px; padding:7px 10px }
+  /* 入力幅をスマホではやや広めに */
+  .search input[type=text]{ flex:0 0 56vw; width:56vw }
+  .list-container{ max-height:450px }
+}
+  .search select, .search input[type=text], .search button{ font-size:13px; padding:7px 10px }
+  .list-container{ max-height:450px }
+}</style>
+<script>const SEARCH_BASE = 'http://ykr.moe:11059/';
+
+function tokensHalf(v){return v.toLowerCase().trim().split(/ +/).filter(Boolean)}
+function qparam(name){ const m = location.search.match(new RegExp('[?&]'+name+'=([^&]+)')); return m ? decodeURIComponent(m[1]) : ''; }
+
+// 軽量リンク化：data-q を href に展開
+document.addEventListener('DOMContentLoaded', ()=>{
+  document.querySelectorAll('a[data-q]').forEach(a=>{
+    try{
+      const q = a.getAttribute('data-q')||'';
+      a.href = SEARCH_BASE + 'search.php?searchword=' + q;
+      a.target = '_blank';
+    }catch(e){}
+  });
+});
+
+function filterCards(listId, boxId){
+  const q = tokensHalf(document.getElementById(boxId).value);
+  const list = document.getElementById(listId);
+  if(!list){return}
+  const cards = list.querySelectorAll('.card');
+  let vis = 0;
+  cards.forEach(c=>{
+    const hit = q.every(tok => c.innerText.toLowerCase().includes(tok));
+    c.style.display = hit ? '' : 'none';
+    if(hit) vis++;
+  });
+  const cEl = document.getElementById('count-'+listId);
+  if(cEl){ cEl.textContent = '表示件数: ' + vis; }
+  const pager = document.getElementById('pager-'+listId);
+  const per = parseInt(list.dataset.per || '100',10);
+  if(pager){ if(q.length===0){ pager.style.display = ''; } else { pager.style.display = (vis<=per) ? 'none' : ''; } }
+}
+
+/* ===== 検索結果専用：表示中カードを「制作者優先度→日付」で並べ替え ===== */
+const DEFAULT_PRIO = 999;
+function reorderByPriority(listId){
+  const list = document.getElementById(listId);
+  if(!list){return}
+  const visible = Array.from(list.querySelectorAll('.card')).filter(c => c.style.display !== 'none');
+  visible.sort((a,b)=>{
+    const pa = parseInt(a.dataset.priority||DEFAULT_PRIO);
+    const pb = parseInt(b.dataset.priority||DEFAULT_PRIO);
+    if(pa !== pb) return pa - pb;
+    const da = parseInt(a.dataset.updated||0); // yyyymmdd
+    const db = parseInt(b.dataset.updated||0);
+    return db - da;
+  });
+  visible.forEach(c => list.appendChild(c));
+}
+
+function filterCardsAdv(listId, boxId, yearId){
+  const q = tokensHalf(document.getElementById(boxId).value);
+  const yEl = document.getElementById(yearId);
+  const y = yEl ? (yEl.value||'').trim() : '';
+  const list = document.getElementById(listId);
+  if(!list){return}
+  const cards = list.querySelectorAll('.card');
+  let vis = 0;
+  cards.forEach(c=>{
+    const okText = q.every(tok => c.innerText.toLowerCase().includes(tok));
+    const band = (c.dataset.yearband||'');
+    const yr = (c.dataset.year||'');
+    const okYear = (y==='' || yr===y || band===y);
+    const show = okText && okYear;
+    c.style.display = show ? '' : 'none';
+    if(show) vis++;
+  });
+  const cEl = document.getElementById('count-'+listId);
+  if(cEl){ cEl.textContent = '表示件数: ' + vis; }
+
+  // ★検索（キーワード or 年帯）を使ったときだけ優先度並び替えを実施
+  if(q.length>0 || y!==''){ reorderByPriority(listId); }
+}
+
+function filterGrid(gridSel, boxId, countId){
+  const q = tokensHalf(document.getElementById(boxId).value);
+  const nodes = document.querySelectorAll(gridSel+' a');
+  let vis=0; nodes.forEach(a=>{ const hit=q.every(t=>a.innerText.toLowerCase().includes(t)); a.style.display=hit?'':'none'; if(hit) vis++; });
+  if(countId){ const el=document.getElementById(countId); if(el){ el.textContent='表示件数: '+vis; } }
+}</script>
+</head>
+<body>
+<div class='wrap'>
+<h1>年別：2019〜2015</h1>
+<div class='back'><a href='index.html'>一覧に戻る</a></div>
+
+<div class='section'>
+  <div class='search'>
+    <input type='text' id='q-list-year-3' placeholder='キーワード（半角スペースAND）'>
+    <button onclick="filterCards('list-year-3','q-list-year-3')">検索</button>
+  </div>
+  <div class='count' id='count-list-year-3'></div>
+
+  <div class='list-container'>
+    <div id='list-year-3' data-per='100'>
+<div class='card' data-year='2018' data-yearband='2019-2015' data-updated='20180813' data-priority='2'>
+  <div class='card-title'>
+    <a data-q='%e3%80%90%e3%82%a2%e3%82%a4%e3%83%89%e3%83%ab%e3%83%9e%e3%82%b9%e3%82%bf%e3%83%bc+%e3%82%b7%e3%83%b3%e3%83%87%e3%83%ac%e3%83%a9%e3%82%ac%e3%83%bc%e3%83%ab%e3%82%ba%e5%8a%87%e5%a0%b4+3rd+SEASON%e3%80%91%e3%81%84%e3%81%a8%e3%81%97%e3%83%bc%e3%81%95%e3%83%bc%e2%99%a5%ef%bc%8f%e8%bc%bf%e6%b0%b4%e5%b9%b8%e5%ad%90%e3%80%81%e5%a4%9a%e7%94%b0%e6%9d%8e%e8%a1%a3%e8%8f%9c%e3%80%81%e8%97%a4%e5%8e%9f%e8%82%87%e3%80%81%e6%b0%b4%e6%9c%ac%e3%82%86%e3%81%8b%e3%82%8a%e3%80%81%e6%a3%ae%e4%b9%85%e4%bf%9d%e4%b9%83%e3%80%85%5b7ch%5d.mp4'>いとしーさー♥／輿水幸子、多田李衣菜、藤原肇、水本ゆかり、森久保乃々[7ch]</a>
+  </div>
+  <div class='card-body'>
+    <div class='meta'><span class='label'>作品名</span> <a href='search_all.html?q=%e3%82%a2%e3%82%a4%e3%83%89%e3%83%ab%e3%83%9e%e3%82%b9%e3%82%bf%e3%83%bc+%e3%82%b7%e3%83%b3%e3%83%87%e3%83%ac%e3%83%a9%e3%82%ac%e3%83%bc%e3%83%ab%e3%82%ba%e5%8a%87%e5%a0%b4+3rd+SEASON'>アイドルマスター シンデレラガールズ劇場 3rd SEASON</a></div>
+    <div class='meta'><span class='label'>歌い手</span> 輿水幸子、多田李衣菜、藤原肇、水本ゆかり、森久保乃々</div>
+    <div class='meta'><span class='label'>制作者</span> タマ兄</div>
+    <div class='meta'><span class='label'>最終更新日</span> 2018/08/13</div>
+    <div class='meta'><span class='label'>ファイル名</span> <a data-q='%e3%80%90%e3%82%a2%e3%82%a4%e3%83%89%e3%83%ab%e3%83%9e%e3%82%b9%e3%82%bf%e3%83%bc+%e3%82%b7%e3%83%b3%e3%83%87%e3%83%ac%e3%83%a9%e3%82%ac%e3%83%bc%e3%83%ab%e3%82%ba%e5%8a%87%e5%a0%b4+3rd+SEASON%e3%80%91%e3%81%84%e3%81%a8%e3%81%97%e3%83%bc%e3%81%95%e3%83%bc%e2%99%a5%ef%bc%8f%e8%bc%bf%e6%b0%b4%e5%b9%b8%e5%ad%90%e3%80%81%e5%a4%9a%e7%94%b0%e6%9d%8e%e8%a1%a3%e8%8f%9c%e3%80%81%e8%97%a4%e5%8e%9f%e8%82%87%e3%80%81%e6%b0%b4%e6%9c%ac%e3%82%86%e3%81%8b%e3%82%8a%e3%80%81%e6%a3%ae%e4%b9%85%e4%bf%9d%e4%b9%83%e3%80%85%5b7ch%5d.mp4'>【アイドルマスター シンデレラガールズ劇場 3rd SEASON】いとしーさー♥／輿水幸子、多田李衣菜、藤原肇、水本ゆかり、森久保乃々[7ch].mp4</a></div>
+  </div>
+</div>
+<div class='card' data-year='2018' data-yearband='2019-2015' data-updated='20180805' data-priority='2'>
+  <div class='card-title'>
+    <a data-q='%e3%80%90%e3%82%a6%e3%83%9e%e5%a8%98+%e3%83%97%e3%83%aa%e3%83%86%e3%82%a3%e3%83%bc%e3%83%80%e3%83%bc%e3%83%93%e3%83%bc%e3%80%91%e3%81%82%e3%82%8a%e3%81%8c%e3%81%a8%e3%81%86%e3%80%81%e7%a5%9e%e6%a7%98%ef%bc%8f%e3%82%b9%e3%83%9a%e3%82%b7%e3%83%a3%e3%83%ab%e3%82%a6%e3%82%a3%e3%83%bc%e3%82%af(%e5%92%8c%e6%b0%a3%e3%81%82%e3%81%9a%e6%9c%aa)(on-off).mp4'>ありがとう、神様</a>
+  </div>
+  <div class='card-body'>
+    <div class='meta'><span class='label'>作品名</span> <a href='search_all.html?q=%e3%82%a6%e3%83%9e%e5%a8%98+%e3%83%97%e3%83%aa%e3%83%86%e3%82%a3%e3%83%bc%e3%83%80%e3%83%bc%e3%83%93%e3%83%bc'>ウマ娘 プリティーダービー</a></div>
+    <div class='meta'><span class='label'>歌い手</span> スペシャルウィーク</div>
+    <div class='meta'><span class='label'>制作者</span> タマ兄</div>
+    <div class='meta'><span class='label'>最終更新日</span> 2018/08/05</div>
+    <div class='meta'><span class='label'>ファイル名</span> <a data-q='%e3%80%90%e3%82%a6%e3%83%9e%e5%a8%98+%e3%83%97%e3%83%aa%e3%83%86%e3%82%a3%e3%83%bc%e3%83%80%e3%83%bc%e3%83%93%e3%83%bc%e3%80%91%e3%81%82%e3%82%8a%e3%81%8c%e3%81%a8%e3%81%86%e3%80%81%e7%a5%9e%e6%a7%98%ef%bc%8f%e3%82%b9%e3%83%9a%e3%82%b7%e3%83%a3%e3%83%ab%e3%82%a6%e3%82%a3%e3%83%bc%e3%82%af(%e5%92%8c%e6%b0%a3%e3%81%82%e3%81%9a%e6%9c%aa)(on-off).mp4'>【ウマ娘 プリティーダービー】ありがとう、神様／スペシャルウィーク(和氣あず未)(on-off).mp4</a></div>
+  </div>
+</div>
+<div class='card' data-year='2018' data-yearband='2019-2015' data-updated='20180805' data-priority='2'>
+  <div class='card-title'>
+    <a data-q='%e3%80%90%e3%82%a2%e3%82%a4%e3%83%89%e3%83%ab%e3%83%9e%e3%82%b9%e3%82%bf%e3%83%bc+%e3%82%b7%e3%83%b3%e3%83%87%e3%83%ac%e3%83%a9%e3%82%ac%e3%83%bc%e3%83%ab%e3%82%ba+%e3%82%b9%e3%82%bf%e3%83%bc%e3%83%a9%e3%82%a4%e3%83%88%e3%82%b9%e3%83%86%e3%83%bc%e3%82%b8%e3%80%91Spring+Screaming%ef%bc%8f%e5%96%9c%e5%a4%9a%e8%a6%8b%e6%9f%9a%e3%80%81%e6%9c%ac%e7%94%b0%e6%9c%aa%e5%a4%ae%e3%80%81%e9%be%8d%e5%b4%8e%e8%96%ab(on-off).mp4'>Spring Screaming</a>
+  </div>
+  <div class='card-body'>
+    <div class='meta'><span class='label'>作品名</span> <a href='search_all.html?q=%e3%82%a2%e3%82%a4%e3%83%89%e3%83%ab%e3%83%9e%e3%82%b9%e3%82%bf%e3%83%bc+%e3%82%b7%e3%83%b3%e3%83%87%e3%83%ac%e3%83%a9%e3%82%ac%e3%83%bc%e3%83%ab%e3%82%ba+%e3%82%b9%e3%82%bf%e3%83%bc%e3%83%a9%e3%82%a4%e3%83%88%e3%82%b9%e3%83%86%e3%83%bc%e3%82%b8'>アイドルマスター シンデレラガールズ スターライトステージ</a></div>
+    <div class='meta'><span class='label'>歌い手</span> 喜多見柚、本田未央、龍崎薫</div>
+    <div class='meta'><span class='label'>制作者</span> タマ兄</div>
+    <div class='meta'><span class='label'>最終更新日</span> 2018/08/05</div>
+    <div class='meta'><span class='label'>ファイル名</span> <a data-q='%e3%80%90%e3%82%a2%e3%82%a4%e3%83%89%e3%83%ab%e3%83%9e%e3%82%b9%e3%82%bf%e3%83%bc+%e3%82%b7%e3%83%b3%e3%83%87%e3%83%ac%e3%83%a9%e3%82%ac%e3%83%bc%e3%83%ab%e3%82%ba+%e3%82%b9%e3%82%bf%e3%83%bc%e3%83%a9%e3%82%a4%e3%83%88%e3%82%b9%e3%83%86%e3%83%bc%e3%82%b8%e3%80%91Spring+Screaming%ef%bc%8f%e5%96%9c%e5%a4%9a%e8%a6%8b%e6%9f%9a%e3%80%81%e6%9c%ac%e7%94%b0%e6%9c%aa%e5%a4%ae%e3%80%81%e9%be%8d%e5%b4%8e%e8%96%ab(on-off).mp4'>【アイドルマスター シンデレラガールズ スターライトステージ】Spring Screaming／喜多見柚、本田未央、龍崎薫(on-off).mp4</a></div>
+  </div>
+</div>
+<div class='card' data-year='2018' data-yearband='2019-2015' data-updated='20180805' data-priority='2'>
+  <div class='card-title'>
+    <a data-q='%e3%80%90%e3%82%a2%e3%82%a4%e3%83%89%e3%83%ab%e3%83%9e%e3%82%b9%e3%82%bf%e3%83%bc+%e3%82%b7%e3%83%b3%e3%83%87%e3%83%ac%e3%83%a9%e3%82%ac%e3%83%bc%e3%83%ab%e3%82%ba+%e3%82%b9%e3%82%bf%e3%83%bc%e3%83%a9%e3%82%a4%e3%83%88%e3%82%b9%e3%83%86%e3%83%bc%e3%82%b8%e3%80%91HARURUNRUN%ef%bc%8f%e9%96%a2%e8%a3%95%e7%be%8e(%e4%bc%9a%e6%b2%a2%e7%b4%97%e5%bc%a5)%e3%80%81%e6%b0%b4%e6%9c%ac%e3%82%86%e3%81%8b%e3%82%8a(%e8%97%a4%e7%94%b0%e8%8c%9c)%e3%80%81%e6%a3%9f%e6%96%b9%e6%84%9b%e6%b5%b7(%e8%97%a4%e6%9c%ac%e5%bd%a9%e8%8a%b1)(on-off).mp4'>HARURUNRUN</a>
+  </div>
+  <div class='card-body'>
+    <div class='meta'><span class='label'>作品名</span> <a href='search_all.html?q=%e3%82%a2%e3%82%a4%e3%83%89%e3%83%ab%e3%83%9e%e3%82%b9%e3%82%bf%e3%83%bc+%e3%82%b7%e3%83%b3%e3%83%87%e3%83%ac%e3%83%a9%e3%82%ac%e3%83%bc%e3%83%ab%e3%82%ba+%e3%82%b9%e3%82%bf%e3%83%bc%e3%83%a9%e3%82%a4%e3%83%88%e3%82%b9%e3%83%86%e3%83%bc%e3%82%b8'>アイドルマスター シンデレラガールズ スターライトステージ</a></div>
+    <div class='meta'><span class='label'>歌い手</span> 関裕美、水本ゆかり、棟方愛海</div>
+    <div class='meta'><span class='label'>制作者</span> タマ兄</div>
+    <div class='meta'><span class='label'>最終更新日</span> 2018/08/05</div>
+    <div class='meta'><span class='label'>ファイル名</span> <a data-q='%e3%80%90%e3%82%a2%e3%82%a4%e3%83%89%e3%83%ab%e3%83%9e%e3%82%b9%e3%82%bf%e3%83%bc+%e3%82%b7%e3%83%b3%e3%83%87%e3%83%ac%e3%83%a9%e3%82%ac%e3%83%bc%e3%83%ab%e3%82%ba+%e3%82%b9%e3%82%bf%e3%83%bc%e3%83%a9%e3%82%a4%e3%83%88%e3%82%b9%e3%83%86%e3%83%bc%e3%82%b8%e3%80%91HARURUNRUN%ef%bc%8f%e9%96%a2%e8%a3%95%e7%be%8e(%e4%bc%9a%e6%b2%a2%e7%b4%97%e5%bc%a5)%e3%80%81%e6%b0%b4%e6%9c%ac%e3%82%86%e3%81%8b%e3%82%8a(%e8%97%a4%e7%94%b0%e8%8c%9c)%e3%80%81%e6%a3%9f%e6%96%b9%e6%84%9b%e6%b5%b7(%e8%97%a4%e6%9c%ac%e5%bd%a9%e8%8a%b1)(on-off).mp4'>【アイドルマスター シンデレラガールズ スターライトステージ】HARURUNRUN／関裕美(会沢紗弥)、水本ゆかり(藤田茜)、棟方愛海(藤本彩花)(on-off).mp4</a></div>
+  </div>
+</div>
+<div class='card' data-year='2018' data-yearband='2019-2015' data-updated='20180805' data-priority='2'>
+  <div class='card-title'>
+    <a data-q='%e3%80%90%e3%82%a2%e3%82%a4%e3%83%89%e3%83%ab%e3%83%9e%e3%82%b9%e3%82%bf%e3%83%bc+%e3%82%b7%e3%83%b3%e3%83%87%e3%83%ac%e3%83%a9%e3%82%ac%e3%83%bc%e3%83%ab%e3%82%ba+%e3%82%b9%e3%82%bf%e3%83%bc%e3%83%a9%e3%82%a4%e3%83%88%e3%82%b9%e3%83%86%e3%83%bc%e3%82%b8%e3%80%91%e2%88%80NSWER%ef%bc%8findividuals%ef%bc%88%e6%97%a9%e5%9d%82%e7%be%8e%e7%8e%b2(%e6%9c%9d%e4%ba%95%e5%bd%a9%e5%8a%a0)%e3%80%81%e6%a3%ae%e4%b9%85%e4%bf%9d%e4%b9%83%e3%80%85(%e9%ab%98%e6%a9%8b%e8%8a%b1%e6%9e%97)%e3%80%81%e6%98%9f%e8%bc%9d%e5%ad%90(%e6%9d%be%e7%94%b0%e9%a2%af%e6%b0%b4)(on-off).mp4'>∀NSWER</a>
+  </div>
+  <div class='card-body'>
+    <div class='meta'><span class='label'>作品名</span> <a href='search_all.html?q=%e3%82%a2%e3%82%a4%e3%83%89%e3%83%ab%e3%83%9e%e3%82%b9%e3%82%bf%e3%83%bc+%e3%82%b7%e3%83%b3%e3%83%87%e3%83%ac%e3%83%a9%e3%82%ac%e3%83%bc%e3%83%ab%e3%82%ba+%e3%82%b9%e3%82%bf%e3%83%bc%e3%83%a9%e3%82%a4%e3%83%88%e3%82%b9%e3%83%86%e3%83%bc%e3%82%b8'>アイドルマスター シンデレラガールズ スターライトステージ</a></div>
+    <div class='meta'><span class='label'>歌い手</span> individuals（早坂美玲、森久保乃々、星輝子</div>
+    <div class='meta'><span class='label'>制作者</span> タマ兄</div>
+    <div class='meta'><span class='label'>最終更新日</span> 2018/08/05</div>
+    <div class='meta'><span class='label'>ファイル名</span> <a data-q='%e3%80%90%e3%82%a2%e3%82%a4%e3%83%89%e3%83%ab%e3%83%9e%e3%82%b9%e3%82%bf%e3%83%bc+%e3%82%b7%e3%83%b3%e3%83%87%e3%83%ac%e3%83%a9%e3%82%ac%e3%83%bc%e3%83%ab%e3%82%ba+%e3%82%b9%e3%82%bf%e3%83%bc%e3%83%a9%e3%82%a4%e3%83%88%e3%82%b9%e3%83%86%e3%83%bc%e3%82%b8%e3%80%91%e2%88%80NSWER%ef%bc%8findividuals%ef%bc%88%e6%97%a9%e5%9d%82%e7%be%8e%e7%8e%b2(%e6%9c%9d%e4%ba%95%e5%bd%a9%e5%8a%a0)%e3%80%81%e6%a3%ae%e4%b9%85%e4%bf%9d%e4%b9%83%e3%80%85(%e9%ab%98%e6%a9%8b%e8%8a%b1%e6%9e%97)%e3%80%81%e6%98%9f%e8%bc%9d%e5%ad%90(%e6%9d%be%e7%94%b0%e9%a2%af%e6%b0%b4)(on-off).mp4'>【アイドルマスター シンデレラガールズ スターライトステージ】∀NSWER／individuals（早坂美玲(朝井彩加)、森久保乃々(高橋花林)、星輝子(松田颯水)(on-off).mp4</a></div>
+  </div>
+</div>
+<div class='card' data-year='2018' data-yearband='2019-2015' data-updated='20180805' data-priority='2'>
+  <div class='card-title'>
+    <a data-q='%e3%80%90%e3%82%a2%e3%82%a4%e3%83%89%e3%83%ab%e3%83%9e%e3%82%b9%e3%82%bf%e3%83%bc+%e3%82%b7%e3%83%b3%e3%83%87%e3%83%ac%e3%83%a9%e3%82%ac%e3%83%bc%e3%83%ab%e3%82%ba+%e3%82%b9%e3%82%bf%e3%83%bc%e3%83%a9%e3%82%a4%e3%83%88%e3%82%b9%e3%83%86%e3%83%bc%e3%82%b8%e3%80%91%e6%a1%9c%e3%81%ae%e9%a0%83%ef%bc%8f%e4%be%9d%e7%94%b0%e8%8a%b3%e4%b9%83%e3%80%81%e5%b0%8f%e6%97%a9%e5%b7%9d%e7%b4%97%e6%9e%9d%e3%80%81%e9%81%93%e6%98%8e%e5%af%ba%e6%ad%8c%e9%88%b4%e3%80%81%e6%b5%9c%e5%8f%a3%e3%81%82%e3%82%84%e3%82%81%e3%80%81%e8%84%87%e5%b1%b1%e7%8f%a0%e7%be%8e(on-off).mp4'>桜の頃</a>
+  </div>
+  <div class='card-body'>
+    <div class='meta'><span class='label'>作品名</span> <a href='search_all.html?q=%e3%82%a2%e3%82%a4%e3%83%89%e3%83%ab%e3%83%9e%e3%82%b9%e3%82%bf%e3%83%bc+%e3%82%b7%e3%83%b3%e3%83%87%e3%83%ac%e3%83%a9%e3%82%ac%e3%83%bc%e3%83%ab%e3%82%ba+%e3%82%b9%e3%82%bf%e3%83%bc%e3%83%a9%e3%82%a4%e3%83%88%e3%82%b9%e3%83%86%e3%83%bc%e3%82%b8'>アイドルマスター シンデレラガールズ スターライトステージ</a></div>
+    <div class='meta'><span class='label'>歌い手</span> 依田芳乃、小早川紗枝、道明寺歌鈴、浜口あやめ、脇山珠美</div>
+    <div class='meta'><span class='label'>制作者</span> タマ兄</div>
+    <div class='meta'><span class='label'>最終更新日</span> 2018/08/05</div>
+    <div class='meta'><span class='label'>ファイル名</span> <a data-q='%e3%80%90%e3%82%a2%e3%82%a4%e3%83%89%e3%83%ab%e3%83%9e%e3%82%b9%e3%82%bf%e3%83%bc+%e3%82%b7%e3%83%b3%e3%83%87%e3%83%ac%e3%83%a9%e3%82%ac%e3%83%bc%e3%83%ab%e3%82%ba+%e3%82%b9%e3%82%bf%e3%83%bc%e3%83%a9%e3%82%a4%e3%83%88%e3%82%b9%e3%83%86%e3%83%bc%e3%82%b8%e3%80%91%e6%a1%9c%e3%81%ae%e9%a0%83%ef%bc%8f%e4%be%9d%e7%94%b0%e8%8a%b3%e4%b9%83%e3%80%81%e5%b0%8f%e6%97%a9%e5%b7%9d%e7%b4%97%e6%9e%9d%e3%80%81%e9%81%93%e6%98%8e%e5%af%ba%e6%ad%8c%e9%88%b4%e3%80%81%e6%b5%9c%e5%8f%a3%e3%81%82%e3%82%84%e3%82%81%e3%80%81%e8%84%87%e5%b1%b1%e7%8f%a0%e7%be%8e(on-off).mp4'>【アイドルマスター シンデレラガールズ スターライトステージ】桜の頃／依田芳乃、小早川紗枝、道明寺歌鈴、浜口あやめ、脇山珠美(on-off).mp4</a></div>
+  </div>
+</div>
+<div class='card' data-year='2018' data-yearband='2019-2015' data-updated='20180805' data-priority='2'>
+  <div class='card-title'>
+    <a data-q='%e3%80%90%e3%83%a4%e3%83%9e%e3%83%8e%e3%82%b9%e3%82%b9%e3%83%a1+%e3%82%b5%e3%83%bc%e3%83%89%e3%82%b7%e3%83%bc%e3%82%ba%e3%83%b3%e3%80%91%e5%9c%b0%e5%b9%b3%e7%b7%9a%e3%82%b9%e3%83%88%e3%83%a9%e3%82%a4%e3%83%89(%e3%83%91%e3%83%bc%e3%83%88%e5%88%86%e3%81%91)(ver.1)%ef%bc%8f%e3%81%82%e3%81%8a%e3%81%84%e3%80%81%e3%81%b2%e3%81%aa%e3%81%9f%e3%80%81%e3%81%93%e3%81%93%e3%81%aa%e3%80%81%e3%81%8b%e3%81%88%e3%81%a7%5bon-off%5d.mp4'>地平線ストライド(パート分け)(ver.1)／あおい、ひなた、ここな、かえで[on-off]</a>
+  </div>
+  <div class='card-body'>
+    <div class='meta'><span class='label'>作品名</span> <a href='search_all.html?q=%e3%83%a4%e3%83%9e%e3%83%8e%e3%82%b9%e3%82%b9%e3%83%a1+%e3%82%b5%e3%83%bc%e3%83%89%e3%82%b7%e3%83%bc%e3%82%ba%e3%83%b3'>ヤマノススメ サードシーズン</a></div>
+    <div class='meta'><span class='label'>歌い手</span> あおい、ひなた、ここな、かえで</div>
+    <div class='meta'><span class='label'>制作者</span> タマ兄</div>
+    <div class='meta'><span class='label'>最終更新日</span> 2018/08/05</div>
+    <div class='meta'><span class='label'>ファイル名</span> <a data-q='%e3%80%90%e3%83%a4%e3%83%9e%e3%83%8e%e3%82%b9%e3%82%b9%e3%83%a1+%e3%82%b5%e3%83%bc%e3%83%89%e3%82%b7%e3%83%bc%e3%82%ba%e3%83%b3%e3%80%91%e5%9c%b0%e5%b9%b3%e7%b7%9a%e3%82%b9%e3%83%88%e3%83%a9%e3%82%a4%e3%83%89(%e3%83%91%e3%83%bc%e3%83%88%e5%88%86%e3%81%91)(ver.1)%ef%bc%8f%e3%81%82%e3%81%8a%e3%81%84%e3%80%81%e3%81%b2%e3%81%aa%e3%81%9f%e3%80%81%e3%81%93%e3%81%93%e3%81%aa%e3%80%81%e3%81%8b%e3%81%88%e3%81%a7%5bon-off%5d.mp4'>【ヤマノススメ サードシーズン】地平線ストライド(パート分け)(ver.1)／あおい、ひなた、ここな、かえで[on-off].mp4</a></div>
+  </div>
+</div>
+<div class='card' data-year='2018' data-yearband='2019-2015' data-updated='20180708' data-priority='2'>
+  <div class='card-title'>
+    <a data-q='%e3%80%90%e3%82%a2%e3%82%a4%e3%83%89%e3%83%ab%e3%83%9e%e3%82%b9%e3%82%bf%e3%83%bc+%e3%82%b7%e3%83%b3%e3%83%87%e3%83%ac%e3%83%a9%e3%82%ac%e3%83%bc%e3%83%ab%e3%82%ba+%e3%82%b9%e3%82%bf%e3%83%bc%e3%83%a9%e3%82%a4%e3%83%88%e3%82%b9%e3%83%86%e3%83%bc%e3%82%b8%e3%80%91%e9%8a%80%e3%81%ae%e3%82%a4%e3%83%ab%e3%82%ab%e3%81%a8%e7%86%b1%e3%81%84%e9%a2%a8(%e3%83%91%e3%83%bc%e3%83%88%e5%88%86%e3%81%91)%ef%bc%8f%e5%a4%a7%e6%a7%bb%e5%94%af%e3%80%81%e7%b7%92%e6%96%b9%e6%99%ba%e7%b5%b5%e9%87%8c%e3%80%81%e6%96%b0%e7%94%b0%e7%be%8e%e6%b3%a2%5bon-off%5d.mp4'>銀のイルカと熱い風(パート分け)／大槻唯、緒方智絵里、新田美波[on-off]</a>
+  </div>
+  <div class='card-body'>
+    <div class='meta'><span class='label'>作品名</span> <a href='search_all.html?q=%e3%82%a2%e3%82%a4%e3%83%89%e3%83%ab%e3%83%9e%e3%82%b9%e3%82%bf%e3%83%bc+%e3%82%b7%e3%83%b3%e3%83%87%e3%83%ac%e3%83%a9%e3%82%ac%e3%83%bc%e3%83%ab%e3%82%ba+%e3%82%b9%e3%82%bf%e3%83%bc%e3%83%a9%e3%82%a4%e3%83%88%e3%82%b9%e3%83%86%e3%83%bc%e3%82%b8'>アイドルマスター シンデレラガールズ スターライトステージ</a></div>
+    <div class='meta'><span class='label'>歌い手</span> 大槻唯、緒方智絵里、新田美波</div>
+    <div class='meta'><span class='label'>制作者</span> タマ兄</div>
+    <div class='meta'><span class='label'>最終更新日</span> 2018/07/08</div>
+    <div class='meta'><span class='label'>ファイル名</span> <a data-q='%e3%80%90%e3%82%a2%e3%82%a4%e3%83%89%e3%83%ab%e3%83%9e%e3%82%b9%e3%82%bf%e3%83%bc+%e3%82%b7%e3%83%b3%e3%83%87%e3%83%ac%e3%83%a9%e3%82%ac%e3%83%bc%e3%83%ab%e3%82%ba+%e3%82%b9%e3%82%bf%e3%83%bc%e3%83%a9%e3%82%a4%e3%83%88%e3%82%b9%e3%83%86%e3%83%bc%e3%82%b8%e3%80%91%e9%8a%80%e3%81%ae%e3%82%a4%e3%83%ab%e3%82%ab%e3%81%a8%e7%86%b1%e3%81%84%e9%a2%a8(%e3%83%91%e3%83%bc%e3%83%88%e5%88%86%e3%81%91)%ef%bc%8f%e5%a4%a7%e6%a7%bb%e5%94%af%e3%80%81%e7%b7%92%e6%96%b9%e6%99%ba%e7%b5%b5%e9%87%8c%e3%80%81%e6%96%b0%e7%94%b0%e7%be%8e%e6%b3%a2%5bon-off%5d.mp4'>【アイドルマスター シンデレラガールズ スターライトステージ】銀のイルカと熱い風(パート分け)／大槻唯、緒方智絵里、新田美波[on-off].mp4</a></div>
+  </div>
+</div>
+<div class='card' data-year='2018' data-yearband='2019-2015' data-updated='20180616' data-priority='2'>
+  <div class='card-title'>
+    <a data-q='%e3%80%90%e3%81%93%e3%81%bf%e3%81%a3%e3%81%8f%e3%81%8c%e3%83%bc%e3%82%8b%e3%81%9a%e3%80%91%e6%b6%99%e3%81%af%e3%81%bf%e3%81%9b%e3%81%aa%e3%81%84(%e3%83%91%e3%83%bc%e3%83%88%e5%88%86%e3%81%91)%ef%bc%8f%e3%81%93%e3%81%bf%e3%81%a3%e3%81%8f%e3%81%8c%e3%83%bc%e3%82%8b%e3%81%9a(%e8%b5%a4%e5%b0%be%e3%81%b2%e3%81%8b%e3%82%8b%e3%80%81%e6%9c%ac%e6%b8%a1%e6%a5%93%e3%80%81%e5%a4%a7%e8%a5%bf%e6%b2%99%e7%b9%94%e3%80%81%e9%ab%98%e6%a9%8b%e6%9d%8e%e4%be%9d)(on-off).mp4'>涙はみせない(パート分け)</a>
+  </div>
+  <div class='card-body'>
+    <div class='meta'><span class='label'>作品名</span> <a href='search_all.html?q=%e3%81%93%e3%81%bf%e3%81%a3%e3%81%8f%e3%81%8c%e3%83%bc%e3%82%8b%e3%81%9a'>こみっくがーるず</a></div>
+    <div class='meta'><span class='label'>歌い手</span> こみっくがーるず</div>
+    <div class='meta'><span class='label'>制作者</span> タマ兄</div>
+    <div class='meta'><span class='label'>最終更新日</span> 2018/06/16</div>
+    <div class='meta'><span class='label'>ファイル名</span> <a data-q='%e3%80%90%e3%81%93%e3%81%bf%e3%81%a3%e3%81%8f%e3%81%8c%e3%83%bc%e3%82%8b%e3%81%9a%e3%80%91%e6%b6%99%e3%81%af%e3%81%bf%e3%81%9b%e3%81%aa%e3%81%84(%e3%83%91%e3%83%bc%e3%83%88%e5%88%86%e3%81%91)%ef%bc%8f%e3%81%93%e3%81%bf%e3%81%a3%e3%81%8f%e3%81%8c%e3%83%bc%e3%82%8b%e3%81%9a(%e8%b5%a4%e5%b0%be%e3%81%b2%e3%81%8b%e3%82%8b%e3%80%81%e6%9c%ac%e6%b8%a1%e6%a5%93%e3%80%81%e5%a4%a7%e8%a5%bf%e6%b2%99%e7%b9%94%e3%80%81%e9%ab%98%e6%a9%8b%e6%9d%8e%e4%be%9d)(on-off).mp4'>【こみっくがーるず】涙はみせない(パート分け)／こみっくがーるず(赤尾ひかる、本渡楓、大西沙織、高橋李依)(on-off).mp4</a></div>
+  </div>
+</div>
+<div class='card' data-year='2018' data-yearband='2019-2015' data-updated='20180603' data-priority='2'>
+  <div class='card-title'>
+    <a data-q='%e3%80%90%e3%82%a6%e3%83%9e%e5%a8%98+%e3%83%97%e3%83%aa%e3%83%86%e3%82%a3%e3%83%bc%e3%83%80%e3%83%bc%e3%83%93%e3%83%bc%e3%80%91ENDLESS+DREAM!!%ef%bc%8f%e3%82%b9%e3%83%9a%e3%82%b7%e3%83%a3%e3%83%ab%e3%82%a6%e3%82%a3%e3%83%bc%e3%82%af(%e5%92%8c%e6%b0%a3%e3%81%82%e3%81%9a%e6%9c%aa)%e3%83%bb%e3%82%b5%e3%82%a4%e3%83%ac%e3%83%b3%e3%82%b9%e3%82%b9%e3%82%ba%e3%82%ab(%e9%ab%98%e9%87%8e%e9%ba%bb%e9%87%8c%e4%bd%b3)%e3%83%bb%e3%83%88%e3%82%a6%e3%82%ab%e3%82%a4%e3%83%86%e3%82%a4%e3%82%aa%e3%83%bc(Machico).mp4'>ENDLESS DREAM!!</a>
+  </div>
+  <div class='card-body'>
+    <div class='meta'><span class='label'>作品名</span> <a href='search_all.html?q=%e3%82%a6%e3%83%9e%e5%a8%98+%e3%83%97%e3%83%aa%e3%83%86%e3%82%a3%e3%83%bc%e3%83%80%e3%83%bc%e3%83%93%e3%83%bc'>ウマ娘 プリティーダービー</a></div>
+    <div class='meta'><span class='label'>歌い手</span> スペシャルウィーク・サイレンススズカ・トウカイテイオー</div>
+    <div class='meta'><span class='label'>制作者</span> タマ兄</div>
+    <div class='meta'><span class='label'>最終更新日</span> 2018/06/03</div>
+    <div class='meta'><span class='label'>ファイル名</span> <a data-q='%e3%80%90%e3%82%a6%e3%83%9e%e5%a8%98+%e3%83%97%e3%83%aa%e3%83%86%e3%82%a3%e3%83%bc%e3%83%80%e3%83%bc%e3%83%93%e3%83%bc%e3%80%91ENDLESS+DREAM!!%ef%bc%8f%e3%82%b9%e3%83%9a%e3%82%b7%e3%83%a3%e3%83%ab%e3%82%a6%e3%82%a3%e3%83%bc%e3%82%af(%e5%92%8c%e6%b0%a3%e3%81%82%e3%81%9a%e6%9c%aa)%e3%83%bb%e3%82%b5%e3%82%a4%e3%83%ac%e3%83%b3%e3%82%b9%e3%82%b9%e3%82%ba%e3%82%ab(%e9%ab%98%e9%87%8e%e9%ba%bb%e9%87%8c%e4%bd%b3)%e3%83%bb%e3%83%88%e3%82%a6%e3%82%ab%e3%82%a4%e3%83%86%e3%82%a4%e3%82%aa%e3%83%bc(Machico).mp4'>【ウマ娘 プリティーダービー】ENDLESS DREAM!!／スペシャルウィーク(和氣あず未)・サイレンススズカ(高野麻里佳)・トウカイテイオー(Machico).mp4</a></div>
+  </div>
+</div>
+<div class='card' data-year='2018' data-yearband='2019-2015' data-updated='20180518' data-priority='2'>
+  <div class='card-title'>
+    <a data-q='%e3%80%90%e3%82%a6%e3%83%9e%e5%a8%98+%e3%83%97%e3%83%aa%e3%83%86%e3%82%a3%e3%83%bc%e3%83%80%e3%83%bc%e3%83%93%e3%83%bc%e3%80%91%e3%82%b0%e3%83%ad%e3%82%a6%e3%82%a2%e3%83%83%e3%83%97%e3%83%bb%e3%82%b7%e3%83%a3%e3%82%a4%e3%83%b3%ef%bc%81%ef%bc%8f%e3%82%b9%e3%83%94%e3%82%ab%5b%e5%92%8c%e6%b0%a3%e3%81%82%e3%81%9a%e6%9c%aa%e3%80%81%e9%ab%98%e9%87%8e%e9%ba%bb%e9%87%8c%e4%bd%b3%e3%80%81Machico%e3%80%81%e5%a4%a7%e6%a9%8b%e5%bd%a9%e9%a6%99%e3%80%81%e6%9c%a8%e6%9d%91%e5%8d%83%e5%92%b2%e3%80%81%e4%b8%8a%e7%94%b0%e7%9e%b3%e3%80%81%e5%a4%a7%e8%a5%bf%e6%b2%99%e7%b9%94%5d(on-off).mp4'>グロウアップ・シャイン！／スピカ[和氣あず未、高野麻里佳、Machico、大橋彩香、木村千咲、上田瞳、大西沙織](on-off)</a>
+  </div>
+  <div class='card-body'>
+    <div class='meta'><span class='label'>作品名</span> <a href='search_all.html?q=%e3%82%a6%e3%83%9e%e5%a8%98+%e3%83%97%e3%83%aa%e3%83%86%e3%82%a3%e3%83%bc%e3%83%80%e3%83%bc%e3%83%93%e3%83%bc'>ウマ娘 プリティーダービー</a></div>
+    <div class='meta'><span class='label'>歌い手</span> スピカ</div>
+    <div class='meta'><span class='label'>制作者</span> タマ兄</div>
+    <div class='meta'><span class='label'>最終更新日</span> 2018/05/18</div>
+    <div class='meta'><span class='label'>ファイル名</span> <a data-q='%e3%80%90%e3%82%a6%e3%83%9e%e5%a8%98+%e3%83%97%e3%83%aa%e3%83%86%e3%82%a3%e3%83%bc%e3%83%80%e3%83%bc%e3%83%93%e3%83%bc%e3%80%91%e3%82%b0%e3%83%ad%e3%82%a6%e3%82%a2%e3%83%83%e3%83%97%e3%83%bb%e3%82%b7%e3%83%a3%e3%82%a4%e3%83%b3%ef%bc%81%ef%bc%8f%e3%82%b9%e3%83%94%e3%82%ab%5b%e5%92%8c%e6%b0%a3%e3%81%82%e3%81%9a%e6%9c%aa%e3%80%81%e9%ab%98%e9%87%8e%e9%ba%bb%e9%87%8c%e4%bd%b3%e3%80%81Machico%e3%80%81%e5%a4%a7%e6%a9%8b%e5%bd%a9%e9%a6%99%e3%80%81%e6%9c%a8%e6%9d%91%e5%8d%83%e5%92%b2%e3%80%81%e4%b8%8a%e7%94%b0%e7%9e%b3%e3%80%81%e5%a4%a7%e8%a5%bf%e6%b2%99%e7%b9%94%5d(on-off).mp4'>【ウマ娘 プリティーダービー】グロウアップ・シャイン！／スピカ[和氣あず未、高野麻里佳、Machico、大橋彩香、木村千咲、上田瞳、大西沙織](on-off).mp4</a></div>
+  </div>
+</div>
+<div class='card' data-year='2018' data-yearband='2019-2015' data-updated='20180504' data-priority='2'>
+  <div class='card-title'>
+    <a data-q='%e3%80%90%e3%82%a2%e3%82%a4%e3%83%89%e3%83%ab%e3%83%9e%e3%82%b9%e3%82%bf%e3%83%bc+%e3%82%b7%e3%83%b3%e3%83%87%e3%83%ac%e3%83%a9%e3%82%ac%e3%83%bc%e3%83%ab%e3%82%ba+%e3%82%b9%e3%82%bf%e3%83%bc%e3%83%a9%e3%82%a4%e3%83%88%e3%82%b9%e3%83%86%e3%83%bc%e3%82%b8%e3%80%91%e8%bf%bd%e3%81%84%e9%a2%a8Running%ef%bc%8f%e4%b9%99%e5%80%89%e6%82%a0%e8%b2%b4(%e4%b8%ad%e5%b3%b6%e7%94%b1%e8%b2%b4)(on-off).mp4'>追い風Running</a>
+  </div>
+  <div class='card-body'>
+    <div class='meta'><span class='label'>作品名</span> <a href='search_all.html?q=%e3%82%a2%e3%82%a4%e3%83%89%e3%83%ab%e3%83%9e%e3%82%b9%e3%82%bf%e3%83%bc+%e3%82%b7%e3%83%b3%e3%83%87%e3%83%ac%e3%83%a9%e3%82%ac%e3%83%bc%e3%83%ab%e3%82%ba+%e3%82%b9%e3%82%bf%e3%83%bc%e3%83%a9%e3%82%a4%e3%83%88%e3%82%b9%e3%83%86%e3%83%bc%e3%82%b8'>アイドルマスター シンデレラガールズ スターライトステージ</a></div>
+    <div class='meta'><span class='label'>歌い手</span> 乙倉悠貴</div>
+    <div class='meta'><span class='label'>制作者</span> タマ兄</div>
+    <div class='meta'><span class='label'>最終更新日</span> 2018/05/04</div>
+    <div class='meta'><span class='label'>ファイル名</span> <a data-q='%e3%80%90%e3%82%a2%e3%82%a4%e3%83%89%e3%83%ab%e3%83%9e%e3%82%b9%e3%82%bf%e3%83%bc+%e3%82%b7%e3%83%b3%e3%83%87%e3%83%ac%e3%83%a9%e3%82%ac%e3%83%bc%e3%83%ab%e3%82%ba+%e3%82%b9%e3%82%bf%e3%83%bc%e3%83%a9%e3%82%a4%e3%83%88%e3%82%b9%e3%83%86%e3%83%bc%e3%82%b8%e3%80%91%e8%bf%bd%e3%81%84%e9%a2%a8Running%ef%bc%8f%e4%b9%99%e5%80%89%e6%82%a0%e8%b2%b4(%e4%b8%ad%e5%b3%b6%e7%94%b1%e8%b2%b4)(on-off).mp4'>【アイドルマスター シンデレラガールズ スターライトステージ】追い風Running／乙倉悠貴(中島由貴)(on-off).mp4</a></div>
+  </div>
+</div>
+<div class='card' data-year='2018' data-yearband='2019-2015' data-updated='20180504' data-priority='2'>
+  <div class='card-title'>
+    <a data-q='%e3%80%90%e3%82%a2%e3%82%a4%e3%83%89%e3%83%ab%e3%83%9e%e3%82%b9%e3%82%bf%e3%83%bc+%e3%82%b7%e3%83%b3%e3%83%87%e3%83%ac%e3%83%a9%e3%82%ac%e3%83%bc%e3%83%ab%e3%82%ba%e5%8a%87%e5%a0%b4+2nd+SEASON%e3%80%91Snow%ef%bc%8aLove%ef%bc%8f%e5%b8%82%e5%8e%9f%e4%bb%81%e5%a5%88%e3%80%81%e5%8f%8a%e5%b7%9d%e9%9b%ab%e3%80%81%e5%a4%a7%e6%a7%bb%e5%94%af%e3%80%81%e9%ab%98%e6%a3%ae%e8%97%8d%e5%ad%90%e3%80%81%e4%be%9d%e7%94%b0%e8%8a%b3%e4%b9%83(on-off).mp4'>Snow＊Love</a>
+  </div>
+  <div class='card-body'>
+    <div class='meta'><span class='label'>作品名</span> <a href='search_all.html?q=%e3%82%a2%e3%82%a4%e3%83%89%e3%83%ab%e3%83%9e%e3%82%b9%e3%82%bf%e3%83%bc+%e3%82%b7%e3%83%b3%e3%83%87%e3%83%ac%e3%83%a9%e3%82%ac%e3%83%bc%e3%83%ab%e3%82%ba%e5%8a%87%e5%a0%b4+2nd+SEASON'>アイドルマスター シンデレラガールズ劇場 2nd SEASON</a></div>
+    <div class='meta'><span class='label'>歌い手</span> 市原仁奈、及川雫、大槻唯、高森藍子、依田芳乃</div>
+    <div class='meta'><span class='label'>制作者</span> タマ兄</div>
+    <div class='meta'><span class='label'>最終更新日</span> 2018/05/04</div>
+    <div class='meta'><span class='label'>ファイル名</span> <a data-q='%e3%80%90%e3%82%a2%e3%82%a4%e3%83%89%e3%83%ab%e3%83%9e%e3%82%b9%e3%82%bf%e3%83%bc+%e3%82%b7%e3%83%b3%e3%83%87%e3%83%ac%e3%83%a9%e3%82%ac%e3%83%bc%e3%83%ab%e3%82%ba%e5%8a%87%e5%a0%b4+2nd+SEASON%e3%80%91Snow%ef%bc%8aLove%ef%bc%8f%e5%b8%82%e5%8e%9f%e4%bb%81%e5%a5%88%e3%80%81%e5%8f%8a%e5%b7%9d%e9%9b%ab%e3%80%81%e5%a4%a7%e6%a7%bb%e5%94%af%e3%80%81%e9%ab%98%e6%a3%ae%e8%97%8d%e5%ad%90%e3%80%81%e4%be%9d%e7%94%b0%e8%8a%b3%e4%b9%83(on-off).mp4'>【アイドルマスター シンデレラガールズ劇場 2nd SEASON】Snow＊Love／市原仁奈、及川雫、大槻唯、高森藍子、依田芳乃(on-off).mp4</a></div>
+  </div>
+</div>
+<div class='card' data-year='2018' data-yearband='2019-2015' data-updated='20180504' data-priority='2'>
+  <div class='card-title'>
+    <a data-q='%e3%80%90%e3%82%a2%e3%82%a4%e3%83%89%e3%83%ab%e3%83%9e%e3%82%b9%e3%82%bf%e3%83%bc+%e3%82%b7%e3%83%b3%e3%83%87%e3%83%ac%e3%83%a9%e3%82%ac%e3%83%bc%e3%83%ab%e3%82%ba+%e3%82%b9%e3%82%bf%e3%83%bc%e3%83%a9%e3%82%a4%e3%83%88%e3%82%b9%e3%83%86%e3%83%bc%e3%82%b8%e3%80%91%e5%86%ac%e7%a9%ba%e3%83%97%e3%83%ac%e3%82%b7%e3%83%a3%e3%82%b9%ef%bc%8f%e7%89%87%e6%a1%90%e6%97%a9%e8%8b%97%e3%80%81%e9%9b%a3%e6%b3%a2%e7%ac%91%e7%be%8e%e3%80%81%e5%a7%ab%e5%b7%9d%e5%8f%8b%e7%b4%80(on-off).mp4'>冬空プレシャス</a>
+  </div>
+  <div class='card-body'>
+    <div class='meta'><span class='label'>作品名</span> <a href='search_all.html?q=%e3%82%a2%e3%82%a4%e3%83%89%e3%83%ab%e3%83%9e%e3%82%b9%e3%82%bf%e3%83%bc+%e3%82%b7%e3%83%b3%e3%83%87%e3%83%ac%e3%83%a9%e3%82%ac%e3%83%bc%e3%83%ab%e3%82%ba+%e3%82%b9%e3%82%bf%e3%83%bc%e3%83%a9%e3%82%a4%e3%83%88%e3%82%b9%e3%83%86%e3%83%bc%e3%82%b8'>アイドルマスター シンデレラガールズ スターライトステージ</a></div>
+    <div class='meta'><span class='label'>歌い手</span> 片桐早苗、難波笑美、姫川友紀</div>
+    <div class='meta'><span class='label'>制作者</span> タマ兄</div>
+    <div class='meta'><span class='label'>最終更新日</span> 2018/05/04</div>
+    <div class='meta'><span class='label'>ファイル名</span> <a data-q='%e3%80%90%e3%82%a2%e3%82%a4%e3%83%89%e3%83%ab%e3%83%9e%e3%82%b9%e3%82%bf%e3%83%bc+%e3%82%b7%e3%83%b3%e3%83%87%e3%83%ac%e3%83%a9%e3%82%ac%e3%83%bc%e3%83%ab%e3%82%ba+%e3%82%b9%e3%82%bf%e3%83%bc%e3%83%a9%e3%82%a4%e3%83%88%e3%82%b9%e3%83%86%e3%83%bc%e3%82%b8%e3%80%91%e5%86%ac%e7%a9%ba%e3%83%97%e3%83%ac%e3%82%b7%e3%83%a3%e3%82%b9%ef%bc%8f%e7%89%87%e6%a1%90%e6%97%a9%e8%8b%97%e3%80%81%e9%9b%a3%e6%b3%a2%e7%ac%91%e7%be%8e%e3%80%81%e5%a7%ab%e5%b7%9d%e5%8f%8b%e7%b4%80(on-off).mp4'>【アイドルマスター シンデレラガールズ スターライトステージ】冬空プレシャス／片桐早苗、難波笑美、姫川友紀(on-off).mp4</a></div>
+  </div>
+</div>
+<div class='card' data-year='2018' data-yearband='2019-2015' data-updated='20180504' data-priority='2'>
+  <div class='card-title'>
+    <a data-q='%e3%80%90%e3%82%a2%e3%82%a4%e3%83%89%e3%83%ab%e3%83%9e%e3%82%b9%e3%82%bf%e3%83%bc+%e3%82%b7%e3%83%b3%e3%83%87%e3%83%ac%e3%83%a9%e3%82%ac%e3%83%bc%e3%83%ab%e3%82%ba+%e3%82%b9%e3%82%bf%e3%83%bc%e3%83%a9%e3%82%a4%e3%83%88%e3%82%b9%e3%83%86%e3%83%bc%e3%82%b8%e3%80%91%e3%83%84%e3%82%a4%e3%83%b3%e3%83%86%e3%83%bc%e3%83%ab%e3%81%ae%e9%a2%a8%ef%bc%8f%e5%b0%8f%e6%97%a5%e5%90%91%e7%be%8e%e7%a9%82(%e6%b4%a5%e7%94%b0%e7%be%8e%e6%b3%a2)%e3%80%81%e5%9f%8e%e3%83%b6%e5%b4%8e%e7%be%8e%e5%98%89(%e4%bd%b3%e6%9d%91%e3%81%af%e3%82%8b%e3%81%8b)%e3%80%81%e9%80%9f%e6%b0%b4%e5%a5%8f(%e9%a3%af%e7%94%b0%e5%8f%8b%e5%ad%90)(on-off).mp4'>ツインテールの風</a>
+  </div>
+  <div class='card-body'>
+    <div class='meta'><span class='label'>作品名</span> <a href='search_all.html?q=%e3%82%a2%e3%82%a4%e3%83%89%e3%83%ab%e3%83%9e%e3%82%b9%e3%82%bf%e3%83%bc+%e3%82%b7%e3%83%b3%e3%83%87%e3%83%ac%e3%83%a9%e3%82%ac%e3%83%bc%e3%83%ab%e3%82%ba+%e3%82%b9%e3%82%bf%e3%83%bc%e3%83%a9%e3%82%a4%e3%83%88%e3%82%b9%e3%83%86%e3%83%bc%e3%82%b8'>アイドルマスター シンデレラガールズ スターライトステージ</a></div>
+    <div class='meta'><span class='label'>歌い手</span> 小日向美穂、城ヶ崎美嘉、速水奏</div>
+    <div class='meta'><span class='label'>制作者</span> タマ兄</div>
+    <div class='meta'><span class='label'>最終更新日</span> 2018/05/04</div>
+    <div class='meta'><span class='label'>ファイル名</span> <a data-q='%e3%80%90%e3%82%a2%e3%82%a4%e3%83%89%e3%83%ab%e3%83%9e%e3%82%b9%e3%82%bf%e3%83%bc+%e3%82%b7%e3%83%b3%e3%83%87%e3%83%ac%e3%83%a9%e3%82%ac%e3%83%bc%e3%83%ab%e3%82%ba+%e3%82%b9%e3%82%bf%e3%83%bc%e3%83%a9%e3%82%a4%e3%83%88%e3%82%b9%e3%83%86%e3%83%bc%e3%82%b8%e3%80%91%e3%83%84%e3%82%a4%e3%83%b3%e3%83%86%e3%83%bc%e3%83%ab%e3%81%ae%e9%a2%a8%ef%bc%8f%e5%b0%8f%e6%97%a5%e5%90%91%e7%be%8e%e7%a9%82(%e6%b4%a5%e7%94%b0%e7%be%8e%e6%b3%a2)%e3%80%81%e5%9f%8e%e3%83%b6%e5%b4%8e%e7%be%8e%e5%98%89(%e4%bd%b3%e6%9d%91%e3%81%af%e3%82%8b%e3%81%8b)%e3%80%81%e9%80%9f%e6%b0%b4%e5%a5%8f(%e9%a3%af%e7%94%b0%e5%8f%8b%e5%ad%90)(on-off).mp4'>【アイドルマスター シンデレラガールズ スターライトステージ】ツインテールの風／小日向美穂(津田美波)、城ヶ崎美嘉(佳村はるか)、速水奏(飯田友子)(on-off).mp4</a></div>
+  </div>
+</div>
+<div class='card' data-year='2018' data-yearband='2019-2015' data-updated='20180504' data-priority='2'>
+  <div class='card-title'>
+    <a data-q='%e3%80%90%e3%82%a2%e3%82%a4%e3%83%89%e3%83%ab%e3%83%9e%e3%82%b9%e3%82%bf%e3%83%bc+%e3%82%b7%e3%83%b3%e3%83%87%e3%83%ac%e3%83%a9%e3%82%ac%e3%83%bc%e3%83%ab%e3%82%ba+%e3%82%b9%e3%82%bf%e3%83%bc%e3%83%a9%e3%82%a4%e3%83%88%e3%82%b9%e3%83%86%e3%83%bc%e3%82%b8%e3%80%91%e3%82%ad%e3%83%a9%e3%83%83!+%e6%ba%80%e9%96%8b%e3%82%b9%e3%83%9e%e3%82%a4%e3%83%ab%ef%bc%8f%e5%b3%b6%e6%9d%91%e5%8d%af%e6%9c%88%e3%80%81%e5%b0%8f%e6%97%a5%e5%90%91%e7%be%8e%e7%a9%82%e3%80%81%e4%bd%90%e4%b9%85%e9%96%93%e3%81%be%e3%82%86%e3%80%81%e6%ab%bb%e4%ba%95%e6%a1%83%e8%8f%af%e3%80%81%e5%8f%8c%e8%91%89%e6%9d%8f(on-off).mp4'>キラッ! 満開スマイル</a>
+  </div>
+  <div class='card-body'>
+    <div class='meta'><span class='label'>作品名</span> <a href='search_all.html?q=%e3%82%a2%e3%82%a4%e3%83%89%e3%83%ab%e3%83%9e%e3%82%b9%e3%82%bf%e3%83%bc+%e3%82%b7%e3%83%b3%e3%83%87%e3%83%ac%e3%83%a9%e3%82%ac%e3%83%bc%e3%83%ab%e3%82%ba+%e3%82%b9%e3%82%bf%e3%83%bc%e3%83%a9%e3%82%a4%e3%83%88%e3%82%b9%e3%83%86%e3%83%bc%e3%82%b8'>アイドルマスター シンデレラガールズ スターライトステージ</a></div>
+    <div class='meta'><span class='label'>歌い手</span> 島村卯月、小日向美穂、佐久間まゆ、櫻井桃華、双葉杏</div>
+    <div class='meta'><span class='label'>制作者</span> タマ兄</div>
+    <div class='meta'><span class='label'>最終更新日</span> 2018/05/04</div>
+    <div class='meta'><span class='label'>ファイル名</span> <a data-q='%e3%80%90%e3%82%a2%e3%82%a4%e3%83%89%e3%83%ab%e3%83%9e%e3%82%b9%e3%82%bf%e3%83%bc+%e3%82%b7%e3%83%b3%e3%83%87%e3%83%ac%e3%83%a9%e3%82%ac%e3%83%bc%e3%83%ab%e3%82%ba+%e3%82%b9%e3%82%bf%e3%83%bc%e3%83%a9%e3%82%a4%e3%83%88%e3%82%b9%e3%83%86%e3%83%bc%e3%82%b8%e3%80%91%e3%82%ad%e3%83%a9%e3%83%83!+%e6%ba%80%e9%96%8b%e3%82%b9%e3%83%9e%e3%82%a4%e3%83%ab%ef%bc%8f%e5%b3%b6%e6%9d%91%e5%8d%af%e6%9c%88%e3%80%81%e5%b0%8f%e6%97%a5%e5%90%91%e7%be%8e%e7%a9%82%e3%80%81%e4%bd%90%e4%b9%85%e9%96%93%e3%81%be%e3%82%86%e3%80%81%e6%ab%bb%e4%ba%95%e6%a1%83%e8%8f%af%e3%80%81%e5%8f%8c%e8%91%89%e6%9d%8f(on-off).mp4'>【アイドルマスター シンデレラガールズ スターライトステージ】キラッ! 満開スマイル／島村卯月、小日向美穂、佐久間まゆ、櫻井桃華、双葉杏(on-off).mp4</a></div>
+  </div>
+</div>
+<div class='card' data-year='2018' data-yearband='2019-2015' data-updated='20180504' data-priority='2'>
+  <div class='card-title'>
+    <a data-q='%e3%80%90%e3%82%a2%e3%82%a4%e3%83%89%e3%83%ab%e3%83%9e%e3%82%b9%e3%82%bf%e3%83%bc+%e3%82%b7%e3%83%b3%e3%83%87%e3%83%ac%e3%83%a9%e3%82%ac%e3%83%bc%e3%83%ab%e3%82%ba+%e3%82%b9%e3%82%bf%e3%83%bc%e3%83%a9%e3%82%a4%e3%83%88%e3%82%b9%e3%83%86%e3%83%bc%e3%82%b8%e3%80%91%e3%82%a4%e3%83%aa%e3%83%a5%e3%83%bc%e3%82%b8%e3%83%a7%e3%83%8b%e3%82%b9%e3%82%bf%ef%bc%81%ef%bc%8f%e6%9c%ac%e7%94%b0%e6%9c%aa%e5%a4%ae%e3%80%81%e4%bd%90%e4%b9%85%e9%96%93%e3%81%be%e3%82%86%e3%80%81%e9%b7%ba%e6%b2%a2%e6%96%87%e9%a6%99%e3%80%81%e8%bc%bf%e6%b0%b4%e5%b9%b8%e5%ad%90%e3%80%81%e6%96%b0%e7%94%b0%e7%be%8e%e6%b3%a2(on-off).mp4'>イリュージョニスタ！</a>
+  </div>
+  <div class='card-body'>
+    <div class='meta'><span class='label'>作品名</span> <a href='search_all.html?q=%e3%82%a2%e3%82%a4%e3%83%89%e3%83%ab%e3%83%9e%e3%82%b9%e3%82%bf%e3%83%bc+%e3%82%b7%e3%83%b3%e3%83%87%e3%83%ac%e3%83%a9%e3%82%ac%e3%83%bc%e3%83%ab%e3%82%ba+%e3%82%b9%e3%82%bf%e3%83%bc%e3%83%a9%e3%82%a4%e3%83%88%e3%82%b9%e3%83%86%e3%83%bc%e3%82%b8'>アイドルマスター シンデレラガールズ スターライトステージ</a></div>
+    <div class='meta'><span class='label'>歌い手</span> 本田未央、佐久間まゆ、鷺沢文香、輿水幸子、新田美波</div>
+    <div class='meta'><span class='label'>制作者</span> タマ兄</div>
+    <div class='meta'><span class='label'>最終更新日</span> 2018/05/04</div>
+    <div class='meta'><span class='label'>ファイル名</span> <a data-q='%e3%80%90%e3%82%a2%e3%82%a4%e3%83%89%e3%83%ab%e3%83%9e%e3%82%b9%e3%82%bf%e3%83%bc+%e3%82%b7%e3%83%b3%e3%83%87%e3%83%ac%e3%83%a9%e3%82%ac%e3%83%bc%e3%83%ab%e3%82%ba+%e3%82%b9%e3%82%bf%e3%83%bc%e3%83%a9%e3%82%a4%e3%83%88%e3%82%b9%e3%83%86%e3%83%bc%e3%82%b8%e3%80%91%e3%82%a4%e3%83%aa%e3%83%a5%e3%83%bc%e3%82%b8%e3%83%a7%e3%83%8b%e3%82%b9%e3%82%bf%ef%bc%81%ef%bc%8f%e6%9c%ac%e7%94%b0%e6%9c%aa%e5%a4%ae%e3%80%81%e4%bd%90%e4%b9%85%e9%96%93%e3%81%be%e3%82%86%e3%80%81%e9%b7%ba%e6%b2%a2%e6%96%87%e9%a6%99%e3%80%81%e8%bc%bf%e6%b0%b4%e5%b9%b8%e5%ad%90%e3%80%81%e6%96%b0%e7%94%b0%e7%be%8e%e6%b3%a2(on-off).mp4'>【アイドルマスター シンデレラガールズ スターライトステージ】イリュージョニスタ！／本田未央、佐久間まゆ、鷺沢文香、輿水幸子、新田美波(on-off).mp4</a></div>
+  </div>
+</div>
+<div class='card' data-year='2018' data-yearband='2019-2015' data-updated='20180504' data-priority='2'>
+  <div class='card-title'>
+    <a data-q='%e3%80%90%e3%82%a2%e3%82%a4%e3%83%89%e3%83%ab%e3%83%9e%e3%82%b9%e3%82%bf%e3%83%bc+%e3%82%b7%e3%83%b3%e3%83%87%e3%83%ac%e3%83%a9%e3%82%ac%e3%83%bc%e3%83%ab%e3%82%ba+%e3%82%b9%e3%82%bf%e3%83%bc%e3%83%a9%e3%82%a4%e3%83%88%e3%82%b9%e3%83%86%e3%83%bc%e3%82%b8%e3%80%91always%ef%bc%8f%e9%ab%98%e5%9e%a3%e6%a5%93%e3%80%81%e6%9c%ac%e7%94%b0%e6%9c%aa%e5%a4%ae%e3%80%81%e8%97%a4%e5%8e%9f%e8%82%87%e3%80%81%e8%8d%92%e6%9c%a8%e6%af%94%e5%a5%88%e3%80%81%e5%96%9c%e5%a4%9a%e8%a6%8b%e6%9f%9a(on-off).mp4'>always</a>
+  </div>
+  <div class='card-body'>
+    <div class='meta'><span class='label'>作品名</span> <a href='search_all.html?q=%e3%82%a2%e3%82%a4%e3%83%89%e3%83%ab%e3%83%9e%e3%82%b9%e3%82%bf%e3%83%bc+%e3%82%b7%e3%83%b3%e3%83%87%e3%83%ac%e3%83%a9%e3%82%ac%e3%83%bc%e3%83%ab%e3%82%ba+%e3%82%b9%e3%82%bf%e3%83%bc%e3%83%a9%e3%82%a4%e3%83%88%e3%82%b9%e3%83%86%e3%83%bc%e3%82%b8'>アイドルマスター シンデレラガールズ スターライトステージ</a></div>
+    <div class='meta'><span class='label'>歌い手</span> 高垣楓、本田未央、藤原肇、荒木比奈、喜多見柚</div>
+    <div class='meta'><span class='label'>制作者</span> タマ兄</div>
+    <div class='meta'><span class='label'>最終更新日</span> 2018/05/04</div>
+    <div class='meta'><span class='label'>ファイル名</span> <a data-q='%e3%80%90%e3%82%a2%e3%82%a4%e3%83%89%e3%83%ab%e3%83%9e%e3%82%b9%e3%82%bf%e3%83%bc+%e3%82%b7%e3%83%b3%e3%83%87%e3%83%ac%e3%83%a9%e3%82%ac%e3%83%bc%e3%83%ab%e3%82%ba+%e3%82%b9%e3%82%bf%e3%83%bc%e3%83%a9%e3%82%a4%e3%83%88%e3%82%b9%e3%83%86%e3%83%bc%e3%82%b8%e3%80%91always%ef%bc%8f%e9%ab%98%e5%9e%a3%e6%a5%93%e3%80%81%e6%9c%ac%e7%94%b0%e6%9c%aa%e5%a4%ae%e3%80%81%e8%97%a4%e5%8e%9f%e8%82%87%e3%80%81%e8%8d%92%e6%9c%a8%e6%af%94%e5%a5%88%e3%80%81%e5%96%9c%e5%a4%9a%e8%a6%8b%e6%9f%9a(on-off).mp4'>【アイドルマスター シンデレラガールズ スターライトステージ】always／高垣楓、本田未央、藤原肇、荒木比奈、喜多見柚(on-off).mp4</a></div>
+  </div>
+</div>
+<div class='card' data-year='2018' data-yearband='2019-2015' data-updated='20180504' data-priority='2'>
+  <div class='card-title'>
+    <a data-q='%e3%80%90%e3%82%a2%e3%82%a4%e3%83%89%e3%83%ab%e3%83%9e%e3%82%b9%e3%82%bf%e3%83%bc+%e3%82%b7%e3%83%b3%e3%83%87%e3%83%ac%e3%83%a9%e3%82%ac%e3%83%bc%e3%83%ab%e3%82%ba+%e3%82%b9%e3%82%bf%e3%83%bc%e3%83%a9%e3%82%a4%e3%83%88%e3%82%b9%e3%83%86%e3%83%bc%e3%82%b8%e3%80%91PANDEMIC+ALONE+(%e5%89%b5%e4%bd%9c%e8%ad%9c%e9%9d%a2)%ef%bc%8f%e6%98%9f%e8%bc%9d%e5%ad%90+(%e6%9d%be%e7%94%b0%e9%a2%af%e6%b0%b4)(on-off).mp4'>PANDEMIC ALONE (創作譜面)</a>
+  </div>
+  <div class='card-body'>
+    <div class='meta'><span class='label'>作品名</span> <a href='search_all.html?q=%e3%82%a2%e3%82%a4%e3%83%89%e3%83%ab%e3%83%9e%e3%82%b9%e3%82%bf%e3%83%bc+%e3%82%b7%e3%83%b3%e3%83%87%e3%83%ac%e3%83%a9%e3%82%ac%e3%83%bc%e3%83%ab%e3%82%ba+%e3%82%b9%e3%82%bf%e3%83%bc%e3%83%a9%e3%82%a4%e3%83%88%e3%82%b9%e3%83%86%e3%83%bc%e3%82%b8'>アイドルマスター シンデレラガールズ スターライトステージ</a></div>
+    <div class='meta'><span class='label'>歌い手</span> 星輝子</div>
+    <div class='meta'><span class='label'>制作者</span> タマ兄</div>
+    <div class='meta'><span class='label'>最終更新日</span> 2018/05/04</div>
+    <div class='meta'><span class='label'>ファイル名</span> <a data-q='%e3%80%90%e3%82%a2%e3%82%a4%e3%83%89%e3%83%ab%e3%83%9e%e3%82%b9%e3%82%bf%e3%83%bc+%e3%82%b7%e3%83%b3%e3%83%87%e3%83%ac%e3%83%a9%e3%82%ac%e3%83%bc%e3%83%ab%e3%82%ba+%e3%82%b9%e3%82%bf%e3%83%bc%e3%83%a9%e3%82%a4%e3%83%88%e3%82%b9%e3%83%86%e3%83%bc%e3%82%b8%e3%80%91PANDEMIC+ALONE+(%e5%89%b5%e4%bd%9c%e8%ad%9c%e9%9d%a2)%ef%bc%8f%e6%98%9f%e8%bc%9d%e5%ad%90+(%e6%9d%be%e7%94%b0%e9%a2%af%e6%b0%b4)(on-off).mp4'>【アイドルマスター シンデレラガールズ スターライトステージ】PANDEMIC ALONE (創作譜面)／星輝子 (松田颯水)(on-off).mp4</a></div>
+  </div>
+</div>
+<div class='card' data-year='2018' data-yearband='2019-2015' data-updated='20180502' data-priority='2'>
+  <div class='card-title'>
+    <a data-q='%e3%80%90%e3%82%a6%e3%83%9e%e5%a8%98+%e3%83%97%e3%83%aa%e3%83%86%e3%82%a3%e3%83%bc%e3%83%80%e3%83%bc%e3%83%93%e3%83%bc%e3%80%91Make+debut%ef%bc%81%ef%bc%8f%e3%82%b9%e3%83%94%e3%82%ab%5b%e5%92%8c%e6%b0%a3%e3%81%82%e3%81%9a%e6%9c%aa%e3%80%81%e9%ab%98%e9%87%8e%e9%ba%bb%e9%87%8c%e4%bd%b3%e3%80%81Machico%e3%80%81%e5%a4%a7%e6%a9%8b%e5%bd%a9%e9%a6%99%e3%80%81%e6%9c%a8%e6%9d%91%e5%8d%83%e5%92%b2%e3%80%81%e4%b8%8a%e7%94%b0%e7%9e%b3%e3%80%81%e5%a4%a7%e8%a5%bf%e6%b2%99%e7%b9%94%5d(on-off).mp4'>Make debut！／スピカ[和氣あず未、高野麻里佳、Machico、大橋彩香、木村千咲、上田瞳、大西沙織](on-off)</a>
+  </div>
+  <div class='card-body'>
+    <div class='meta'><span class='label'>作品名</span> <a href='search_all.html?q=%e3%82%a6%e3%83%9e%e5%a8%98+%e3%83%97%e3%83%aa%e3%83%86%e3%82%a3%e3%83%bc%e3%83%80%e3%83%bc%e3%83%93%e3%83%bc'>ウマ娘 プリティーダービー</a></div>
+    <div class='meta'><span class='label'>歌い手</span> スピカ</div>
+    <div class='meta'><span class='label'>制作者</span> タマ兄</div>
+    <div class='meta'><span class='label'>最終更新日</span> 2018/05/02</div>
+    <div class='meta'><span class='label'>ファイル名</span> <a data-q='%e3%80%90%e3%82%a6%e3%83%9e%e5%a8%98+%e3%83%97%e3%83%aa%e3%83%86%e3%82%a3%e3%83%bc%e3%83%80%e3%83%bc%e3%83%93%e3%83%bc%e3%80%91Make+debut%ef%bc%81%ef%bc%8f%e3%82%b9%e3%83%94%e3%82%ab%5b%e5%92%8c%e6%b0%a3%e3%81%82%e3%81%9a%e6%9c%aa%e3%80%81%e9%ab%98%e9%87%8e%e9%ba%bb%e9%87%8c%e4%bd%b3%e3%80%81Machico%e3%80%81%e5%a4%a7%e6%a9%8b%e5%bd%a9%e9%a6%99%e3%80%81%e6%9c%a8%e6%9d%91%e5%8d%83%e5%92%b2%e3%80%81%e4%b8%8a%e7%94%b0%e7%9e%b3%e3%80%81%e5%a4%a7%e8%a5%bf%e6%b2%99%e7%b9%94%5d(on-off).mp4'>【ウマ娘 プリティーダービー】Make debut！／スピカ[和氣あず未、高野麻里佳、Machico、大橋彩香、木村千咲、上田瞳、大西沙織](on-off).mp4</a></div>
+  </div>
+</div>
+<div class='card' data-year='2018' data-yearband='2019-2015' data-updated='20180430' data-priority='2'>
+  <div class='card-title'>
+    <a data-q='%e3%80%90%e3%82%8a%e3%82%85%e3%81%86%e3%81%8a%e3%81%86%e3%81%ae%e3%81%8a%e3%81%97%e3%81%94%e3%81%a8%ef%bc%81%e3%80%91%e3%82%b3%e3%83%ac%e3%82%ab%e3%83%a9(%e6%9c%80%e7%b5%82%e5%9b%9ever)%ef%bc%8fMachico(on-off).mp4'>コレカラ(最終回ver)</a>
+  </div>
+  <div class='card-body'>
+    <div class='meta'><span class='label'>作品名</span> <a href='search_all.html?q=%e3%82%8a%e3%82%85%e3%81%86%e3%81%8a%e3%81%86%e3%81%ae%e3%81%8a%e3%81%97%e3%81%94%e3%81%a8%ef%bc%81'>りゅうおうのおしごと！</a></div>
+    <div class='meta'><span class='label'>歌い手</span> Machico</div>
+    <div class='meta'><span class='label'>制作者</span> タマ兄</div>
+    <div class='meta'><span class='label'>最終更新日</span> 2018/04/30</div>
+    <div class='meta'><span class='label'>ファイル名</span> <a data-q='%e3%80%90%e3%82%8a%e3%82%85%e3%81%86%e3%81%8a%e3%81%86%e3%81%ae%e3%81%8a%e3%81%97%e3%81%94%e3%81%a8%ef%bc%81%e3%80%91%e3%82%b3%e3%83%ac%e3%82%ab%e3%83%a9(%e6%9c%80%e7%b5%82%e5%9b%9ever)%ef%bc%8fMachico(on-off).mp4'>【りゅうおうのおしごと！】コレカラ(最終回ver)／Machico(on-off).mp4</a></div>
+  </div>
+</div>
+<div class='card' data-year='2018' data-yearband='2019-2015' data-updated='20180428' data-priority='2'>
+  <div class='card-title'>
+    <a data-q='%e3%80%90%e3%83%a4%e3%83%9e%e3%83%8e%e3%82%b9%e3%82%b9%e3%83%a1+%e3%81%8a%e3%82%82%e3%81%84%e3%81%a7%e3%83%97%e3%83%ac%e3%82%bc%e3%83%b3%e3%83%88%e3%80%91%e3%81%8a%e3%82%82%e3%81%84%e3%81%a7%e3%82%af%e3%83%aa%e3%82%a8%e3%82%a4%e3%82%bf%e3%83%bc%e3%82%ba%ef%bc%8f%e3%81%82%e3%81%8a%e3%81%84(%e4%ba%95%e5%8f%a3%e8%a3%95%e9%a6%99)%e3%80%81%e3%81%b2%e3%81%aa%e3%81%9f(%e9%98%bf%e6%be%84%e4%bd%b3%e5%a5%88).mp4'>おもいでクリエイターズ</a>
+  </div>
+  <div class='card-body'>
+    <div class='meta'><span class='label'>作品名</span> <a href='search_all.html?q=%e3%83%a4%e3%83%9e%e3%83%8e%e3%82%b9%e3%82%b9%e3%83%a1+%e3%81%8a%e3%82%82%e3%81%84%e3%81%a7%e3%83%97%e3%83%ac%e3%82%bc%e3%83%b3%e3%83%88'>ヤマノススメ おもいでプレゼント</a></div>
+    <div class='meta'><span class='label'>歌い手</span> あおい、ひなた</div>
+    <div class='meta'><span class='label'>制作者</span> タマ兄</div>
+    <div class='meta'><span class='label'>最終更新日</span> 2018/04/28</div>
+    <div class='meta'><span class='label'>ファイル名</span> <a data-q='%e3%80%90%e3%83%a4%e3%83%9e%e3%83%8e%e3%82%b9%e3%82%b9%e3%83%a1+%e3%81%8a%e3%82%82%e3%81%84%e3%81%a7%e3%83%97%e3%83%ac%e3%82%bc%e3%83%b3%e3%83%88%e3%80%91%e3%81%8a%e3%82%82%e3%81%84%e3%81%a7%e3%82%af%e3%83%aa%e3%82%a8%e3%82%a4%e3%82%bf%e3%83%bc%e3%82%ba%ef%bc%8f%e3%81%82%e3%81%8a%e3%81%84(%e4%ba%95%e5%8f%a3%e8%a3%95%e9%a6%99)%e3%80%81%e3%81%b2%e3%81%aa%e3%81%9f(%e9%98%bf%e6%be%84%e4%bd%b3%e5%a5%88).mp4'>【ヤマノススメ おもいでプレゼント】おもいでクリエイターズ／あおい(井口裕香)、ひなた(阿澄佳奈).mp4</a></div>
+  </div>
+</div>
+<div class='card' data-year='2018' data-yearband='2019-2015' data-updated='20180415' data-priority='2'>
+  <div class='card-title'>
+    <a data-q='%e3%80%90%e3%82%b9%e3%83%ad%e3%82%a6%e3%82%b9%e3%82%bf%e3%83%bc%e3%83%88%e3%80%91%e5%a4%95%e7%84%bc%e3%81%91%e3%81%a8%e3%81%84%e3%81%a3%e3%81%97%e3%82%87%e3%81%ab%ef%bc%8fSTARTails%e2%98%86+(%e8%bf%91%e8%97%a4%e7%8e%b2%e5%a5%88%e3%80%81%e4%bc%8a%e8%97%a4%e5%bd%a9%e6%b2%99%e3%80%81%e5%b6%ba%e5%86%85%e3%81%a8%e3%82%82%e3%81%bf%e3%80%81%e9%95%b7%e7%b8%84%e3%81%be%e3%82%8a%e3%81%82)(on-off).mp4'>夕焼けといっしょに</a>
+  </div>
+  <div class='card-body'>
+    <div class='meta'><span class='label'>作品名</span> <a href='search_all.html?q=%e3%82%b9%e3%83%ad%e3%82%a6%e3%82%b9%e3%82%bf%e3%83%bc%e3%83%88'>スロウスタート</a></div>
+    <div class='meta'><span class='label'>歌い手</span> STARTails☆</div>
+    <div class='meta'><span class='label'>制作者</span> タマ兄</div>
+    <div class='meta'><span class='label'>最終更新日</span> 2018/04/15</div>
+    <div class='meta'><span class='label'>ファイル名</span> <a data-q='%e3%80%90%e3%82%b9%e3%83%ad%e3%82%a6%e3%82%b9%e3%82%bf%e3%83%bc%e3%83%88%e3%80%91%e5%a4%95%e7%84%bc%e3%81%91%e3%81%a8%e3%81%84%e3%81%a3%e3%81%97%e3%82%87%e3%81%ab%ef%bc%8fSTARTails%e2%98%86+(%e8%bf%91%e8%97%a4%e7%8e%b2%e5%a5%88%e3%80%81%e4%bc%8a%e8%97%a4%e5%bd%a9%e6%b2%99%e3%80%81%e5%b6%ba%e5%86%85%e3%81%a8%e3%82%82%e3%81%bf%e3%80%81%e9%95%b7%e7%b8%84%e3%81%be%e3%82%8a%e3%81%82)(on-off).mp4'>【スロウスタート】夕焼けといっしょに／STARTails☆ (近藤玲奈、伊藤彩沙、嶺内ともみ、長縄まりあ)(on-off).mp4</a></div>
+  </div>
+</div>
+<div class='card' data-year='2018' data-yearband='2019-2015' data-updated='20180414' data-priority='2'>
+  <div class='card-title'>
+    <a data-q='%e3%80%90%e3%82%a2%e3%82%a4%e3%83%89%e3%83%ab%e3%83%9e%e3%82%b9%e3%82%bf%e3%83%bc+%e3%82%b7%e3%83%b3%e3%83%87%e3%83%ac%e3%83%a9%e3%82%ac%e3%83%bc%e3%83%ab%e3%82%ba+U149%e3%80%91%e9%9d%92%e7%a9%ba%e3%82%a8%e3%83%bc%e3%83%ab%ef%bc%8f%e8%b5%a4%e5%9f%8e%e3%81%bf%e3%82%8a%e3%81%82(%e9%bb%92%e6%b2%a2%e3%81%a8%e3%82%82%e3%82%88)+%ef%bc%86+%e7%b5%90%e5%9f%8e%e6%99%b4(%e5%b0%8f%e5%b8%82%e7%9c%9e%e7%90%b4).mp4'>青空エール</a>
+  </div>
+  <div class='card-body'>
+    <div class='meta'><span class='label'>作品名</span> <a href='search_all.html?q=%e3%82%a2%e3%82%a4%e3%83%89%e3%83%ab%e3%83%9e%e3%82%b9%e3%82%bf%e3%83%bc+%e3%82%b7%e3%83%b3%e3%83%87%e3%83%ac%e3%83%a9%e3%82%ac%e3%83%bc%e3%83%ab%e3%82%ba+U149'>アイドルマスター シンデレラガールズ U149</a></div>
+    <div class='meta'><span class='label'>歌い手</span> 赤城みりあ ＆ 結城晴</div>
+    <div class='meta'><span class='label'>制作者</span> タマ兄</div>
+    <div class='meta'><span class='label'>最終更新日</span> 2018/04/14</div>
+    <div class='meta'><span class='label'>ファイル名</span> <a data-q='%e3%80%90%e3%82%a2%e3%82%a4%e3%83%89%e3%83%ab%e3%83%9e%e3%82%b9%e3%82%bf%e3%83%bc+%e3%82%b7%e3%83%b3%e3%83%87%e3%83%ac%e3%83%a9%e3%82%ac%e3%83%bc%e3%83%ab%e3%82%ba+U149%e3%80%91%e9%9d%92%e7%a9%ba%e3%82%a8%e3%83%bc%e3%83%ab%ef%bc%8f%e8%b5%a4%e5%9f%8e%e3%81%bf%e3%82%8a%e3%81%82(%e9%bb%92%e6%b2%a2%e3%81%a8%e3%82%82%e3%82%88)+%ef%bc%86+%e7%b5%90%e5%9f%8e%e6%99%b4(%e5%b0%8f%e5%b8%82%e7%9c%9e%e7%90%b4).mp4'>【アイドルマスター シンデレラガールズ U149】青空エール／赤城みりあ(黒沢ともよ) ＆ 結城晴(小市眞琴).mp4</a></div>
+  </div>
+</div>
+<div class='card' data-year='2018' data-yearband='2019-2015' data-updated='20180401' data-priority='2'>
+  <div class='card-title'>
+    <a data-q='%e3%80%90%e4%b8%89%e3%83%84%e6%98%9f%e3%82%ab%e3%83%a9%e3%83%bc%e3%82%ba%e3%80%91%e3%82%ab%e3%83%a9%e3%83%bc%e3%82%ba%e3%81%b1%e3%82%8f%e3%83%bc%e3%81%ab%e3%81%8a%e3%81%be%e3%81%8b%e3%81%9b%e3%82%8d%ef%bc%81(%e3%83%91%e3%83%bc%e3%83%88%e5%88%86%e3%81%91)%ef%bc%8f%e7%b5%90%e8%a1%a3(%e9%ab%98%e7%94%b0%e6%86%82%e5%b8%8c)%e3%80%81%e3%81%95%e3%81%a3%e3%81%a1%e3%82%83%e3%82%93(%e9%ab%98%e9%87%8e%e9%ba%bb%e9%87%8c%e4%bd%b3)%e3%80%81%e7%90%b4%e8%91%89(%e6%97%a5%e5%b2%a1%e3%81%aa%e3%81%a4%e3%81%bf)(on-off).mp4'>カラーズぱわーにおまかせろ！(パート分け)</a>
+  </div>
+  <div class='card-body'>
+    <div class='meta'><span class='label'>作品名</span> <a href='search_all.html?q=%e4%b8%89%e3%83%84%e6%98%9f%e3%82%ab%e3%83%a9%e3%83%bc%e3%82%ba'>三ツ星カラーズ</a></div>
+    <div class='meta'><span class='label'>歌い手</span> 結衣、さっちゃん、琴葉</div>
+    <div class='meta'><span class='label'>制作者</span> タマ兄</div>
+    <div class='meta'><span class='label'>最終更新日</span> 2018/04/01</div>
+    <div class='meta'><span class='label'>ファイル名</span> <a data-q='%e3%80%90%e4%b8%89%e3%83%84%e6%98%9f%e3%82%ab%e3%83%a9%e3%83%bc%e3%82%ba%e3%80%91%e3%82%ab%e3%83%a9%e3%83%bc%e3%82%ba%e3%81%b1%e3%82%8f%e3%83%bc%e3%81%ab%e3%81%8a%e3%81%be%e3%81%8b%e3%81%9b%e3%82%8d%ef%bc%81(%e3%83%91%e3%83%bc%e3%83%88%e5%88%86%e3%81%91)%ef%bc%8f%e7%b5%90%e8%a1%a3(%e9%ab%98%e7%94%b0%e6%86%82%e5%b8%8c)%e3%80%81%e3%81%95%e3%81%a3%e3%81%a1%e3%82%83%e3%82%93(%e9%ab%98%e9%87%8e%e9%ba%bb%e9%87%8c%e4%bd%b3)%e3%80%81%e7%90%b4%e8%91%89(%e6%97%a5%e5%b2%a1%e3%81%aa%e3%81%a4%e3%81%bf)(on-off).mp4'>【三ツ星カラーズ】カラーズぱわーにおまかせろ！(パート分け)／結衣(高田憂希)、さっちゃん(高野麻里佳)、琴葉(日岡なつみ)(on-off).mp4</a></div>
+  </div>
+</div>
+<div class='card' data-year='2018' data-yearband='2019-2015' data-updated='20180401' data-priority='2'>
+  <div class='card-title'>
+    <a data-q='%e3%80%90%e3%82%8a%e3%82%85%e3%81%86%e3%81%8a%e3%81%86%e3%81%ae%e3%81%8a%e3%81%97%e3%81%94%e3%81%a8%ef%bc%81%e3%80%91%e5%ae%88%e3%82%8a%e3%81%9f%e3%81%84%e3%82%82%e3%81%ae%e3%81%ae%e3%81%9f%e3%82%81%e3%81%ab%ef%bc%8f%e4%bc%8a%e8%97%a4%e7%be%8e%e6%9d%a5(on-off).mp4'>守りたいもののために</a>
+  </div>
+  <div class='card-body'>
+    <div class='meta'><span class='label'>作品名</span> <a href='search_all.html?q=%e3%82%8a%e3%82%85%e3%81%86%e3%81%8a%e3%81%86%e3%81%ae%e3%81%8a%e3%81%97%e3%81%94%e3%81%a8%ef%bc%81'>りゅうおうのおしごと！</a></div>
+    <div class='meta'><span class='label'>歌い手</span> 伊藤美来</div>
+    <div class='meta'><span class='label'>制作者</span> タマ兄</div>
+    <div class='meta'><span class='label'>最終更新日</span> 2018/04/01</div>
+    <div class='meta'><span class='label'>ファイル名</span> <a data-q='%e3%80%90%e3%82%8a%e3%82%85%e3%81%86%e3%81%8a%e3%81%86%e3%81%ae%e3%81%8a%e3%81%97%e3%81%94%e3%81%a8%ef%bc%81%e3%80%91%e5%ae%88%e3%82%8a%e3%81%9f%e3%81%84%e3%82%82%e3%81%ae%e3%81%ae%e3%81%9f%e3%82%81%e3%81%ab%ef%bc%8f%e4%bc%8a%e8%97%a4%e7%be%8e%e6%9d%a5(on-off).mp4'>【りゅうおうのおしごと！】守りたいもののために／伊藤美来(on-off).mp4</a></div>
+  </div>
+</div>
+<div class='card' data-year='2018' data-yearband='2019-2015' data-updated='20180401' data-priority='2'>
+  <div class='card-title'>
+    <a data-q='%e3%80%90%e3%82%8a%e3%82%85%e3%81%86%e3%81%8a%e3%81%86%e3%81%ae%e3%81%8a%e3%81%97%e3%81%94%e3%81%a8%ef%bc%81%e3%80%91%e3%82%b3%e3%83%ac%e3%82%ab%e3%83%a9%ef%bc%8fMachico(on-off).mp4'>コレカラ</a>
+  </div>
+  <div class='card-body'>
+    <div class='meta'><span class='label'>作品名</span> <a href='search_all.html?q=%e3%82%8a%e3%82%85%e3%81%86%e3%81%8a%e3%81%86%e3%81%ae%e3%81%8a%e3%81%97%e3%81%94%e3%81%a8%ef%bc%81'>りゅうおうのおしごと！</a></div>
+    <div class='meta'><span class='label'>歌い手</span> Machico</div>
+    <div class='meta'><span class='label'>制作者</span> タマ兄</div>
+    <div class='meta'><span class='label'>最終更新日</span> 2018/04/01</div>
+    <div class='meta'><span class='label'>ファイル名</span> <a data-q='%e3%80%90%e3%82%8a%e3%82%85%e3%81%86%e3%81%8a%e3%81%86%e3%81%ae%e3%81%8a%e3%81%97%e3%81%94%e3%81%a8%ef%bc%81%e3%80%91%e3%82%b3%e3%83%ac%e3%82%ab%e3%83%a9%ef%bc%8fMachico(on-off).mp4'>【りゅうおうのおしごと！】コレカラ／Machico(on-off).mp4</a></div>
+  </div>
+</div>
+<div class='card' data-year='2018' data-yearband='2019-2015' data-updated='20180324' data-priority='2'>
+  <div class='card-title'>
+    <a data-q='%e3%80%90%e3%82%86%e3%82%8b%e3%82%ad%e3%83%a3%e3%83%b3%e2%96%b3%e3%80%91SHINY+DAYS(ver.2)%ef%bc%8f%e4%ba%9c%e5%92%b2%e8%8a%b1(on-off).mp4'>SHINY DAYS(ver.2)</a>
+  </div>
+  <div class='card-body'>
+    <div class='meta'><span class='label'>作品名</span> <a href='search_all.html?q=%e3%82%86%e3%82%8b%e3%82%ad%e3%83%a3%e3%83%b3%e2%96%b3'>ゆるキャン△</a></div>
+    <div class='meta'><span class='label'>歌い手</span> 亜咲花</div>
+    <div class='meta'><span class='label'>制作者</span> タマ兄</div>
+    <div class='meta'><span class='label'>最終更新日</span> 2018/03/24</div>
+    <div class='meta'><span class='label'>ファイル名</span> <a data-q='%e3%80%90%e3%82%86%e3%82%8b%e3%82%ad%e3%83%a3%e3%83%b3%e2%96%b3%e3%80%91SHINY+DAYS(ver.2)%ef%bc%8f%e4%ba%9c%e5%92%b2%e8%8a%b1(on-off).mp4'>【ゆるキャン△】SHINY DAYS(ver.2)／亜咲花(on-off).mp4</a></div>
+  </div>
+</div>
+<div class='card' data-year='2018' data-yearband='2019-2015' data-updated='20180210' data-priority='2'>
+  <div class='card-title'>
+    <a data-q='%e3%80%90%e3%82%b9%e3%83%ad%e3%82%a6%e3%82%b9%e3%82%bf%e3%83%bc%e3%83%88%e3%80%91%e9%a2%a8%e3%81%ae%e5%a3%b0%e3%82%92%e8%81%b4%e3%81%8d%e3%81%aa%e3%81%8c%e3%82%89%ef%bc%8f%e4%b8%89%e6%9c%88%e3%81%ae%e3%83%91%e3%83%b3%e3%82%bf%e3%82%b7%e3%82%a2.mp4'>風の声を聴きながら</a>
+  </div>
+  <div class='card-body'>
+    <div class='meta'><span class='label'>作品名</span> <a href='search_all.html?q=%e3%82%b9%e3%83%ad%e3%82%a6%e3%82%b9%e3%82%bf%e3%83%bc%e3%83%88'>スロウスタート</a></div>
+    <div class='meta'><span class='label'>歌い手</span> 三月のパンタシア</div>
+    <div class='meta'><span class='label'>制作者</span> タマ兄</div>
+    <div class='meta'><span class='label'>最終更新日</span> 2018/02/10</div>
+    <div class='meta'><span class='label'>ファイル名</span> <a data-q='%e3%80%90%e3%82%b9%e3%83%ad%e3%82%a6%e3%82%b9%e3%82%bf%e3%83%bc%e3%83%88%e3%80%91%e9%a2%a8%e3%81%ae%e5%a3%b0%e3%82%92%e8%81%b4%e3%81%8d%e3%81%aa%e3%81%8c%e3%82%89%ef%bc%8f%e4%b8%89%e6%9c%88%e3%81%ae%e3%83%91%e3%83%b3%e3%82%bf%e3%82%b7%e3%82%a2.mp4'>【スロウスタート】風の声を聴きながら／三月のパンタシア.mp4</a></div>
+  </div>
+</div>
+<div class='card' data-year='2018' data-yearband='2019-2015' data-updated='20180202' data-priority='2'>
+  <div class='card-title'>
+    <a data-q='%e3%80%90%e3%82%86%e3%82%8b%e3%82%ad%e3%83%a3%e3%83%b3%e2%96%b3%e3%80%91SHINY+DAYS(ver.1)%ef%bc%8f%e4%ba%9c%e5%92%b2%e8%8a%b1(on-off).mp4'>SHINY DAYS(ver.1)</a>
+  </div>
+  <div class='card-body'>
+    <div class='meta'><span class='label'>作品名</span> <a href='search_all.html?q=%e3%82%86%e3%82%8b%e3%82%ad%e3%83%a3%e3%83%b3%e2%96%b3'>ゆるキャン△</a></div>
+    <div class='meta'><span class='label'>歌い手</span> 亜咲花</div>
+    <div class='meta'><span class='label'>制作者</span> タマ兄</div>
+    <div class='meta'><span class='label'>最終更新日</span> 2018/02/02</div>
+    <div class='meta'><span class='label'>ファイル名</span> <a data-q='%e3%80%90%e3%82%86%e3%82%8b%e3%82%ad%e3%83%a3%e3%83%b3%e2%96%b3%e3%80%91SHINY+DAYS(ver.1)%ef%bc%8f%e4%ba%9c%e5%92%b2%e8%8a%b1(on-off).mp4'>【ゆるキャン△】SHINY DAYS(ver.1)／亜咲花(on-off).mp4</a></div>
+  </div>
+</div>
+<div class='card' data-year='2017' data-yearband='2019-2015' data-updated='20171216' data-priority='2'>
+  <div class='card-title'>
+    <a data-q='%e3%80%90%e3%82%a2%e3%82%a4%e3%83%89%e3%83%ab%e3%83%9e%e3%82%b9%e3%82%bf%e3%83%bc+%e3%82%b7%e3%83%b3%e3%83%87%e3%83%ac%e3%83%a9%e3%82%ac%e3%83%bc%e3%83%ab%e3%82%ba%e5%8a%87%e5%a0%b4+2nd+SEASON%e3%80%91%e7%a7%8b%e3%82%81%e3%81%84%e3%81%a6+Ding+Dong+Dang!%ef%bc%8f%e3%82%a2%e3%83%8a%e3%82%b9%e3%82%bf%e3%82%b7%e3%82%a2%e3%80%81%e4%bd%90%e3%80%85%e6%9c%a8%e5%8d%83%e6%9e%9d%e3%80%81%e9%80%9f%e6%b0%b4%e5%a5%8f%e3%80%81%e5%8c%97%e6%9d%a1%e5%8a%a0%e8%93%ae%e3%80%81%e6%96%b0%e7%94%b0%e7%be%8e%e6%b3%a2(on-off).mp4'>秋めいて Ding Dong Dang!</a>
+  </div>
+  <div class='card-body'>
+    <div class='meta'><span class='label'>作品名</span> <a href='search_all.html?q=%e3%82%a2%e3%82%a4%e3%83%89%e3%83%ab%e3%83%9e%e3%82%b9%e3%82%bf%e3%83%bc+%e3%82%b7%e3%83%b3%e3%83%87%e3%83%ac%e3%83%a9%e3%82%ac%e3%83%bc%e3%83%ab%e3%82%ba%e5%8a%87%e5%a0%b4+2nd+SEASON'>アイドルマスター シンデレラガールズ劇場 2nd SEASON</a></div>
+    <div class='meta'><span class='label'>歌い手</span> アナスタシア、佐々木千枝、速水奏、北条加蓮、新田美波</div>
+    <div class='meta'><span class='label'>制作者</span> タマ兄</div>
+    <div class='meta'><span class='label'>最終更新日</span> 2017/12/16</div>
+    <div class='meta'><span class='label'>ファイル名</span> <a data-q='%e3%80%90%e3%82%a2%e3%82%a4%e3%83%89%e3%83%ab%e3%83%9e%e3%82%b9%e3%82%bf%e3%83%bc+%e3%82%b7%e3%83%b3%e3%83%87%e3%83%ac%e3%83%a9%e3%82%ac%e3%83%bc%e3%83%ab%e3%82%ba%e5%8a%87%e5%a0%b4+2nd+SEASON%e3%80%91%e7%a7%8b%e3%82%81%e3%81%84%e3%81%a6+Ding+Dong+Dang!%ef%bc%8f%e3%82%a2%e3%83%8a%e3%82%b9%e3%82%bf%e3%82%b7%e3%82%a2%e3%80%81%e4%bd%90%e3%80%85%e6%9c%a8%e5%8d%83%e6%9e%9d%e3%80%81%e9%80%9f%e6%b0%b4%e5%a5%8f%e3%80%81%e5%8c%97%e6%9d%a1%e5%8a%a0%e8%93%ae%e3%80%81%e6%96%b0%e7%94%b0%e7%be%8e%e6%b3%a2(on-off).mp4'>【アイドルマスター シンデレラガールズ劇場 2nd SEASON】秋めいて Ding Dong Dang!／アナスタシア、佐々木千枝、速水奏、北条加蓮、新田美波(on-off).mp4</a></div>
+  </div>
+</div>
+<div class='card' data-year='2017' data-yearband='2019-2015' data-updated='20171215' data-priority='2'>
+  <div class='card-title'>
+    <a data-q='%e3%80%90%e3%83%96%e3%83%ac%e3%83%b3%e3%83%89%e3%83%bb%ef%bc%b3%e3%80%91%e3%83%87%e3%82%bf%e3%83%a9%e3%83%a1%e3%81%aa%e3%83%9e%e3%82%a4%e3%83%8a%e3%82%b9%e3%81%a8%e3%83%97%e3%83%a9%e3%82%b9%e3%81%ab%e3%81%8a%e3%81%91%e3%82%8b%e3%83%96%e3%83%ac%e3%83%b3%e3%83%89%e8%80%83%ef%bc%8f%e3%83%96%e3%83%ac%e3%83%b3%e3%83%89%e3%83%bbA%ef%bc%88%e5%92%8c%e6%b0%a3%e3%81%82%e3%81%9a%e6%9c%aa%e3%83%bb%e9%ac%bc%e9%a0%ad%e6%98%8e%e9%87%8c%e3%83%bb%e6%98%a5%e9%87%8e%e6%9d%8f%ef%bc%89(on-off).mp4'>デタラメなマイナスとプラスにおけるブレンド考</a>
+  </div>
+  <div class='card-body'>
+    <div class='meta'><span class='label'>作品名</span> <a href='search_all.html?q=%e3%83%96%e3%83%ac%e3%83%b3%e3%83%89%e3%83%bb%ef%bc%b3'>ブレンド・Ｓ</a></div>
+    <div class='meta'><span class='label'>歌い手</span> ブレンド・A（和氣あず未・鬼頭明里・春野杏）</div>
+    <div class='meta'><span class='label'>制作者</span> タマ兄</div>
+    <div class='meta'><span class='label'>最終更新日</span> 2017/12/15</div>
+    <div class='meta'><span class='label'>ファイル名</span> <a data-q='%e3%80%90%e3%83%96%e3%83%ac%e3%83%b3%e3%83%89%e3%83%bb%ef%bc%b3%e3%80%91%e3%83%87%e3%82%bf%e3%83%a9%e3%83%a1%e3%81%aa%e3%83%9e%e3%82%a4%e3%83%8a%e3%82%b9%e3%81%a8%e3%83%97%e3%83%a9%e3%82%b9%e3%81%ab%e3%81%8a%e3%81%91%e3%82%8b%e3%83%96%e3%83%ac%e3%83%b3%e3%83%89%e8%80%83%ef%bc%8f%e3%83%96%e3%83%ac%e3%83%b3%e3%83%89%e3%83%bbA%ef%bc%88%e5%92%8c%e6%b0%a3%e3%81%82%e3%81%9a%e6%9c%aa%e3%83%bb%e9%ac%bc%e9%a0%ad%e6%98%8e%e9%87%8c%e3%83%bb%e6%98%a5%e9%87%8e%e6%9d%8f%ef%bc%89(on-off).mp4'>【ブレンド・Ｓ】デタラメなマイナスとプラスにおけるブレンド考／ブレンド・A（和氣あず未・鬼頭明里・春野杏）(on-off).mp4</a></div>
+  </div>
+</div>
+<div class='card' data-year='2017' data-yearband='2019-2015' data-updated='20171209' data-priority='2'>
+  <div class='card-title'>
+    <a data-q='%e3%80%90%e3%83%96%e3%83%ac%e3%83%b3%e3%83%89%e3%83%bb%ef%bc%b3%e3%80%91%e3%81%bc%e3%81%aa%e3%81%ba%e3%81%a6%e3%81%83%e3%83%bc%e3%81%a8%e2%99%a5S(%e3%83%91%e3%83%bc%e3%83%88%e5%88%86%e3%81%91)%ef%bc%8f%e3%83%96%e3%83%ac%e3%83%b3%e3%83%89%e3%83%bbA%ef%bc%88%e5%92%8c%e6%b0%a3%e3%81%82%e3%81%9a%e6%9c%aa%e3%83%bb%e9%ac%bc%e9%a0%ad%e6%98%8e%e9%87%8c%e3%83%bb%e6%98%a5%e9%87%8e%e6%9d%8f%ef%bc%89(on-off).mp4'>ぼなぺてぃーと♥S(パート分け)</a>
+  </div>
+  <div class='card-body'>
+    <div class='meta'><span class='label'>作品名</span> <a href='search_all.html?q=%e3%83%96%e3%83%ac%e3%83%b3%e3%83%89%e3%83%bb%ef%bc%b3'>ブレンド・Ｓ</a></div>
+    <div class='meta'><span class='label'>歌い手</span> ブレンド・A（和氣あず未・鬼頭明里・春野杏）</div>
+    <div class='meta'><span class='label'>制作者</span> タマ兄</div>
+    <div class='meta'><span class='label'>最終更新日</span> 2017/12/09</div>
+    <div class='meta'><span class='label'>ファイル名</span> <a data-q='%e3%80%90%e3%83%96%e3%83%ac%e3%83%b3%e3%83%89%e3%83%bb%ef%bc%b3%e3%80%91%e3%81%bc%e3%81%aa%e3%81%ba%e3%81%a6%e3%81%83%e3%83%bc%e3%81%a8%e2%99%a5S(%e3%83%91%e3%83%bc%e3%83%88%e5%88%86%e3%81%91)%ef%bc%8f%e3%83%96%e3%83%ac%e3%83%b3%e3%83%89%e3%83%bbA%ef%bc%88%e5%92%8c%e6%b0%a3%e3%81%82%e3%81%9a%e6%9c%aa%e3%83%bb%e9%ac%bc%e9%a0%ad%e6%98%8e%e9%87%8c%e3%83%bb%e6%98%a5%e9%87%8e%e6%9d%8f%ef%bc%89(on-off).mp4'>【ブレンド・Ｓ】ぼなぺてぃーと♥S(パート分け)／ブレンド・A（和氣あず未・鬼頭明里・春野杏）(on-off).mp4</a></div>
+  </div>
+</div>
+<div class='card' data-year='2017' data-yearband='2019-2015' data-updated='20171209' data-priority='2'>
+  <div class='card-title'>
+    <a data-q='%e3%80%90%e3%83%96%e3%83%ac%e3%83%b3%e3%83%89%e3%83%bb%ef%bc%b3%e3%80%91%e3%81%bc%e3%81%aa%e3%81%ba%e3%81%a6%e3%81%83%e3%83%bc%e3%81%a8%e2%99%a5S(MV)(%e3%83%91%e3%83%bc%e3%83%88%e5%88%86%e3%81%91)%ef%bc%8f%e3%83%96%e3%83%ac%e3%83%b3%e3%83%89%e3%83%bbA%ef%bc%88%e5%92%8c%e6%b0%a3%e3%81%82%e3%81%9a%e6%9c%aa%e3%83%bb%e9%ac%bc%e9%a0%ad%e6%98%8e%e9%87%8c%e3%83%bb%e6%98%a5%e9%87%8e%e6%9d%8f%ef%bc%89(on-off).mp4'>ぼなぺてぃーと♥S(MV)(パート分け)</a>
+  </div>
+  <div class='card-body'>
+    <div class='meta'><span class='label'>作品名</span> <a href='search_all.html?q=%e3%83%96%e3%83%ac%e3%83%b3%e3%83%89%e3%83%bb%ef%bc%b3'>ブレンド・Ｓ</a></div>
+    <div class='meta'><span class='label'>歌い手</span> ブレンド・A（和氣あず未・鬼頭明里・春野杏）</div>
+    <div class='meta'><span class='label'>制作者</span> タマ兄</div>
+    <div class='meta'><span class='label'>最終更新日</span> 2017/12/09</div>
+    <div class='meta'><span class='label'>ファイル名</span> <a data-q='%e3%80%90%e3%83%96%e3%83%ac%e3%83%b3%e3%83%89%e3%83%bb%ef%bc%b3%e3%80%91%e3%81%bc%e3%81%aa%e3%81%ba%e3%81%a6%e3%81%83%e3%83%bc%e3%81%a8%e2%99%a5S(MV)(%e3%83%91%e3%83%bc%e3%83%88%e5%88%86%e3%81%91)%ef%bc%8f%e3%83%96%e3%83%ac%e3%83%b3%e3%83%89%e3%83%bbA%ef%bc%88%e5%92%8c%e6%b0%a3%e3%81%82%e3%81%9a%e6%9c%aa%e3%83%bb%e9%ac%bc%e9%a0%ad%e6%98%8e%e9%87%8c%e3%83%bb%e6%98%a5%e9%87%8e%e6%9d%8f%ef%bc%89(on-off).mp4'>【ブレンド・Ｓ】ぼなぺてぃーと♥S(MV)(パート分け)／ブレンド・A（和氣あず未・鬼頭明里・春野杏）(on-off).mp4</a></div>
+  </div>
+</div>
+<div class='card' data-year='2017' data-yearband='2019-2015' data-updated='20171203' data-priority='2'>
+  <div class='card-title'>
+    <a data-q='%e3%80%90%e3%82%a2%e3%82%a4%e3%83%89%e3%83%ab%e3%83%9e%e3%82%b9%e3%82%bf%e3%83%bc+%e3%82%b7%e3%83%b3%e3%83%87%e3%83%ac%e3%83%a9%e3%82%ac%e3%83%bc%e3%83%ab%e3%82%ba+%e3%82%b9%e3%82%bf%e3%83%bc%e3%83%a9%e3%82%a4%e3%83%88%e3%82%b9%e3%83%86%e3%83%bc%e3%82%b8%e3%80%91%e6%83%85%e7%86%b1%e3%83%95%e3%82%a1%e3%83%b3%e3%83%95%e3%82%a1%e3%83%b3%e3%83%95%e3%82%a1%e3%83%bc%e3%83%ac%ef%bc%8f%e6%9c%ac%e7%94%b0%e6%9c%aa%e5%a4%ae%e3%80%81%e9%ab%98%e6%a3%ae%e8%97%8d%e5%ad%90%e3%80%81%e6%97%a5%e9%87%8e%e8%8c%9c(on-off).mp4'>情熱ファンファンファーレ</a>
+  </div>
+  <div class='card-body'>
+    <div class='meta'><span class='label'>作品名</span> <a href='search_all.html?q=%e3%82%a2%e3%82%a4%e3%83%89%e3%83%ab%e3%83%9e%e3%82%b9%e3%82%bf%e3%83%bc+%e3%82%b7%e3%83%b3%e3%83%87%e3%83%ac%e3%83%a9%e3%82%ac%e3%83%bc%e3%83%ab%e3%82%ba+%e3%82%b9%e3%82%bf%e3%83%bc%e3%83%a9%e3%82%a4%e3%83%88%e3%82%b9%e3%83%86%e3%83%bc%e3%82%b8'>アイドルマスター シンデレラガールズ スターライトステージ</a></div>
+    <div class='meta'><span class='label'>歌い手</span> 本田未央、高森藍子、日野茜</div>
+    <div class='meta'><span class='label'>制作者</span> タマ兄</div>
+    <div class='meta'><span class='label'>最終更新日</span> 2017/12/03</div>
+    <div class='meta'><span class='label'>ファイル名</span> <a data-q='%e3%80%90%e3%82%a2%e3%82%a4%e3%83%89%e3%83%ab%e3%83%9e%e3%82%b9%e3%82%bf%e3%83%bc+%e3%82%b7%e3%83%b3%e3%83%87%e3%83%ac%e3%83%a9%e3%82%ac%e3%83%bc%e3%83%ab%e3%82%ba+%e3%82%b9%e3%82%bf%e3%83%bc%e3%83%a9%e3%82%a4%e3%83%88%e3%82%b9%e3%83%86%e3%83%bc%e3%82%b8%e3%80%91%e6%83%85%e7%86%b1%e3%83%95%e3%82%a1%e3%83%b3%e3%83%95%e3%82%a1%e3%83%b3%e3%83%95%e3%82%a1%e3%83%bc%e3%83%ac%ef%bc%8f%e6%9c%ac%e7%94%b0%e6%9c%aa%e5%a4%ae%e3%80%81%e9%ab%98%e6%a3%ae%e8%97%8d%e5%ad%90%e3%80%81%e6%97%a5%e9%87%8e%e8%8c%9c(on-off).mp4'>【アイドルマスター シンデレラガールズ スターライトステージ】情熱ファンファンファーレ／本田未央、高森藍子、日野茜(on-off).mp4</a></div>
+  </div>
+</div>
+<div class='card' data-year='2017' data-yearband='2019-2015' data-updated='20171130' data-priority='2'>
+  <div class='card-title'>
+    <a data-q='%e3%80%90%e3%82%a2%e3%82%a4%e3%83%89%e3%83%ab%e3%83%9e%e3%82%b9%e3%82%bf%e3%83%bc+%e3%82%b7%e3%83%b3%e3%83%87%e3%83%ac%e3%83%a9%e3%82%ac%e3%83%bc%e3%83%ab%e3%82%ba%e5%8a%87%e5%a0%b4%e3%80%91%e3%81%b4%e3%81%ab%e3%82%83%e3%81%93%e3%82%89%e5%a4%aa%e7%b5%b5%e3%81%8b%e3%81%8d%e6%ad%8c%ef%bc%8f%e5%b3%b6%e6%9d%91%e5%8d%af%e6%9c%88+(%e5%a4%a7%e6%a9%8b%e5%bd%a9%e9%a6%99).mp4'>ぴにゃこら太絵かき歌</a>
+  </div>
+  <div class='card-body'>
+    <div class='meta'><span class='label'>作品名</span> <a href='search_all.html?q=%e3%82%a2%e3%82%a4%e3%83%89%e3%83%ab%e3%83%9e%e3%82%b9%e3%82%bf%e3%83%bc+%e3%82%b7%e3%83%b3%e3%83%87%e3%83%ac%e3%83%a9%e3%82%ac%e3%83%bc%e3%83%ab%e3%82%ba%e5%8a%87%e5%a0%b4'>アイドルマスター シンデレラガールズ劇場</a></div>
+    <div class='meta'><span class='label'>歌い手</span> 島村卯月</div>
+    <div class='meta'><span class='label'>制作者</span> タマ兄</div>
+    <div class='meta'><span class='label'>最終更新日</span> 2017/11/30</div>
+    <div class='meta'><span class='label'>ファイル名</span> <a data-q='%e3%80%90%e3%82%a2%e3%82%a4%e3%83%89%e3%83%ab%e3%83%9e%e3%82%b9%e3%82%bf%e3%83%bc+%e3%82%b7%e3%83%b3%e3%83%87%e3%83%ac%e3%83%a9%e3%82%ac%e3%83%bc%e3%83%ab%e3%82%ba%e5%8a%87%e5%a0%b4%e3%80%91%e3%81%b4%e3%81%ab%e3%82%83%e3%81%93%e3%82%89%e5%a4%aa%e7%b5%b5%e3%81%8b%e3%81%8d%e6%ad%8c%ef%bc%8f%e5%b3%b6%e6%9d%91%e5%8d%af%e6%9c%88+(%e5%a4%a7%e6%a9%8b%e5%bd%a9%e9%a6%99).mp4'>【アイドルマスター シンデレラガールズ劇場】ぴにゃこら太絵かき歌／島村卯月 (大橋彩香).mp4</a></div>
+  </div>
+</div>
+<div class='card' data-year='2017' data-yearband='2019-2015' data-updated='20171125' data-priority='2'>
+  <div class='card-title'>
+    <a data-q='%e3%80%90%e3%82%a2%e3%82%a4%e3%83%89%e3%83%ab%e3%83%9e%e3%82%b9%e3%82%bf%e3%83%bc+%e3%82%b7%e3%83%b3%e3%83%87%e3%83%ac%e3%83%a9%e3%82%ac%e3%83%bc%e3%83%ab%e3%82%ba+%e3%82%b9%e3%82%bf%e3%83%bc%e3%83%a9%e3%82%a4%e3%83%88%e3%82%b9%e3%83%86%e3%83%bc%e3%82%b8%e3%80%91%e3%82%ad%e3%83%9f%e3%81%ae%e3%81%9d%e3%81%b0%e3%81%a7%e3%81%9a%e3%81%a3%e3%81%a8%ef%bc%8f%e5%b3%b6%e6%9d%91%e5%8d%af%e6%9c%88%e3%80%81%e9%ab%98%e5%9e%a3%e6%a5%93%e3%80%81%e4%b8%89%e8%88%b9%e7%be%8e%e5%84%aa%e3%80%81%e6%a3%ae%e4%b9%85%e4%bf%9d%e4%b9%83%e3%80%85%e3%80%81%e4%be%9d%e7%94%b0%e8%8a%b3%e4%b9%83(on-off).mp4'>キミのそばでずっと</a>
+  </div>
+  <div class='card-body'>
+    <div class='meta'><span class='label'>作品名</span> <a href='search_all.html?q=%e3%82%a2%e3%82%a4%e3%83%89%e3%83%ab%e3%83%9e%e3%82%b9%e3%82%bf%e3%83%bc+%e3%82%b7%e3%83%b3%e3%83%87%e3%83%ac%e3%83%a9%e3%82%ac%e3%83%bc%e3%83%ab%e3%82%ba+%e3%82%b9%e3%82%bf%e3%83%bc%e3%83%a9%e3%82%a4%e3%83%88%e3%82%b9%e3%83%86%e3%83%bc%e3%82%b8'>アイドルマスター シンデレラガールズ スターライトステージ</a></div>
+    <div class='meta'><span class='label'>歌い手</span> 島村卯月、高垣楓、三船美優、森久保乃々、依田芳乃</div>
+    <div class='meta'><span class='label'>制作者</span> タマ兄</div>
+    <div class='meta'><span class='label'>最終更新日</span> 2017/11/25</div>
+    <div class='meta'><span class='label'>ファイル名</span> <a data-q='%e3%80%90%e3%82%a2%e3%82%a4%e3%83%89%e3%83%ab%e3%83%9e%e3%82%b9%e3%82%bf%e3%83%bc+%e3%82%b7%e3%83%b3%e3%83%87%e3%83%ac%e3%83%a9%e3%82%ac%e3%83%bc%e3%83%ab%e3%82%ba+%e3%82%b9%e3%82%bf%e3%83%bc%e3%83%a9%e3%82%a4%e3%83%88%e3%82%b9%e3%83%86%e3%83%bc%e3%82%b8%e3%80%91%e3%82%ad%e3%83%9f%e3%81%ae%e3%81%9d%e3%81%b0%e3%81%a7%e3%81%9a%e3%81%a3%e3%81%a8%ef%bc%8f%e5%b3%b6%e6%9d%91%e5%8d%af%e6%9c%88%e3%80%81%e9%ab%98%e5%9e%a3%e6%a5%93%e3%80%81%e4%b8%89%e8%88%b9%e7%be%8e%e5%84%aa%e3%80%81%e6%a3%ae%e4%b9%85%e4%bf%9d%e4%b9%83%e3%80%85%e3%80%81%e4%be%9d%e7%94%b0%e8%8a%b3%e4%b9%83(on-off).mp4'>【アイドルマスター シンデレラガールズ スターライトステージ】キミのそばでずっと／島村卯月、高垣楓、三船美優、森久保乃々、依田芳乃(on-off).mp4</a></div>
+  </div>
+</div>
+<div class='card' data-year='2017' data-yearband='2019-2015' data-updated='20171111' data-priority='2'>
+  <div class='card-title'>
+    <a data-q='%e3%80%90%e3%82%a2%e3%82%a4%e3%83%89%e3%83%ab%e3%83%9e%e3%82%b9%e3%82%bf%e3%83%bc+%e3%82%b7%e3%83%b3%e3%83%87%e3%83%ac%e3%83%a9%e3%82%ac%e3%83%bc%e3%83%ab%e3%82%ba+%e3%82%b9%e3%82%bf%e3%83%bc%e3%83%a9%e3%82%a4%e3%83%88%e3%82%b9%e3%83%86%e3%83%bc%e3%82%b8%e3%80%91%e7%a7%8b%e9%a2%a8%e3%81%ab%e6%89%8b%e3%82%92%e6%8c%af%e3%81%a3%e3%81%a6%ef%bc%8f%e7%9b%b8%e8%91%89%e5%a4%95%e7%be%8e%e3%80%81%e5%a4%9a%e7%94%b0%e6%9d%8e%e8%a1%a3%e8%8f%9c%e3%80%81%e4%b8%ad%e9%87%8e%e6%9c%89%e9%a6%99(on-off).mp4'>秋風に手を振って</a>
+  </div>
+  <div class='card-body'>
+    <div class='meta'><span class='label'>作品名</span> <a href='search_all.html?q=%e3%82%a2%e3%82%a4%e3%83%89%e3%83%ab%e3%83%9e%e3%82%b9%e3%82%bf%e3%83%bc+%e3%82%b7%e3%83%b3%e3%83%87%e3%83%ac%e3%83%a9%e3%82%ac%e3%83%bc%e3%83%ab%e3%82%ba+%e3%82%b9%e3%82%bf%e3%83%bc%e3%83%a9%e3%82%a4%e3%83%88%e3%82%b9%e3%83%86%e3%83%bc%e3%82%b8'>アイドルマスター シンデレラガールズ スターライトステージ</a></div>
+    <div class='meta'><span class='label'>歌い手</span> 相葉夕美、多田李衣菜、中野有香</div>
+    <div class='meta'><span class='label'>制作者</span> タマ兄</div>
+    <div class='meta'><span class='label'>最終更新日</span> 2017/11/11</div>
+    <div class='meta'><span class='label'>ファイル名</span> <a data-q='%e3%80%90%e3%82%a2%e3%82%a4%e3%83%89%e3%83%ab%e3%83%9e%e3%82%b9%e3%82%bf%e3%83%bc+%e3%82%b7%e3%83%b3%e3%83%87%e3%83%ac%e3%83%a9%e3%82%ac%e3%83%bc%e3%83%ab%e3%82%ba+%e3%82%b9%e3%82%bf%e3%83%bc%e3%83%a9%e3%82%a4%e3%83%88%e3%82%b9%e3%83%86%e3%83%bc%e3%82%b8%e3%80%91%e7%a7%8b%e9%a2%a8%e3%81%ab%e6%89%8b%e3%82%92%e6%8c%af%e3%81%a3%e3%81%a6%ef%bc%8f%e7%9b%b8%e8%91%89%e5%a4%95%e7%be%8e%e3%80%81%e5%a4%9a%e7%94%b0%e6%9d%8e%e8%a1%a3%e8%8f%9c%e3%80%81%e4%b8%ad%e9%87%8e%e6%9c%89%e9%a6%99(on-off).mp4'>【アイドルマスター シンデレラガールズ スターライトステージ】秋風に手を振って／相葉夕美、多田李衣菜、中野有香(on-off).mp4</a></div>
+  </div>
+</div>
+<div class='card' data-year='2017' data-yearband='2019-2015' data-updated='20171105' data-priority='2'>
+  <div class='card-title'>
+    <a data-q='%e3%80%90%e3%82%a2%e3%82%a4%e3%83%89%e3%83%ab%e3%83%9e%e3%82%b9%e3%82%bf%e3%83%bc+%e3%82%b7%e3%83%b3%e3%83%87%e3%83%ac%e3%83%a9%e3%82%ac%e3%83%bc%e3%83%ab%e3%82%ba%e5%8a%87%e5%a0%b4+2nd+SEASON%e3%80%91Blooming+Days+(Web%e8%bf%bd%e5%8a%a0%e7%89%88)%ef%bc%8f%e5%ae%89%e9%83%a8%e8%8f%9c%e3%80%85%e3%80%81%e4%ba%94%e5%8d%81%e5%b5%90%e9%9f%bf%e5%ad%90%e3%80%81%e7%b7%92%e6%96%b9%e6%99%ba%e7%b5%b5%e9%87%8c%e3%80%81%e9%81%93%e6%98%8e%e5%af%ba%e6%ad%8c%e9%88%b4%e3%80%81%e6%97%a9%e5%9d%82%e7%be%8e%e7%8e%b2(on-off).mp4'>Blooming Days (Web追加版)</a>
+  </div>
+  <div class='card-body'>
+    <div class='meta'><span class='label'>作品名</span> <a href='search_all.html?q=%e3%82%a2%e3%82%a4%e3%83%89%e3%83%ab%e3%83%9e%e3%82%b9%e3%82%bf%e3%83%bc+%e3%82%b7%e3%83%b3%e3%83%87%e3%83%ac%e3%83%a9%e3%82%ac%e3%83%bc%e3%83%ab%e3%82%ba%e5%8a%87%e5%a0%b4+2nd+SEASON'>アイドルマスター シンデレラガールズ劇場 2nd SEASON</a></div>
+    <div class='meta'><span class='label'>歌い手</span> 安部菜々、五十嵐響子、緒方智絵里、道明寺歌鈴、早坂美玲</div>
+    <div class='meta'><span class='label'>制作者</span> タマ兄</div>
+    <div class='meta'><span class='label'>最終更新日</span> 2017/11/05</div>
+    <div class='meta'><span class='label'>ファイル名</span> <a data-q='%e3%80%90%e3%82%a2%e3%82%a4%e3%83%89%e3%83%ab%e3%83%9e%e3%82%b9%e3%82%bf%e3%83%bc+%e3%82%b7%e3%83%b3%e3%83%87%e3%83%ac%e3%83%a9%e3%82%ac%e3%83%bc%e3%83%ab%e3%82%ba%e5%8a%87%e5%a0%b4+2nd+SEASON%e3%80%91Blooming+Days+(Web%e8%bf%bd%e5%8a%a0%e7%89%88)%ef%bc%8f%e5%ae%89%e9%83%a8%e8%8f%9c%e3%80%85%e3%80%81%e4%ba%94%e5%8d%81%e5%b5%90%e9%9f%bf%e5%ad%90%e3%80%81%e7%b7%92%e6%96%b9%e6%99%ba%e7%b5%b5%e9%87%8c%e3%80%81%e9%81%93%e6%98%8e%e5%af%ba%e6%ad%8c%e9%88%b4%e3%80%81%e6%97%a9%e5%9d%82%e7%be%8e%e7%8e%b2(on-off).mp4'>【アイドルマスター シンデレラガールズ劇場 2nd SEASON】Blooming Days (Web追加版)／安部菜々、五十嵐響子、緒方智絵里、道明寺歌鈴、早坂美玲(on-off).mp4</a></div>
+  </div>
+</div>
+<div class='card' data-year='2017' data-yearband='2019-2015' data-updated='20171103' data-priority='2'>
+  <div class='card-title'>
+    <a data-q='%e3%80%90%e3%82%a2%e3%82%a4%e3%83%89%e3%83%ab%e3%83%9e%e3%82%b9%e3%82%bf%e3%83%bc+%e3%82%b7%e3%83%b3%e3%83%87%e3%83%ac%e3%83%a9%e3%82%ac%e3%83%bc%e3%83%ab%e3%82%ba+%e3%82%b9%e3%82%bf%e3%83%bc%e3%83%a9%e3%82%a4%e3%83%88%e3%82%b9%e3%83%86%e3%83%bc%e3%82%b8%e3%80%91Halloween%e2%99%a5Code%ef%bc%8f%e5%ae%89%e9%83%a8%e8%8f%9c%e3%80%85%e3%80%81%e4%b9%99%e5%80%89%e6%82%a0%e8%b2%b4%e3%80%81%e5%89%8d%e5%b7%9d%e3%81%bf%e3%81%8f(on-off).mp4'>Halloween♥Code</a>
+  </div>
+  <div class='card-body'>
+    <div class='meta'><span class='label'>作品名</span> <a href='search_all.html?q=%e3%82%a2%e3%82%a4%e3%83%89%e3%83%ab%e3%83%9e%e3%82%b9%e3%82%bf%e3%83%bc+%e3%82%b7%e3%83%b3%e3%83%87%e3%83%ac%e3%83%a9%e3%82%ac%e3%83%bc%e3%83%ab%e3%82%ba+%e3%82%b9%e3%82%bf%e3%83%bc%e3%83%a9%e3%82%a4%e3%83%88%e3%82%b9%e3%83%86%e3%83%bc%e3%82%b8'>アイドルマスター シンデレラガールズ スターライトステージ</a></div>
+    <div class='meta'><span class='label'>歌い手</span> 安部菜々、乙倉悠貴、前川みく</div>
+    <div class='meta'><span class='label'>制作者</span> タマ兄</div>
+    <div class='meta'><span class='label'>最終更新日</span> 2017/11/03</div>
+    <div class='meta'><span class='label'>ファイル名</span> <a data-q='%e3%80%90%e3%82%a2%e3%82%a4%e3%83%89%e3%83%ab%e3%83%9e%e3%82%b9%e3%82%bf%e3%83%bc+%e3%82%b7%e3%83%b3%e3%83%87%e3%83%ac%e3%83%a9%e3%82%ac%e3%83%bc%e3%83%ab%e3%82%ba+%e3%82%b9%e3%82%bf%e3%83%bc%e3%83%a9%e3%82%a4%e3%83%88%e3%82%b9%e3%83%86%e3%83%bc%e3%82%b8%e3%80%91Halloween%e2%99%a5Code%ef%bc%8f%e5%ae%89%e9%83%a8%e8%8f%9c%e3%80%85%e3%80%81%e4%b9%99%e5%80%89%e6%82%a0%e8%b2%b4%e3%80%81%e5%89%8d%e5%b7%9d%e3%81%bf%e3%81%8f(on-off).mp4'>【アイドルマスター シンデレラガールズ スターライトステージ】Halloween♥Code／安部菜々、乙倉悠貴、前川みく(on-off).mp4</a></div>
+  </div>
+</div>
+<div class='card' data-year='2017' data-yearband='2019-2015' data-updated='20171029' data-priority='2'>
+  <div class='card-title'>
+    <a data-q='%e3%80%90%e3%81%93%e3%81%ae%e3%81%af%e3%81%aa%e5%a5%87%e8%ad%9a%e3%80%91%e3%82%b3%e3%82%b3%e3%83%ad%e3%83%8b%e3%83%84%e3%83%9c%e3%83%9f%ef%bc%8feufonius(on-off).mp4'>ココロニツボミ</a>
+  </div>
+  <div class='card-body'>
+    <div class='meta'><span class='label'>作品名</span> <a href='search_all.html?q=%e3%81%93%e3%81%ae%e3%81%af%e3%81%aa%e5%a5%87%e8%ad%9a'>このはな奇譚</a></div>
+    <div class='meta'><span class='label'>歌い手</span> eufonius</div>
+    <div class='meta'><span class='label'>制作者</span> タマ兄</div>
+    <div class='meta'><span class='label'>最終更新日</span> 2017/10/29</div>
+    <div class='meta'><span class='label'>ファイル名</span> <a data-q='%e3%80%90%e3%81%93%e3%81%ae%e3%81%af%e3%81%aa%e5%a5%87%e8%ad%9a%e3%80%91%e3%82%b3%e3%82%b3%e3%83%ad%e3%83%8b%e3%83%84%e3%83%9c%e3%83%9f%ef%bc%8feufonius(on-off).mp4'>【このはな奇譚】ココロニツボミ／eufonius(on-off).mp4</a></div>
+  </div>
+</div>
+<div class='card' data-year='2017' data-yearband='2019-2015' data-updated='20171009' data-priority='2'>
+  <div class='card-title'>
+    <a data-q='%e3%80%90NEW+GAME!!%e3%80%91%e3%83%a6%e3%83%a1%e3%82%a4%e3%83%ad%e3%82%b3%e3%83%b3%e3%83%91%e3%82%b9%ef%bc%8ffourfolium(on-off).mp4'>ユメイロコンパス</a>
+  </div>
+  <div class='card-body'>
+    <div class='meta'><span class='label'>作品名</span> <a href='search_all.html?q=NEW+GAME!!'>NEW GAME!!</a></div>
+    <div class='meta'><span class='label'>歌い手</span> fourfolium</div>
+    <div class='meta'><span class='label'>制作者</span> タマ兄</div>
+    <div class='meta'><span class='label'>最終更新日</span> 2017/10/09</div>
+    <div class='meta'><span class='label'>ファイル名</span> <a data-q='%e3%80%90NEW+GAME!!%e3%80%91%e3%83%a6%e3%83%a1%e3%82%a4%e3%83%ad%e3%82%b3%e3%83%b3%e3%83%91%e3%82%b9%ef%bc%8ffourfolium(on-off).mp4'>【NEW GAME!!】ユメイロコンパス／fourfolium(on-off).mp4</a></div>
+  </div>
+</div>
+<div class='card' data-year='2017' data-yearband='2019-2015' data-updated='20170924' data-priority='2'>
+  <div class='card-title'>
+    <a data-q='%e3%80%90%e3%82%a2%e3%82%a4%e3%83%89%e3%83%ab%e3%83%9e%e3%82%b9%e3%82%bf%e3%83%bc+%e3%82%b7%e3%83%b3%e3%83%87%e3%83%ac%e3%83%a9%e3%82%ac%e3%83%bc%e3%83%ab%e3%82%ba+%e3%82%b9%e3%82%bf%e3%83%bc%e3%83%a9%e3%82%a4%e3%83%88%e3%82%b9%e3%83%86%e3%83%bc%e3%82%b8%e3%80%91Take+me%e2%98%86Take+you%ef%bc%8fTHE+IDOLM%40STER+CINDERELLA+GIRLS!!(on-off).mp4'>Take me☆Take you</a>
+  </div>
+  <div class='card-body'>
+    <div class='meta'><span class='label'>作品名</span> <a href='search_all.html?q=%e3%82%a2%e3%82%a4%e3%83%89%e3%83%ab%e3%83%9e%e3%82%b9%e3%82%bf%e3%83%bc+%e3%82%b7%e3%83%b3%e3%83%87%e3%83%ac%e3%83%a9%e3%82%ac%e3%83%bc%e3%83%ab%e3%82%ba+%e3%82%b9%e3%82%bf%e3%83%bc%e3%83%a9%e3%82%a4%e3%83%88%e3%82%b9%e3%83%86%e3%83%bc%e3%82%b8'>アイドルマスター シンデレラガールズ スターライトステージ</a></div>
+    <div class='meta'><span class='label'>歌い手</span> THE IDOLM@STER CINDERELLA GIRLS!!</div>
+    <div class='meta'><span class='label'>制作者</span> タマ兄</div>
+    <div class='meta'><span class='label'>最終更新日</span> 2017/09/24</div>
+    <div class='meta'><span class='label'>ファイル名</span> <a data-q='%e3%80%90%e3%82%a2%e3%82%a4%e3%83%89%e3%83%ab%e3%83%9e%e3%82%b9%e3%82%bf%e3%83%bc+%e3%82%b7%e3%83%b3%e3%83%87%e3%83%ac%e3%83%a9%e3%82%ac%e3%83%bc%e3%83%ab%e3%82%ba+%e3%82%b9%e3%82%bf%e3%83%bc%e3%83%a9%e3%82%a4%e3%83%88%e3%82%b9%e3%83%86%e3%83%bc%e3%82%b8%e3%80%91Take+me%e2%98%86Take+you%ef%bc%8fTHE+IDOLM%40STER+CINDERELLA+GIRLS!!(on-off).mp4'>【アイドルマスター シンデレラガールズ スターライトステージ】Take me☆Take you／THE IDOLM@STER CINDERELLA GIRLS!!(on-off).mp4</a></div>
+  </div>
+</div>
+<div class='card' data-year='2017' data-yearband='2019-2015' data-updated='20170918' data-priority='2'>
+  <div class='card-title'>
+    <a data-q='%e3%80%90%e3%82%a2%e3%82%a4%e3%83%89%e3%83%ab%e3%83%9e%e3%82%b9%e3%82%bf%e3%83%bc+%e3%82%b7%e3%83%b3%e3%83%87%e3%83%ac%e3%83%a9%e3%82%ac%e3%83%bc%e3%83%ab%e3%82%ba+%e3%82%b9%e3%82%bf%e3%83%bc%e3%83%a9%e3%82%a4%e3%83%88%e3%82%b9%e3%83%86%e3%83%bc%e3%82%b8%e3%80%91Sweet+Witches%27+Night+%ef%bd%9e6%e4%ba%ba%e7%9b%ae%e3%81%af%e3%81%a0%e3%81%81%e3%82%8c%ef%bd%9e%ef%bc%8f%e4%b8%89%e6%9d%91%e3%81%8b%e3%81%aa%e5%ad%90%e3%80%81%e5%8d%81%e6%99%82%e6%84%9b%e6%a2%a8%e3%80%81%e6%a3%ae%e4%b9%85%e4%bf%9d%e4%b9%83%e3%80%85%e3%80%81%e6%a4%8e%e5%90%8d%e6%b3%95%e5%ad%90%e3%80%81%e5%8f%8a%e5%b7%9d%e9%9b%ab(on-off).mp4'>Sweet Witches&#39; Night ～6人目はだぁれ～</a>
+  </div>
+  <div class='card-body'>
+    <div class='meta'><span class='label'>作品名</span> <a href='search_all.html?q=%e3%82%a2%e3%82%a4%e3%83%89%e3%83%ab%e3%83%9e%e3%82%b9%e3%82%bf%e3%83%bc+%e3%82%b7%e3%83%b3%e3%83%87%e3%83%ac%e3%83%a9%e3%82%ac%e3%83%bc%e3%83%ab%e3%82%ba+%e3%82%b9%e3%82%bf%e3%83%bc%e3%83%a9%e3%82%a4%e3%83%88%e3%82%b9%e3%83%86%e3%83%bc%e3%82%b8'>アイドルマスター シンデレラガールズ スターライトステージ</a></div>
+    <div class='meta'><span class='label'>歌い手</span> 三村かな子、十時愛梨、森久保乃々、椎名法子、及川雫</div>
+    <div class='meta'><span class='label'>制作者</span> タマ兄</div>
+    <div class='meta'><span class='label'>最終更新日</span> 2017/09/18</div>
+    <div class='meta'><span class='label'>ファイル名</span> <a data-q='%e3%80%90%e3%82%a2%e3%82%a4%e3%83%89%e3%83%ab%e3%83%9e%e3%82%b9%e3%82%bf%e3%83%bc+%e3%82%b7%e3%83%b3%e3%83%87%e3%83%ac%e3%83%a9%e3%82%ac%e3%83%bc%e3%83%ab%e3%82%ba+%e3%82%b9%e3%82%bf%e3%83%bc%e3%83%a9%e3%82%a4%e3%83%88%e3%82%b9%e3%83%86%e3%83%bc%e3%82%b8%e3%80%91Sweet+Witches%27+Night+%ef%bd%9e6%e4%ba%ba%e7%9b%ae%e3%81%af%e3%81%a0%e3%81%81%e3%82%8c%ef%bd%9e%ef%bc%8f%e4%b8%89%e6%9d%91%e3%81%8b%e3%81%aa%e5%ad%90%e3%80%81%e5%8d%81%e6%99%82%e6%84%9b%e6%a2%a8%e3%80%81%e6%a3%ae%e4%b9%85%e4%bf%9d%e4%b9%83%e3%80%85%e3%80%81%e6%a4%8e%e5%90%8d%e6%b3%95%e5%ad%90%e3%80%81%e5%8f%8a%e5%b7%9d%e9%9b%ab(on-off).mp4'>【アイドルマスター シンデレラガールズ スターライトステージ】Sweet Witches&#39; Night ～6人目はだぁれ～／三村かな子、十時愛梨、森久保乃々、椎名法子、及川雫(on-off).mp4</a></div>
+  </div>
+</div>
+<div class='card' data-year='2017' data-yearband='2019-2015' data-updated='20170825' data-priority='2'>
+  <div class='card-title'>
+    <a data-q='%e3%80%90%e3%82%a2%e3%82%a4%e3%83%89%e3%83%ab%e3%83%9e%e3%82%b9%e3%82%bf%e3%83%bc+%e3%83%9f%e3%83%aa%e3%82%aa%e3%83%b3%e3%83%a9%e3%82%a4%e3%83%96%ef%bc%81%e3%82%b7%e3%82%a2%e3%82%bf%e3%83%bc%e3%83%87%e3%82%a4%e3%82%ba%e3%80%91%e7%91%a0%e7%92%83%e8%89%b2%e9%87%91%e9%ad%9a%e3%81%a8%e8%8a%b1%e8%8f%96%e8%92%b2%ef%bc%8f%e7%99%bd%e7%9f%b3%e7%b4%ac(CV.%e5%8d%97%e6%97%a9%e7%b4%80).mp4'>瑠璃色金魚と花菖蒲</a>
+  </div>
+  <div class='card-body'>
+    <div class='meta'><span class='label'>作品名</span> <a href='search_all.html?q=%e3%82%a2%e3%82%a4%e3%83%89%e3%83%ab%e3%83%9e%e3%82%b9%e3%82%bf%e3%83%bc+%e3%83%9f%e3%83%aa%e3%82%aa%e3%83%b3%e3%83%a9%e3%82%a4%e3%83%96%ef%bc%81%e3%82%b7%e3%82%a2%e3%82%bf%e3%83%bc%e3%83%87%e3%82%a4%e3%82%ba'>アイドルマスター ミリオンライブ！シアターデイズ</a></div>
+    <div class='meta'><span class='label'>歌い手</span> 白石紬</div>
+    <div class='meta'><span class='label'>制作者</span> タマ兄</div>
+    <div class='meta'><span class='label'>最終更新日</span> 2017/08/25</div>
+    <div class='meta'><span class='label'>ファイル名</span> <a data-q='%e3%80%90%e3%82%a2%e3%82%a4%e3%83%89%e3%83%ab%e3%83%9e%e3%82%b9%e3%82%bf%e3%83%bc+%e3%83%9f%e3%83%aa%e3%82%aa%e3%83%b3%e3%83%a9%e3%82%a4%e3%83%96%ef%bc%81%e3%82%b7%e3%82%a2%e3%82%bf%e3%83%bc%e3%83%87%e3%82%a4%e3%82%ba%e3%80%91%e7%91%a0%e7%92%83%e8%89%b2%e9%87%91%e9%ad%9a%e3%81%a8%e8%8a%b1%e8%8f%96%e8%92%b2%ef%bc%8f%e7%99%bd%e7%9f%b3%e7%b4%ac(CV.%e5%8d%97%e6%97%a9%e7%b4%80).mp4'>【アイドルマスター ミリオンライブ！シアターデイズ】瑠璃色金魚と花菖蒲／白石紬(CV.南早紀).mp4</a></div>
+  </div>
+</div>
+<div class='card' data-year='2017' data-yearband='2019-2015' data-updated='20170820' data-priority='2'>
+  <div class='card-title'>
+    <a data-q='%e3%80%90%e3%81%b2%e3%81%aa%e3%82%8d%e3%81%98+%ef%bd%9efrom+Luck+%26+Logic%ef%bd%9e%e3%80%91%e3%83%99%e3%82%a3%e3%83%93%e3%82%a3%e3%83%90%e3%83%bc%e3%83%89%ef%bc%81%ef%bd%9e%e3%82%ac%e3%82%af%e3%82%a8%e3%83%b3%e3%83%ad%e3%82%b8%e3%83%83%e3%82%af%ef%bd%9e%ef%bc%8f%e3%83%aa%e3%82%aa%e3%83%b3(%e6%9c%9d%e6%97%a5%e5%a5%88%e4%b8%b8%e4%bd%b3)%e3%80%81%e3%83%8b%e3%83%bc%e3%83%8a(%e5%b1%b1%e6%9d%91+%e9%9f%bf)%e3%80%81%e3%81%be%e3%81%b2%e3%82%8d(%e9%ab%98%e6%a3%ae%e5%a5%88%e6%b4%a5%e7%be%8e).mp4'>ベィビィバード！～ガクエンロジック～</a>
+  </div>
+  <div class='card-body'>
+    <div class='meta'><span class='label'>作品名</span> <a href='search_all.html?q=%e3%81%b2%e3%81%aa%e3%82%8d%e3%81%98+%ef%bd%9efrom+Luck+%26+Logic%ef%bd%9e'>ひなろじ ～from Luck &amp; Logic～</a></div>
+    <div class='meta'><span class='label'>歌い手</span> リオン、ニーナ、まひろ</div>
+    <div class='meta'><span class='label'>制作者</span> タマ兄</div>
+    <div class='meta'><span class='label'>最終更新日</span> 2017/08/20</div>
+    <div class='meta'><span class='label'>ファイル名</span> <a data-q='%e3%80%90%e3%81%b2%e3%81%aa%e3%82%8d%e3%81%98+%ef%bd%9efrom+Luck+%26+Logic%ef%bd%9e%e3%80%91%e3%83%99%e3%82%a3%e3%83%93%e3%82%a3%e3%83%90%e3%83%bc%e3%83%89%ef%bc%81%ef%bd%9e%e3%82%ac%e3%82%af%e3%82%a8%e3%83%b3%e3%83%ad%e3%82%b8%e3%83%83%e3%82%af%ef%bd%9e%ef%bc%8f%e3%83%aa%e3%82%aa%e3%83%b3(%e6%9c%9d%e6%97%a5%e5%a5%88%e4%b8%b8%e4%bd%b3)%e3%80%81%e3%83%8b%e3%83%bc%e3%83%8a(%e5%b1%b1%e6%9d%91+%e9%9f%bf)%e3%80%81%e3%81%be%e3%81%b2%e3%82%8d(%e9%ab%98%e6%a3%ae%e5%a5%88%e6%b4%a5%e7%be%8e).mp4'>【ひなろじ ～from Luck &amp; Logic～】ベィビィバード！～ガクエンロジック～／リオン(朝日奈丸佳)、ニーナ(山村 響)、まひろ(高森奈津美).mp4</a></div>
+  </div>
+</div>
+<div class='card' data-year='2017' data-yearband='2019-2015' data-updated='20170815' data-priority='2'>
+  <div class='card-title'>
+    <a data-q='%e3%80%90%e3%82%a2%e3%82%a4%e3%83%89%e3%83%ab%e3%83%9e%e3%82%b9%e3%82%bf%e3%83%bc+%e3%83%9f%e3%83%aa%e3%82%aa%e3%83%b3%e3%83%a9%e3%82%a4%e3%83%96%ef%bc%81%e3%82%b7%e3%82%a2%e3%82%bf%e3%83%bc%e3%83%87%e3%82%a4%e3%82%ba%e3%80%91Brand+New+Theater!%ef%bc%8f765+MILLION+ALLSTARS.mp4'>Brand New Theater!</a>
+  </div>
+  <div class='card-body'>
+    <div class='meta'><span class='label'>作品名</span> <a href='search_all.html?q=%e3%82%a2%e3%82%a4%e3%83%89%e3%83%ab%e3%83%9e%e3%82%b9%e3%82%bf%e3%83%bc+%e3%83%9f%e3%83%aa%e3%82%aa%e3%83%b3%e3%83%a9%e3%82%a4%e3%83%96%ef%bc%81%e3%82%b7%e3%82%a2%e3%82%bf%e3%83%bc%e3%83%87%e3%82%a4%e3%82%ba'>アイドルマスター ミリオンライブ！シアターデイズ</a></div>
+    <div class='meta'><span class='label'>歌い手</span> 765 MILLION ALLSTARS</div>
+    <div class='meta'><span class='label'>制作者</span> タマ兄</div>
+    <div class='meta'><span class='label'>最終更新日</span> 2017/08/15</div>
+    <div class='meta'><span class='label'>ファイル名</span> <a data-q='%e3%80%90%e3%82%a2%e3%82%a4%e3%83%89%e3%83%ab%e3%83%9e%e3%82%b9%e3%82%bf%e3%83%bc+%e3%83%9f%e3%83%aa%e3%82%aa%e3%83%b3%e3%83%a9%e3%82%a4%e3%83%96%ef%bc%81%e3%82%b7%e3%82%a2%e3%82%bf%e3%83%bc%e3%83%87%e3%82%a4%e3%82%ba%e3%80%91Brand+New+Theater!%ef%bc%8f765+MILLION+ALLSTARS.mp4'>【アイドルマスター ミリオンライブ！シアターデイズ】Brand New Theater!／765 MILLION ALLSTARS.mp4</a></div>
+  </div>
+</div>
+<div class='card' data-year='2017' data-yearband='2019-2015' data-updated='20170810' data-priority='2'>
+  <div class='card-title'>
+    <a data-q='%e3%80%90%e3%82%a2%e3%82%a4%e3%83%89%e3%83%ab%e3%83%9e%e3%82%b9%e3%82%bf%e3%83%bc+%e3%82%b7%e3%83%b3%e3%83%87%e3%83%ac%e3%83%a9%e3%82%ac%e3%83%bc%e3%83%ab%e3%82%ba+%e3%82%b9%e3%82%bf%e3%83%bc%e3%83%a9%e3%82%a4%e3%83%88%e3%82%b9%e3%83%86%e3%83%bc%e3%82%b8%e3%80%91%e5%91%bd%e7%87%83%e3%82%84%e3%81%97%e3%81%a6%e6%81%8b%e3%81%9b%e3%82%88%e4%b9%99%e5%a5%b3%ef%bc%8f%e9%ab%98%e5%9e%a3%e6%a5%93%e3%80%81%e4%bd%90%e8%97%a4%e5%bf%83%e3%80%81%e4%b8%89%e8%88%b9%e7%be%8e%e5%84%aa%e3%80%81%e5%ae%89%e9%83%a8%e8%8f%9c%e3%80%85%e3%80%81%e7%89%87%e6%a1%90%e6%97%a9%e8%8b%97(on-off).mp4'>命燃やして恋せよ乙女</a>
+  </div>
+  <div class='card-body'>
+    <div class='meta'><span class='label'>作品名</span> <a href='search_all.html?q=%e3%82%a2%e3%82%a4%e3%83%89%e3%83%ab%e3%83%9e%e3%82%b9%e3%82%bf%e3%83%bc+%e3%82%b7%e3%83%b3%e3%83%87%e3%83%ac%e3%83%a9%e3%82%ac%e3%83%bc%e3%83%ab%e3%82%ba+%e3%82%b9%e3%82%bf%e3%83%bc%e3%83%a9%e3%82%a4%e3%83%88%e3%82%b9%e3%83%86%e3%83%bc%e3%82%b8'>アイドルマスター シンデレラガールズ スターライトステージ</a></div>
+    <div class='meta'><span class='label'>歌い手</span> 高垣楓、佐藤心、三船美優、安部菜々、片桐早苗</div>
+    <div class='meta'><span class='label'>制作者</span> タマ兄</div>
+    <div class='meta'><span class='label'>最終更新日</span> 2017/08/10</div>
+    <div class='meta'><span class='label'>ファイル名</span> <a data-q='%e3%80%90%e3%82%a2%e3%82%a4%e3%83%89%e3%83%ab%e3%83%9e%e3%82%b9%e3%82%bf%e3%83%bc+%e3%82%b7%e3%83%b3%e3%83%87%e3%83%ac%e3%83%a9%e3%82%ac%e3%83%bc%e3%83%ab%e3%82%ba+%e3%82%b9%e3%82%bf%e3%83%bc%e3%83%a9%e3%82%a4%e3%83%88%e3%82%b9%e3%83%86%e3%83%bc%e3%82%b8%e3%80%91%e5%91%bd%e7%87%83%e3%82%84%e3%81%97%e3%81%a6%e6%81%8b%e3%81%9b%e3%82%88%e4%b9%99%e5%a5%b3%ef%bc%8f%e9%ab%98%e5%9e%a3%e6%a5%93%e3%80%81%e4%bd%90%e8%97%a4%e5%bf%83%e3%80%81%e4%b8%89%e8%88%b9%e7%be%8e%e5%84%aa%e3%80%81%e5%ae%89%e9%83%a8%e8%8f%9c%e3%80%85%e3%80%81%e7%89%87%e6%a1%90%e6%97%a9%e8%8b%97(on-off).mp4'>【アイドルマスター シンデレラガールズ スターライトステージ】命燃やして恋せよ乙女／高垣楓、佐藤心、三船美優、安部菜々、片桐早苗(on-off).mp4</a></div>
+  </div>
+</div>
+<div class='card' data-year='2017' data-yearband='2019-2015' data-updated='20170810' data-priority='2'>
+  <div class='card-title'>
+    <a data-q='%e3%80%90NEW+GAME!!%e3%80%91JUMPin%27+JUMP+UP!!!!(%e3%83%91%e3%83%bc%e3%83%88%e5%88%86%e3%81%91)%ef%bc%8ffourfolium(on-off).mp4'>JUMPin&#39; JUMP UP!!!!(パート分け)</a>
+  </div>
+  <div class='card-body'>
+    <div class='meta'><span class='label'>作品名</span> <a href='search_all.html?q=NEW+GAME!!'>NEW GAME!!</a></div>
+    <div class='meta'><span class='label'>歌い手</span> fourfolium</div>
+    <div class='meta'><span class='label'>制作者</span> タマ兄</div>
+    <div class='meta'><span class='label'>最終更新日</span> 2017/08/10</div>
+    <div class='meta'><span class='label'>ファイル名</span> <a data-q='%e3%80%90NEW+GAME!!%e3%80%91JUMPin%27+JUMP+UP!!!!(%e3%83%91%e3%83%bc%e3%83%88%e5%88%86%e3%81%91)%ef%bc%8ffourfolium(on-off).mp4'>【NEW GAME!!】JUMPin&#39; JUMP UP!!!!(パート分け)／fourfolium(on-off).mp4</a></div>
+  </div>
+</div>
+<div class='card' data-year='2017' data-yearband='2019-2015' data-updated='20170807' data-priority='2'>
+  <div class='card-title'>
+    <a data-q='%e3%80%90%e5%a4%a9%e4%bd%bf%e3%81%ae3P!%e3%80%91%e7%be%bd%e3%81%b0%e3%81%9f%e3%81%8d%e3%81%ae%e3%83%90%e3%83%bc%e3%82%b9%e3%83%87%e3%82%a4%ef%bc%8fBaby%e2%80%99s+breath(on-off).mp4'>羽ばたきのバースデイ</a>
+  </div>
+  <div class='card-body'>
+    <div class='meta'><span class='label'>作品名</span> <a href='search_all.html?q=%e5%a4%a9%e4%bd%bf%e3%81%ae3P!'>天使の3P!</a></div>
+    <div class='meta'><span class='label'>歌い手</span> Baby’s breath</div>
+    <div class='meta'><span class='label'>制作者</span> タマ兄</div>
+    <div class='meta'><span class='label'>最終更新日</span> 2017/08/07</div>
+    <div class='meta'><span class='label'>ファイル名</span> <a data-q='%e3%80%90%e5%a4%a9%e4%bd%bf%e3%81%ae3P!%e3%80%91%e7%be%bd%e3%81%b0%e3%81%9f%e3%81%8d%e3%81%ae%e3%83%90%e3%83%bc%e3%82%b9%e3%83%87%e3%82%a4%ef%bc%8fBaby%e2%80%99s+breath(on-off).mp4'>【天使の3P!】羽ばたきのバースデイ／Baby’s breath(on-off).mp4</a></div>
+  </div>
+</div>
+<div class='card' data-year='2017' data-yearband='2019-2015' data-updated='20170806' data-priority='2'>
+  <div class='card-title'>
+    <a data-q='%e3%80%90%e3%81%b2%e3%81%aa%e3%82%8d%e3%81%98+%ef%bd%9efrom+Luck+%26+Logic%ef%bd%9e%e3%80%91BUTTERFLY+EFFECTOR%ef%bc%8fTRUE(on-off).mp4'>BUTTERFLY EFFECTOR</a>
+  </div>
+  <div class='card-body'>
+    <div class='meta'><span class='label'>作品名</span> <a href='search_all.html?q=%e3%81%b2%e3%81%aa%e3%82%8d%e3%81%98+%ef%bd%9efrom+Luck+%26+Logic%ef%bd%9e'>ひなろじ ～from Luck &amp; Logic～</a></div>
+    <div class='meta'><span class='label'>歌い手</span> TRUE</div>
+    <div class='meta'><span class='label'>制作者</span> タマ兄</div>
+    <div class='meta'><span class='label'>最終更新日</span> 2017/08/06</div>
+    <div class='meta'><span class='label'>ファイル名</span> <a data-q='%e3%80%90%e3%81%b2%e3%81%aa%e3%82%8d%e3%81%98+%ef%bd%9efrom+Luck+%26+Logic%ef%bd%9e%e3%80%91BUTTERFLY+EFFECTOR%ef%bc%8fTRUE(on-off).mp4'>【ひなろじ ～from Luck &amp; Logic～】BUTTERFLY EFFECTOR／TRUE(on-off).mp4</a></div>
+  </div>
+</div>
+<div class='card' data-year='2017' data-yearband='2019-2015' data-updated='20170722' data-priority='2'>
+  <div class='card-title'>
+    <a data-q='%e3%80%90%e3%82%a2%e3%82%a4%e3%83%89%e3%83%ab%e3%83%9e%e3%82%b9%e3%82%bf%e3%83%bc+%e3%82%b7%e3%83%b3%e3%83%87%e3%83%ac%e3%83%a9%e3%82%ac%e3%83%bc%e3%83%ab%e3%82%ba+%e3%82%b9%e3%82%bf%e3%83%bc%e3%83%a9%e3%82%a4%e3%83%88%e3%82%b9%e3%83%86%e3%83%bc%e3%82%b8%e3%80%91%e6%81%8b%e8%89%b2%e3%82%a8%e3%83%8a%e3%82%b8%e3%83%bc%ef%bc%8f%e4%b8%ad%e9%87%8e%e6%9c%89%e9%a6%99%ef%bc%88%e4%b8%8b%e5%9c%b0%e7%b4%ab%e9%87%8e%ef%bc%89(on-off).mp4'>恋色エナジー</a>
+  </div>
+  <div class='card-body'>
+    <div class='meta'><span class='label'>作品名</span> <a href='search_all.html?q=%e3%82%a2%e3%82%a4%e3%83%89%e3%83%ab%e3%83%9e%e3%82%b9%e3%82%bf%e3%83%bc+%e3%82%b7%e3%83%b3%e3%83%87%e3%83%ac%e3%83%a9%e3%82%ac%e3%83%bc%e3%83%ab%e3%82%ba+%e3%82%b9%e3%82%bf%e3%83%bc%e3%83%a9%e3%82%a4%e3%83%88%e3%82%b9%e3%83%86%e3%83%bc%e3%82%b8'>アイドルマスター シンデレラガールズ スターライトステージ</a></div>
+    <div class='meta'><span class='label'>歌い手</span> 中野有香（下地紫野）</div>
+    <div class='meta'><span class='label'>制作者</span> タマ兄</div>
+    <div class='meta'><span class='label'>最終更新日</span> 2017/07/22</div>
+    <div class='meta'><span class='label'>ファイル名</span> <a data-q='%e3%80%90%e3%82%a2%e3%82%a4%e3%83%89%e3%83%ab%e3%83%9e%e3%82%b9%e3%82%bf%e3%83%bc+%e3%82%b7%e3%83%b3%e3%83%87%e3%83%ac%e3%83%a9%e3%82%ac%e3%83%bc%e3%83%ab%e3%82%ba+%e3%82%b9%e3%82%bf%e3%83%bc%e3%83%a9%e3%82%a4%e3%83%88%e3%82%b9%e3%83%86%e3%83%bc%e3%82%b8%e3%80%91%e6%81%8b%e8%89%b2%e3%82%a8%e3%83%8a%e3%82%b8%e3%83%bc%ef%bc%8f%e4%b8%ad%e9%87%8e%e6%9c%89%e9%a6%99%ef%bc%88%e4%b8%8b%e5%9c%b0%e7%b4%ab%e9%87%8e%ef%bc%89(on-off).mp4'>【アイドルマスター シンデレラガールズ スターライトステージ】恋色エナジー／中野有香（下地紫野）(on-off).mp4</a></div>
+  </div>
+</div>
+<div class='card' data-year='2017' data-yearband='2019-2015' data-updated='20170709' data-priority='2'>
+  <div class='card-title'>
+    <a data-q='%e3%80%90%e3%82%a2%e3%82%a4%e3%83%89%e3%83%ab%e3%83%9e%e3%82%b9%e3%82%bf%e3%83%bc+%e3%82%b7%e3%83%b3%e3%83%87%e3%83%ac%e3%83%a9%e3%82%ac%e3%83%bc%e3%83%ab%e3%82%ba%e5%8a%87%e5%a0%b4%e3%80%91SUN+FLOWER%ef%bc%8f%e6%9c%ac%e7%94%b0%e6%9c%aa%e5%a4%ae%e3%80%81%e7%89%87%e6%a1%90%e6%97%a9%e8%8b%97%e3%80%81%e4%bd%90%e8%97%a4%e5%bf%83%e3%80%81%e5%9f%8e%e3%83%b6%e5%b4%8e%e7%be%8e%e5%98%89%e3%80%81%e8%ab%b8%e6%98%9f%e3%81%8d%e3%82%89%e3%82%8a(2ch).mp4'>SUN FLOWER</a>
+  </div>
+  <div class='card-body'>
+    <div class='meta'><span class='label'>作品名</span> <a href='search_all.html?q=%e3%82%a2%e3%82%a4%e3%83%89%e3%83%ab%e3%83%9e%e3%82%b9%e3%82%bf%e3%83%bc+%e3%82%b7%e3%83%b3%e3%83%87%e3%83%ac%e3%83%a9%e3%82%ac%e3%83%bc%e3%83%ab%e3%82%ba%e5%8a%87%e5%a0%b4'>アイドルマスター シンデレラガールズ劇場</a></div>
+    <div class='meta'><span class='label'>歌い手</span> 本田未央、片桐早苗、佐藤心、城ヶ崎美嘉、諸星きらり</div>
+    <div class='meta'><span class='label'>制作者</span> タマ兄</div>
+    <div class='meta'><span class='label'>最終更新日</span> 2017/07/09</div>
+    <div class='meta'><span class='label'>ファイル名</span> <a data-q='%e3%80%90%e3%82%a2%e3%82%a4%e3%83%89%e3%83%ab%e3%83%9e%e3%82%b9%e3%82%bf%e3%83%bc+%e3%82%b7%e3%83%b3%e3%83%87%e3%83%ac%e3%83%a9%e3%82%ac%e3%83%bc%e3%83%ab%e3%82%ba%e5%8a%87%e5%a0%b4%e3%80%91SUN+FLOWER%ef%bc%8f%e6%9c%ac%e7%94%b0%e6%9c%aa%e5%a4%ae%e3%80%81%e7%89%87%e6%a1%90%e6%97%a9%e8%8b%97%e3%80%81%e4%bd%90%e8%97%a4%e5%bf%83%e3%80%81%e5%9f%8e%e3%83%b6%e5%b4%8e%e7%be%8e%e5%98%89%e3%80%81%e8%ab%b8%e6%98%9f%e3%81%8d%e3%82%89%e3%82%8a(2ch).mp4'>【アイドルマスター シンデレラガールズ劇場】SUN FLOWER／本田未央、片桐早苗、佐藤心、城ヶ崎美嘉、諸星きらり(2ch).mp4</a></div>
+  </div>
+</div>
+<div class='card' data-year='2017' data-yearband='2019-2015' data-updated='20170624' data-priority='2'>
+  <div class='card-title'>
+    <a data-q='%e3%80%90%e3%82%a2%e3%82%a4%e3%83%89%e3%83%ab%e3%83%9e%e3%82%b9%e3%82%bf%e3%83%bc+%e3%82%b7%e3%83%b3%e3%83%87%e3%83%ac%e3%83%a9%e3%82%ac%e3%83%bc%e3%83%ab%e3%82%ba+%e3%82%b9%e3%82%bf%e3%83%bc%e3%83%a9%e3%82%a4%e3%83%88%e3%82%b9%e3%83%86%e3%83%bc%e3%82%b8%e3%80%91%e7%b4%94%e6%83%85Midnight%e4%bc%9d%e8%aa%ac%ef%bc%8f%e5%90%91%e4%ba%95%e6%8b%93%e6%b5%b7%e3%80%81%e8%97%a4%e6%9c%ac%e9%87%8c%e5%a5%88%e3%80%81%e6%9d%be%e6%b0%b8%e6%b6%bc%e3%80%81%e5%a4%a7%e5%92%8c%e4%ba%9c%e5%ad%a3%e3%80%81%e6%9c%a8%e6%9d%91%e5%a4%8f%e6%a8%b9(2ch).mp4'>純情Midnight伝説</a>
+  </div>
+  <div class='card-body'>
+    <div class='meta'><span class='label'>作品名</span> <a href='search_all.html?q=%e3%82%a2%e3%82%a4%e3%83%89%e3%83%ab%e3%83%9e%e3%82%b9%e3%82%bf%e3%83%bc+%e3%82%b7%e3%83%b3%e3%83%87%e3%83%ac%e3%83%a9%e3%82%ac%e3%83%bc%e3%83%ab%e3%82%ba+%e3%82%b9%e3%82%bf%e3%83%bc%e3%83%a9%e3%82%a4%e3%83%88%e3%82%b9%e3%83%86%e3%83%bc%e3%82%b8'>アイドルマスター シンデレラガールズ スターライトステージ</a></div>
+    <div class='meta'><span class='label'>歌い手</span> 向井拓海、藤本里奈、松永涼、大和亜季、木村夏樹</div>
+    <div class='meta'><span class='label'>制作者</span> タマ兄</div>
+    <div class='meta'><span class='label'>最終更新日</span> 2017/06/24</div>
+    <div class='meta'><span class='label'>ファイル名</span> <a data-q='%e3%80%90%e3%82%a2%e3%82%a4%e3%83%89%e3%83%ab%e3%83%9e%e3%82%b9%e3%82%bf%e3%83%bc+%e3%82%b7%e3%83%b3%e3%83%87%e3%83%ac%e3%83%a9%e3%82%ac%e3%83%bc%e3%83%ab%e3%82%ba+%e3%82%b9%e3%82%bf%e3%83%bc%e3%83%a9%e3%82%a4%e3%83%88%e3%82%b9%e3%83%86%e3%83%bc%e3%82%b8%e3%80%91%e7%b4%94%e6%83%85Midnight%e4%bc%9d%e8%aa%ac%ef%bc%8f%e5%90%91%e4%ba%95%e6%8b%93%e6%b5%b7%e3%80%81%e8%97%a4%e6%9c%ac%e9%87%8c%e5%a5%88%e3%80%81%e6%9d%be%e6%b0%b8%e6%b6%bc%e3%80%81%e5%a4%a7%e5%92%8c%e4%ba%9c%e5%ad%a3%e3%80%81%e6%9c%a8%e6%9d%91%e5%a4%8f%e6%a8%b9(2ch).mp4'>【アイドルマスター シンデレラガールズ スターライトステージ】純情Midnight伝説／向井拓海、藤本里奈、松永涼、大和亜季、木村夏樹(2ch).mp4</a></div>
+  </div>
+</div>
+<div class='card' data-year='2017' data-yearband='2019-2015' data-updated='20170624' data-priority='2'>
+  <div class='card-title'>
+    <a data-q='%e3%80%90NEW+GAME!+-THE+CHALLENGE+STAGE%ef%bc%81-%e3%80%91%e5%90%91%e4%b8%8a%e4%b8%8a%e3%80%85%e3%83%8f%e3%82%a4%e3%82%b8%e3%83%a3%e3%83%b3%e3%83%97%e2%86%91%e2%86%91%e2%86%91%e2%86%91%ef%bc%8ffourfolium.mp4'>向上上々ハイジャンプ↑↑↑↑</a>
+  </div>
+  <div class='card-body'>
+    <div class='meta'><span class='label'>作品名</span> <a href='search_all.html?q=NEW+GAME!+-THE+CHALLENGE+STAGE%ef%bc%81-'>NEW GAME! -THE CHALLENGE STAGE！-</a></div>
+    <div class='meta'><span class='label'>歌い手</span> fourfolium</div>
+    <div class='meta'><span class='label'>制作者</span> タマ兄</div>
+    <div class='meta'><span class='label'>最終更新日</span> 2017/06/24</div>
+    <div class='meta'><span class='label'>ファイル名</span> <a data-q='%e3%80%90NEW+GAME!+-THE+CHALLENGE+STAGE%ef%bc%81-%e3%80%91%e5%90%91%e4%b8%8a%e4%b8%8a%e3%80%85%e3%83%8f%e3%82%a4%e3%82%b8%e3%83%a3%e3%83%b3%e3%83%97%e2%86%91%e2%86%91%e2%86%91%e2%86%91%ef%bc%8ffourfolium.mp4'>【NEW GAME! -THE CHALLENGE STAGE！-】向上上々ハイジャンプ↑↑↑↑／fourfolium.mp4</a></div>
+  </div>
+</div>
+<div class='card' data-year='2017' data-yearband='2019-2015' data-updated='20170621' data-priority='2'>
+  <div class='card-title'>
+    <a data-q='%e3%80%90%e3%82%a2%e3%82%a4%e3%83%89%e3%83%ab%e3%83%9e%e3%82%b9%e3%82%bf%e3%83%bc+%e3%82%b7%e3%83%b3%e3%83%87%e3%83%ac%e3%83%a9%e3%82%ac%e3%83%bc%e3%83%ab%e3%82%ba+%e3%83%93%e3%83%a5%e3%83%bc%e3%82%a4%e3%83%b3%e3%82%b0%e3%83%ac%e3%83%9c%e3%83%aa%e3%83%a5%e3%83%bc%e3%82%b7%e3%83%a7%e3%83%b3%e3%80%91Yes!+Party+Time!!%ef%bc%8f%e5%b3%b6%e6%9d%91%e5%8d%af%e6%9c%88%e3%80%81%e6%b8%8b%e8%b0%b7%e5%87%9b%e3%80%81%e6%9c%ac%e7%94%b0%e6%9c%aa%e5%a4%ae%e3%80%81%e8%b5%a4%e5%9f%8e%e3%81%bf%e3%82%8a%e3%81%82%e3%80%81%e5%ae%89%e9%83%a8%e8%8f%9c%e3%80%85.mp4'>Yes! Party Time!!</a>
+  </div>
+  <div class='card-body'>
+    <div class='meta'><span class='label'>作品名</span> <a href='search_all.html?q=%e3%82%a2%e3%82%a4%e3%83%89%e3%83%ab%e3%83%9e%e3%82%b9%e3%82%bf%e3%83%bc+%e3%82%b7%e3%83%b3%e3%83%87%e3%83%ac%e3%83%a9%e3%82%ac%e3%83%bc%e3%83%ab%e3%82%ba+%e3%83%93%e3%83%a5%e3%83%bc%e3%82%a4%e3%83%b3%e3%82%b0%e3%83%ac%e3%83%9c%e3%83%aa%e3%83%a5%e3%83%bc%e3%82%b7%e3%83%a7%e3%83%b3'>アイドルマスター シンデレラガールズ ビューイングレボリューション</a></div>
+    <div class='meta'><span class='label'>歌い手</span> 島村卯月、渋谷凛、本田未央、赤城みりあ、安部菜々</div>
+    <div class='meta'><span class='label'>制作者</span> タマ兄</div>
+    <div class='meta'><span class='label'>最終更新日</span> 2017/06/21</div>
+    <div class='meta'><span class='label'>ファイル名</span> <a data-q='%e3%80%90%e3%82%a2%e3%82%a4%e3%83%89%e3%83%ab%e3%83%9e%e3%82%b9%e3%82%bf%e3%83%bc+%e3%82%b7%e3%83%b3%e3%83%87%e3%83%ac%e3%83%a9%e3%82%ac%e3%83%bc%e3%83%ab%e3%82%ba+%e3%83%93%e3%83%a5%e3%83%bc%e3%82%a4%e3%83%b3%e3%82%b0%e3%83%ac%e3%83%9c%e3%83%aa%e3%83%a5%e3%83%bc%e3%82%b7%e3%83%a7%e3%83%b3%e3%80%91Yes!+Party+Time!!%ef%bc%8f%e5%b3%b6%e6%9d%91%e5%8d%af%e6%9c%88%e3%80%81%e6%b8%8b%e8%b0%b7%e5%87%9b%e3%80%81%e6%9c%ac%e7%94%b0%e6%9c%aa%e5%a4%ae%e3%80%81%e8%b5%a4%e5%9f%8e%e3%81%bf%e3%82%8a%e3%81%82%e3%80%81%e5%ae%89%e9%83%a8%e8%8f%9c%e3%80%85.mp4'>【アイドルマスター シンデレラガールズ ビューイングレボリューション】Yes! Party Time!!／島村卯月、渋谷凛、本田未央、赤城みりあ、安部菜々.mp4</a></div>
+  </div>
+</div>
+<div class='card' data-year='2017' data-yearband='2019-2015' data-updated='20170617' data-priority='2'>
+  <div class='card-title'>
+    <a data-q='%e3%80%90%e5%86%b4%e3%81%88%e3%81%aa%e3%81%84%e5%bd%bc%e5%a5%b3%e3%81%ae%e8%82%b2%e3%81%a6%e3%81%8b%e3%81%9f%e2%99%ad%e3%80%91%e6%a1%9c%e8%89%b2%e3%83%80%e3%82%a4%e3%82%a2%e3%83%aa%e3%83%bc%ef%bc%8f%e5%a6%84%e6%83%b3%e3%82%ad%e3%83%a3%e3%83%aa%e3%83%96%e3%83%ac%e3%83%bc%e3%82%b7%e3%83%a7%e3%83%b3(2ch).mp4'>桜色ダイアリー</a>
+  </div>
+  <div class='card-body'>
+    <div class='meta'><span class='label'>作品名</span> <a href='search_all.html?q=%e5%86%b4%e3%81%88%e3%81%aa%e3%81%84%e5%bd%bc%e5%a5%b3%e3%81%ae%e8%82%b2%e3%81%a6%e3%81%8b%e3%81%9f%e2%99%ad'>冴えない彼女の育てかた♭</a></div>
+    <div class='meta'><span class='label'>歌い手</span> 妄想キャリブレーション</div>
+    <div class='meta'><span class='label'>制作者</span> タマ兄</div>
+    <div class='meta'><span class='label'>最終更新日</span> 2017/06/17</div>
+    <div class='meta'><span class='label'>ファイル名</span> <a data-q='%e3%80%90%e5%86%b4%e3%81%88%e3%81%aa%e3%81%84%e5%bd%bc%e5%a5%b3%e3%81%ae%e8%82%b2%e3%81%a6%e3%81%8b%e3%81%9f%e2%99%ad%e3%80%91%e6%a1%9c%e8%89%b2%e3%83%80%e3%82%a4%e3%82%a2%e3%83%aa%e3%83%bc%ef%bc%8f%e5%a6%84%e6%83%b3%e3%82%ad%e3%83%a3%e3%83%aa%e3%83%96%e3%83%ac%e3%83%bc%e3%82%b7%e3%83%a7%e3%83%b3(2ch).mp4'>【冴えない彼女の育てかた♭】桜色ダイアリー／妄想キャリブレーション(2ch).mp4</a></div>
+  </div>
+</div>
+<div class='card' data-year='2017' data-yearband='2019-2015' data-updated='20170611' data-priority='2'>
+  <div class='card-title'>
+    <a data-q='%e3%80%90%e3%82%a2%e3%82%a4%e3%83%89%e3%83%ab%e3%83%9e%e3%82%b9%e3%82%bf%e3%83%bc+%e3%82%b7%e3%83%b3%e3%83%87%e3%83%ac%e3%83%a9%e3%82%ac%e3%83%bc%e3%83%ab%e3%82%ba+%e3%82%b9%e3%82%bf%e3%83%bc%e3%83%a9%e3%82%a4%e3%83%88%e3%82%b9%e3%83%86%e3%83%bc%e3%82%b8%e3%80%91%e3%81%82%e3%82%93%e3%81%8d%e3%82%89%ef%bc%81%ef%bc%9f%e7%8b%82%e9%a8%92%e6%9b%b2(%e3%83%91%e3%83%bc%e3%83%88%e5%88%86)%ef%bc%8f%e5%8f%8c%e8%91%89%e6%9d%8f+%26+%e8%ab%b8%e6%98%9f%e3%81%8d%e3%82%89%e3%82%8a.mp4'>あんきら！？狂騒曲(パート分)</a>
+  </div>
+  <div class='card-body'>
+    <div class='meta'><span class='label'>作品名</span> <a href='search_all.html?q=%e3%82%a2%e3%82%a4%e3%83%89%e3%83%ab%e3%83%9e%e3%82%b9%e3%82%bf%e3%83%bc+%e3%82%b7%e3%83%b3%e3%83%87%e3%83%ac%e3%83%a9%e3%82%ac%e3%83%bc%e3%83%ab%e3%82%ba+%e3%82%b9%e3%82%bf%e3%83%bc%e3%83%a9%e3%82%a4%e3%83%88%e3%82%b9%e3%83%86%e3%83%bc%e3%82%b8'>アイドルマスター シンデレラガールズ スターライトステージ</a></div>
+    <div class='meta'><span class='label'>歌い手</span> 双葉杏 &amp; 諸星きらり</div>
+    <div class='meta'><span class='label'>制作者</span> タマ兄</div>
+    <div class='meta'><span class='label'>最終更新日</span> 2017/06/11</div>
+    <div class='meta'><span class='label'>ファイル名</span> <a data-q='%e3%80%90%e3%82%a2%e3%82%a4%e3%83%89%e3%83%ab%e3%83%9e%e3%82%b9%e3%82%bf%e3%83%bc+%e3%82%b7%e3%83%b3%e3%83%87%e3%83%ac%e3%83%a9%e3%82%ac%e3%83%bc%e3%83%ab%e3%82%ba+%e3%82%b9%e3%82%bf%e3%83%bc%e3%83%a9%e3%82%a4%e3%83%88%e3%82%b9%e3%83%86%e3%83%bc%e3%82%b8%e3%80%91%e3%81%82%e3%82%93%e3%81%8d%e3%82%89%ef%bc%81%ef%bc%9f%e7%8b%82%e9%a8%92%e6%9b%b2(%e3%83%91%e3%83%bc%e3%83%88%e5%88%86)%ef%bc%8f%e5%8f%8c%e8%91%89%e6%9d%8f+%26+%e8%ab%b8%e6%98%9f%e3%81%8d%e3%82%89%e3%82%8a.mp4'>【アイドルマスター シンデレラガールズ スターライトステージ】あんきら！？狂騒曲(パート分)／双葉杏 &amp; 諸星きらり.mp4</a></div>
+  </div>
+</div>
+<div class='card' data-year='2017' data-yearband='2019-2015' data-updated='20170603' data-priority='2'>
+  <div class='card-title'>
+    <a data-q='%e3%80%90%e3%82%a2%e3%82%a4%e3%83%89%e3%83%ab%e3%83%9e%e3%82%b9%e3%82%bf%e3%83%bc+%e3%82%b7%e3%83%b3%e3%83%87%e3%83%ac%e3%83%a9%e3%82%ac%e3%83%bc%e3%83%ab%e3%82%ba+%e3%82%b9%e3%82%bf%e3%83%bc%e3%83%a9%e3%82%a4%e3%83%88%e3%82%b9%e3%83%86%e3%83%bc%e3%82%b8%e3%80%91Tulip%ef%bc%8f%e9%80%9f%e6%b0%b4%e5%a5%8f%e3%80%81%e5%a1%a9%e8%a6%8b%e5%91%a8%e5%ad%90%e3%80%81%e5%9f%8e%e3%83%b6%e5%b4%8e%e7%be%8e%e5%98%89%e3%80%81%e5%ae%ae%e6%9c%ac%e3%83%95%e3%83%ac%e3%83%87%e3%83%aa%e3%82%ab%e3%80%81%e4%b8%80%e3%83%8e%e7%80%ac%e5%bf%97%e5%b8%8c.mp4'>Tulip</a>
+  </div>
+  <div class='card-body'>
+    <div class='meta'><span class='label'>作品名</span> <a href='search_all.html?q=%e3%82%a2%e3%82%a4%e3%83%89%e3%83%ab%e3%83%9e%e3%82%b9%e3%82%bf%e3%83%bc+%e3%82%b7%e3%83%b3%e3%83%87%e3%83%ac%e3%83%a9%e3%82%ac%e3%83%bc%e3%83%ab%e3%82%ba+%e3%82%b9%e3%82%bf%e3%83%bc%e3%83%a9%e3%82%a4%e3%83%88%e3%82%b9%e3%83%86%e3%83%bc%e3%82%b8'>アイドルマスター シンデレラガールズ スターライトステージ</a></div>
+    <div class='meta'><span class='label'>歌い手</span> 速水奏、塩見周子、城ヶ崎美嘉、宮本フレデリカ、一ノ瀬志希</div>
+    <div class='meta'><span class='label'>制作者</span> タマ兄</div>
+    <div class='meta'><span class='label'>最終更新日</span> 2017/06/03</div>
+    <div class='meta'><span class='label'>ファイル名</span> <a data-q='%e3%80%90%e3%82%a2%e3%82%a4%e3%83%89%e3%83%ab%e3%83%9e%e3%82%b9%e3%82%bf%e3%83%bc+%e3%82%b7%e3%83%b3%e3%83%87%e3%83%ac%e3%83%a9%e3%82%ac%e3%83%bc%e3%83%ab%e3%82%ba+%e3%82%b9%e3%82%bf%e3%83%bc%e3%83%a9%e3%82%a4%e3%83%88%e3%82%b9%e3%83%86%e3%83%bc%e3%82%b8%e3%80%91Tulip%ef%bc%8f%e9%80%9f%e6%b0%b4%e5%a5%8f%e3%80%81%e5%a1%a9%e8%a6%8b%e5%91%a8%e5%ad%90%e3%80%81%e5%9f%8e%e3%83%b6%e5%b4%8e%e7%be%8e%e5%98%89%e3%80%81%e5%ae%ae%e6%9c%ac%e3%83%95%e3%83%ac%e3%83%87%e3%83%aa%e3%82%ab%e3%80%81%e4%b8%80%e3%83%8e%e7%80%ac%e5%bf%97%e5%b8%8c.mp4'>【アイドルマスター シンデレラガールズ スターライトステージ】Tulip／速水奏、塩見周子、城ヶ崎美嘉、宮本フレデリカ、一ノ瀬志希.mp4</a></div>
+  </div>
+</div>
+<div class='card' data-year='2017' data-yearband='2019-2015' data-updated='20170603' data-priority='2'>
+  <div class='card-title'>
+    <a data-q='%e3%80%90%e3%82%a2%e3%83%aa%e3%82%b9%e3%81%a8%e8%94%b5%e5%85%ad%e3%80%91%e3%83%af%e3%83%b3%e3%83%80%e3%83%bc%e3%83%89%e3%83%a9%e3%82%a4%e3%83%96%ef%bc%8fORESAMA.mp4'>ワンダードライブ</a>
+  </div>
+  <div class='card-body'>
+    <div class='meta'><span class='label'>作品名</span> <a href='search_all.html?q=%e3%82%a2%e3%83%aa%e3%82%b9%e3%81%a8%e8%94%b5%e5%85%ad'>アリスと蔵六</a></div>
+    <div class='meta'><span class='label'>歌い手</span> ORESAMA</div>
+    <div class='meta'><span class='label'>制作者</span> タマ兄</div>
+    <div class='meta'><span class='label'>最終更新日</span> 2017/06/03</div>
+    <div class='meta'><span class='label'>ファイル名</span> <a data-q='%e3%80%90%e3%82%a2%e3%83%aa%e3%82%b9%e3%81%a8%e8%94%b5%e5%85%ad%e3%80%91%e3%83%af%e3%83%b3%e3%83%80%e3%83%bc%e3%83%89%e3%83%a9%e3%82%a4%e3%83%96%ef%bc%8fORESAMA.mp4'>【アリスと蔵六】ワンダードライブ／ORESAMA.mp4</a></div>
+  </div>
+</div>
+<div class='card' data-year='2017' data-yearband='2019-2015' data-updated='20170531' data-priority='2'>
+  <div class='card-title'>
+    <a data-q='%e3%80%90%e3%82%a2%e3%82%a4%e3%83%89%e3%83%ab%e3%83%9e%e3%82%b9%e3%82%bf%e3%83%bc+%e3%82%b7%e3%83%b3%e3%83%87%e3%83%ac%e3%83%a9%e3%82%ac%e3%83%bc%e3%83%ab%e3%82%ba%e5%8a%87%e5%a0%b4%e3%80%91%e3%82%ad%e3%83%a9%e3%83%83!+%e6%ba%80%e9%96%8b%e3%82%b9%e3%83%9e%e3%82%a4%e3%83%ab(ver.2)%ef%bc%8f%e5%b3%b6%e6%9d%91%e5%8d%af%e6%9c%88%e3%80%81%e5%b0%8f%e6%97%a5%e5%90%91%e7%be%8e%e7%a9%82%e3%80%81%e4%bd%90%e4%b9%85%e9%96%93%e3%81%be%e3%82%86%e3%80%81%e6%ab%bb%e4%ba%95%e6%a1%83%e8%8f%af%e3%80%81%e5%8f%8c%e8%91%89%e6%9d%8f(2ch).mp4'>キラッ! 満開スマイル(ver.2)</a>
+  </div>
+  <div class='card-body'>
+    <div class='meta'><span class='label'>作品名</span> <a href='search_all.html?q=%e3%82%a2%e3%82%a4%e3%83%89%e3%83%ab%e3%83%9e%e3%82%b9%e3%82%bf%e3%83%bc+%e3%82%b7%e3%83%b3%e3%83%87%e3%83%ac%e3%83%a9%e3%82%ac%e3%83%bc%e3%83%ab%e3%82%ba%e5%8a%87%e5%a0%b4'>アイドルマスター シンデレラガールズ劇場</a></div>
+    <div class='meta'><span class='label'>歌い手</span> 島村卯月、小日向美穂、佐久間まゆ、櫻井桃華、双葉杏</div>
+    <div class='meta'><span class='label'>制作者</span> タマ兄</div>
+    <div class='meta'><span class='label'>最終更新日</span> 2017/05/31</div>
+    <div class='meta'><span class='label'>ファイル名</span> <a data-q='%e3%80%90%e3%82%a2%e3%82%a4%e3%83%89%e3%83%ab%e3%83%9e%e3%82%b9%e3%82%bf%e3%83%bc+%e3%82%b7%e3%83%b3%e3%83%87%e3%83%ac%e3%83%a9%e3%82%ac%e3%83%bc%e3%83%ab%e3%82%ba%e5%8a%87%e5%a0%b4%e3%80%91%e3%82%ad%e3%83%a9%e3%83%83!+%e6%ba%80%e9%96%8b%e3%82%b9%e3%83%9e%e3%82%a4%e3%83%ab(ver.2)%ef%bc%8f%e5%b3%b6%e6%9d%91%e5%8d%af%e6%9c%88%e3%80%81%e5%b0%8f%e6%97%a5%e5%90%91%e7%be%8e%e7%a9%82%e3%80%81%e4%bd%90%e4%b9%85%e9%96%93%e3%81%be%e3%82%86%e3%80%81%e6%ab%bb%e4%ba%95%e6%a1%83%e8%8f%af%e3%80%81%e5%8f%8c%e8%91%89%e6%9d%8f(2ch).mp4'>【アイドルマスター シンデレラガールズ劇場】キラッ! 満開スマイル(ver.2)／島村卯月、小日向美穂、佐久間まゆ、櫻井桃華、双葉杏(2ch).mp4</a></div>
+  </div>
+</div>
+<div class='card' data-year='2017' data-yearband='2019-2015' data-updated='20170529' data-priority='2'>
+  <div class='card-title'>
+    <a data-q='%e3%80%90%e3%82%a2%e3%82%a4%e3%83%89%e3%83%ab%e3%83%9e%e3%82%b9%e3%82%bf%e3%83%bc+%e3%82%b7%e3%83%b3%e3%83%87%e3%83%ac%e3%83%a9%e3%82%ac%e3%83%bc%e3%83%ab%e3%82%ba%e5%8a%87%e5%a0%b4%e3%80%91%e3%82%a8%e3%83%81%e3%83%a5%e3%83%bc%e3%83%89%e3%81%af1%e6%9b%b2%e3%81%a0%e3%81%91%ef%bc%8f%e6%b8%8b%e8%b0%b7%e5%87%9b%e3%80%81%e4%b8%8a%e6%9d%a1%e6%98%a5%e8%8f%9c%e3%80%81%e7%a5%9e%e8%b0%b7%e5%a5%88%e7%b7%92%e3%80%81%e7%a5%9e%e5%b4%8e%e8%98%ad%e5%ad%90%e3%80%81%e4%b8%89%e8%88%b9%e7%be%8e%e5%84%aa(2ch).mp4'>エチュードは1曲だけ</a>
+  </div>
+  <div class='card-body'>
+    <div class='meta'><span class='label'>作品名</span> <a href='search_all.html?q=%e3%82%a2%e3%82%a4%e3%83%89%e3%83%ab%e3%83%9e%e3%82%b9%e3%82%bf%e3%83%bc+%e3%82%b7%e3%83%b3%e3%83%87%e3%83%ac%e3%83%a9%e3%82%ac%e3%83%bc%e3%83%ab%e3%82%ba%e5%8a%87%e5%a0%b4'>アイドルマスター シンデレラガールズ劇場</a></div>
+    <div class='meta'><span class='label'>歌い手</span> 渋谷凛、上条春菜、神谷奈緒、神崎蘭子、三船美優</div>
+    <div class='meta'><span class='label'>制作者</span> タマ兄</div>
+    <div class='meta'><span class='label'>最終更新日</span> 2017/05/29</div>
+    <div class='meta'><span class='label'>ファイル名</span> <a data-q='%e3%80%90%e3%82%a2%e3%82%a4%e3%83%89%e3%83%ab%e3%83%9e%e3%82%b9%e3%82%bf%e3%83%bc+%e3%82%b7%e3%83%b3%e3%83%87%e3%83%ac%e3%83%a9%e3%82%ac%e3%83%bc%e3%83%ab%e3%82%ba%e5%8a%87%e5%a0%b4%e3%80%91%e3%82%a8%e3%83%81%e3%83%a5%e3%83%bc%e3%83%89%e3%81%af1%e6%9b%b2%e3%81%a0%e3%81%91%ef%bc%8f%e6%b8%8b%e8%b0%b7%e5%87%9b%e3%80%81%e4%b8%8a%e6%9d%a1%e6%98%a5%e8%8f%9c%e3%80%81%e7%a5%9e%e8%b0%b7%e5%a5%88%e7%b7%92%e3%80%81%e7%a5%9e%e5%b4%8e%e8%98%ad%e5%ad%90%e3%80%81%e4%b8%89%e8%88%b9%e7%be%8e%e5%84%aa(2ch).mp4'>【アイドルマスター シンデレラガールズ劇場】エチュードは1曲だけ／渋谷凛、上条春菜、神谷奈緒、神崎蘭子、三船美優(2ch).mp4</a></div>
+  </div>
+</div>
+<div class='card' data-year='2017' data-yearband='2019-2015' data-updated='20170528' data-priority='2'>
+  <div class='card-title'>
+    <a data-q='%e3%80%90%e3%82%a2%e3%82%a4%e3%83%89%e3%83%ab%e3%83%9e%e3%82%b9%e3%82%bf%e3%83%bc+%e3%82%b7%e3%83%b3%e3%83%87%e3%83%ac%e3%83%a9%e3%82%ac%e3%83%bc%e3%83%ab%e3%82%ba+%e3%82%b9%e3%82%bf%e3%83%bc%e3%83%a9%e3%82%a4%e3%83%88%e3%82%b9%e3%83%86%e3%83%bc%e3%82%b8%e3%80%91%e3%83%8f%e3%82%a4%e3%83%95%e3%82%a1%e3%82%a4%e2%98%86%e3%83%87%e3%82%a4%e3%82%ba%ef%bc%8f%e4%bd%90%e3%80%85%e6%9c%a8%e5%8d%83%e6%9e%9d%e3%80%81%e6%ab%bb%e4%ba%95%e6%a1%83%e8%8f%af%e3%80%81%e5%b8%82%e5%8e%9f%e4%bb%81%e5%a5%88%e3%80%81%e9%be%8d%e5%b4%8e%e8%96%ab%e3%80%81%e8%b5%a4%e5%9f%8e%e3%81%bf%e3%82%8a%e3%81%82.mp4'>ハイファイ☆デイズ</a>
+  </div>
+  <div class='card-body'>
+    <div class='meta'><span class='label'>作品名</span> <a href='search_all.html?q=%e3%82%a2%e3%82%a4%e3%83%89%e3%83%ab%e3%83%9e%e3%82%b9%e3%82%bf%e3%83%bc+%e3%82%b7%e3%83%b3%e3%83%87%e3%83%ac%e3%83%a9%e3%82%ac%e3%83%bc%e3%83%ab%e3%82%ba+%e3%82%b9%e3%82%bf%e3%83%bc%e3%83%a9%e3%82%a4%e3%83%88%e3%82%b9%e3%83%86%e3%83%bc%e3%82%b8'>アイドルマスター シンデレラガールズ スターライトステージ</a></div>
+    <div class='meta'><span class='label'>歌い手</span> 佐々木千枝、櫻井桃華、市原仁奈、龍崎薫、赤城みりあ</div>
+    <div class='meta'><span class='label'>制作者</span> タマ兄</div>
+    <div class='meta'><span class='label'>最終更新日</span> 2017/05/28</div>
+    <div class='meta'><span class='label'>ファイル名</span> <a data-q='%e3%80%90%e3%82%a2%e3%82%a4%e3%83%89%e3%83%ab%e3%83%9e%e3%82%b9%e3%82%bf%e3%83%bc+%e3%82%b7%e3%83%b3%e3%83%87%e3%83%ac%e3%83%a9%e3%82%ac%e3%83%bc%e3%83%ab%e3%82%ba+%e3%82%b9%e3%82%bf%e3%83%bc%e3%83%a9%e3%82%a4%e3%83%88%e3%82%b9%e3%83%86%e3%83%bc%e3%82%b8%e3%80%91%e3%83%8f%e3%82%a4%e3%83%95%e3%82%a1%e3%82%a4%e2%98%86%e3%83%87%e3%82%a4%e3%82%ba%ef%bc%8f%e4%bd%90%e3%80%85%e6%9c%a8%e5%8d%83%e6%9e%9d%e3%80%81%e6%ab%bb%e4%ba%95%e6%a1%83%e8%8f%af%e3%80%81%e5%b8%82%e5%8e%9f%e4%bb%81%e5%a5%88%e3%80%81%e9%be%8d%e5%b4%8e%e8%96%ab%e3%80%81%e8%b5%a4%e5%9f%8e%e3%81%bf%e3%82%8a%e3%81%82.mp4'>【アイドルマスター シンデレラガールズ スターライトステージ】ハイファイ☆デイズ／佐々木千枝、櫻井桃華、市原仁奈、龍崎薫、赤城みりあ.mp4</a></div>
+  </div>
+</div>
+<div class='card' data-year='2017' data-yearband='2019-2015' data-updated='20170527' data-priority='2'>
+  <div class='card-title'>
+    <a data-q='%e3%80%90%e3%82%a2%e3%82%a4%e3%83%89%e3%83%ab%e3%83%9e%e3%82%b9%e3%82%bf%e3%83%bc+%e3%82%b7%e3%83%b3%e3%83%87%e3%83%ac%e3%83%a9%e3%82%ac%e3%83%bc%e3%83%ab%e3%82%ba+%e3%82%b9%e3%82%bf%e3%83%bc%e3%83%a9%e3%82%a4%e3%83%88%e3%82%b9%e3%83%86%e3%83%bc%e3%82%b8%e3%80%91Radio+Happy%ef%bc%8f%e5%a4%a7%e6%a7%bb%e5%94%af%ef%bc%88%e5%b1%b1%e4%b8%8b%e4%b8%83%e6%b5%b7%ef%bc%89.mp4'>Radio Happy</a>
+  </div>
+  <div class='card-body'>
+    <div class='meta'><span class='label'>作品名</span> <a href='search_all.html?q=%e3%82%a2%e3%82%a4%e3%83%89%e3%83%ab%e3%83%9e%e3%82%b9%e3%82%bf%e3%83%bc+%e3%82%b7%e3%83%b3%e3%83%87%e3%83%ac%e3%83%a9%e3%82%ac%e3%83%bc%e3%83%ab%e3%82%ba+%e3%82%b9%e3%82%bf%e3%83%bc%e3%83%a9%e3%82%a4%e3%83%88%e3%82%b9%e3%83%86%e3%83%bc%e3%82%b8'>アイドルマスター シンデレラガールズ スターライトステージ</a></div>
+    <div class='meta'><span class='label'>歌い手</span> 大槻唯（山下七海）</div>
+    <div class='meta'><span class='label'>制作者</span> タマ兄</div>
+    <div class='meta'><span class='label'>最終更新日</span> 2017/05/27</div>
+    <div class='meta'><span class='label'>ファイル名</span> <a data-q='%e3%80%90%e3%82%a2%e3%82%a4%e3%83%89%e3%83%ab%e3%83%9e%e3%82%b9%e3%82%bf%e3%83%bc+%e3%82%b7%e3%83%b3%e3%83%87%e3%83%ac%e3%83%a9%e3%82%ac%e3%83%bc%e3%83%ab%e3%82%ba+%e3%82%b9%e3%82%bf%e3%83%bc%e3%83%a9%e3%82%a4%e3%83%88%e3%82%b9%e3%83%86%e3%83%bc%e3%82%b8%e3%80%91Radio+Happy%ef%bc%8f%e5%a4%a7%e6%a7%bb%e5%94%af%ef%bc%88%e5%b1%b1%e4%b8%8b%e4%b8%83%e6%b5%b7%ef%bc%89.mp4'>【アイドルマスター シンデレラガールズ スターライトステージ】Radio Happy／大槻唯（山下七海）.mp4</a></div>
+  </div>
+</div>
+<div class='card' data-year='2017' data-yearband='2019-2015' data-updated='20170527' data-priority='2'>
+  <div class='card-title'>
+    <a data-q='%e3%80%90%e3%82%a2%e3%82%a4%e3%83%89%e3%83%ab%e3%83%9e%e3%82%b9%e3%82%bf%e3%83%bc+%e3%82%b7%e3%83%b3%e3%83%87%e3%83%ac%e3%83%a9%e3%82%ac%e3%83%bc%e3%83%ab%e3%82%ba+%e3%82%b9%e3%82%bf%e3%83%bc%e3%83%a9%e3%82%a4%e3%83%88%e3%82%b9%e3%83%86%e3%83%bc%e3%82%b8%e3%80%91Treasure%e2%98%86%ef%bc%8f%e5%b3%b6%e6%9d%91%e5%8d%af%e6%9c%88%e3%80%81%e6%b8%8b%e8%b0%b7%e5%87%9b%e3%80%81%e5%9f%8e%e3%83%b6%e5%b4%8e%e7%be%8e%e5%98%89%e3%80%81%e6%9c%ac%e7%94%b0%e6%9c%aa%e5%a4%ae%e3%80%81%e5%a4%9a%e7%94%b0%e6%9d%8e%e8%a1%a3%e8%8f%9c(2ch).mp4'>Treasure☆</a>
+  </div>
+  <div class='card-body'>
+    <div class='meta'><span class='label'>作品名</span> <a href='search_all.html?q=%e3%82%a2%e3%82%a4%e3%83%89%e3%83%ab%e3%83%9e%e3%82%b9%e3%82%bf%e3%83%bc+%e3%82%b7%e3%83%b3%e3%83%87%e3%83%ac%e3%83%a9%e3%82%ac%e3%83%bc%e3%83%ab%e3%82%ba+%e3%82%b9%e3%82%bf%e3%83%bc%e3%83%a9%e3%82%a4%e3%83%88%e3%82%b9%e3%83%86%e3%83%bc%e3%82%b8'>アイドルマスター シンデレラガールズ スターライトステージ</a></div>
+    <div class='meta'><span class='label'>歌い手</span> 島村卯月、渋谷凛、城ヶ崎美嘉、本田未央、多田李衣菜</div>
+    <div class='meta'><span class='label'>制作者</span> タマ兄</div>
+    <div class='meta'><span class='label'>最終更新日</span> 2017/05/27</div>
+    <div class='meta'><span class='label'>ファイル名</span> <a data-q='%e3%80%90%e3%82%a2%e3%82%a4%e3%83%89%e3%83%ab%e3%83%9e%e3%82%b9%e3%82%bf%e3%83%bc+%e3%82%b7%e3%83%b3%e3%83%87%e3%83%ac%e3%83%a9%e3%82%ac%e3%83%bc%e3%83%ab%e3%82%ba+%e3%82%b9%e3%82%bf%e3%83%bc%e3%83%a9%e3%82%a4%e3%83%88%e3%82%b9%e3%83%86%e3%83%bc%e3%82%b8%e3%80%91Treasure%e2%98%86%ef%bc%8f%e5%b3%b6%e6%9d%91%e5%8d%af%e6%9c%88%e3%80%81%e6%b8%8b%e8%b0%b7%e5%87%9b%e3%80%81%e5%9f%8e%e3%83%b6%e5%b4%8e%e7%be%8e%e5%98%89%e3%80%81%e6%9c%ac%e7%94%b0%e6%9c%aa%e5%a4%ae%e3%80%81%e5%a4%9a%e7%94%b0%e6%9d%8e%e8%a1%a3%e8%8f%9c(2ch).mp4'>【アイドルマスター シンデレラガールズ スターライトステージ】Treasure☆／島村卯月、渋谷凛、城ヶ崎美嘉、本田未央、多田李衣菜(2ch).mp4</a></div>
+  </div>
+</div>
+<div class='card' data-year='2017' data-yearband='2019-2015' data-updated='20170520' data-priority='2'>
+  <div class='card-title'>
+    <a data-q='%e3%80%90%e5%86%b4%e3%81%88%e3%81%aa%e3%81%84%e5%bd%bc%e5%a5%b3%e3%81%ae%e8%82%b2%e3%81%a6%e3%81%8b%e3%81%9f%e2%99%ad%e3%80%91%e3%82%b9%e3%83%86%e3%83%a9%e3%83%97%e3%83%aa%e3%83%bc%e3%82%ba%ef%bc%8f%e6%98%a5%e5%a5%88%e3%82%8b%e3%81%aa.mp4'>ステラプリーズ</a>
+  </div>
+  <div class='card-body'>
+    <div class='meta'><span class='label'>作品名</span> <a href='search_all.html?q=%e5%86%b4%e3%81%88%e3%81%aa%e3%81%84%e5%bd%bc%e5%a5%b3%e3%81%ae%e8%82%b2%e3%81%a6%e3%81%8b%e3%81%9f%e2%99%ad'>冴えない彼女の育てかた♭</a></div>
+    <div class='meta'><span class='label'>歌い手</span> 春奈るな</div>
+    <div class='meta'><span class='label'>制作者</span> タマ兄</div>
+    <div class='meta'><span class='label'>最終更新日</span> 2017/05/20</div>
+    <div class='meta'><span class='label'>ファイル名</span> <a data-q='%e3%80%90%e5%86%b4%e3%81%88%e3%81%aa%e3%81%84%e5%bd%bc%e5%a5%b3%e3%81%ae%e8%82%b2%e3%81%a6%e3%81%8b%e3%81%9f%e2%99%ad%e3%80%91%e3%82%b9%e3%83%86%e3%83%a9%e3%83%97%e3%83%aa%e3%83%bc%e3%82%ba%ef%bc%8f%e6%98%a5%e5%a5%88%e3%82%8b%e3%81%aa.mp4'>【冴えない彼女の育てかた♭】ステラプリーズ／春奈るな.mp4</a></div>
+  </div>
+</div>
+<div class='card' data-year='2017' data-yearband='2019-2015' data-updated='20170516' data-priority='2'>
+  <div class='card-title'>
+    <a data-q='%e3%80%90%e3%82%a2%e3%82%a4%e3%83%89%e3%83%ab%e3%83%9e%e3%82%b9%e3%82%bf%e3%83%bc+%e3%82%b7%e3%83%b3%e3%83%87%e3%83%ac%e3%83%a9%e3%82%ac%e3%83%bc%e3%83%ab%e3%82%ba+%e3%82%b9%e3%82%bf%e3%83%bc%e3%83%a9%e3%82%a4%e3%83%88%e3%82%b9%e3%83%86%e3%83%bc%e3%82%b8%e3%80%91%e5%85%b1%e9%b3%b4%e4%b8%96%e7%95%8c%e3%81%ae%e5%ad%98%e5%9c%a8%e8%ab%96%ef%bc%8f%e4%ba%8c%e5%ae%ae%e9%a3%9b%e9%b3%a5%ef%bc%88%e9%9d%92%e6%9c%a8%e5%bf%97%e8%b2%b4%ef%bc%89(2ch).mp4'>共鳴世界の存在論</a>
+  </div>
+  <div class='card-body'>
+    <div class='meta'><span class='label'>作品名</span> <a href='search_all.html?q=%e3%82%a2%e3%82%a4%e3%83%89%e3%83%ab%e3%83%9e%e3%82%b9%e3%82%bf%e3%83%bc+%e3%82%b7%e3%83%b3%e3%83%87%e3%83%ac%e3%83%a9%e3%82%ac%e3%83%bc%e3%83%ab%e3%82%ba+%e3%82%b9%e3%82%bf%e3%83%bc%e3%83%a9%e3%82%a4%e3%83%88%e3%82%b9%e3%83%86%e3%83%bc%e3%82%b8'>アイドルマスター シンデレラガールズ スターライトステージ</a></div>
+    <div class='meta'><span class='label'>歌い手</span> 二宮飛鳥（青木志貴）</div>
+    <div class='meta'><span class='label'>制作者</span> タマ兄</div>
+    <div class='meta'><span class='label'>最終更新日</span> 2017/05/16</div>
+    <div class='meta'><span class='label'>ファイル名</span> <a data-q='%e3%80%90%e3%82%a2%e3%82%a4%e3%83%89%e3%83%ab%e3%83%9e%e3%82%b9%e3%82%bf%e3%83%bc+%e3%82%b7%e3%83%b3%e3%83%87%e3%83%ac%e3%83%a9%e3%82%ac%e3%83%bc%e3%83%ab%e3%82%ba+%e3%82%b9%e3%82%bf%e3%83%bc%e3%83%a9%e3%82%a4%e3%83%88%e3%82%b9%e3%83%86%e3%83%bc%e3%82%b8%e3%80%91%e5%85%b1%e9%b3%b4%e4%b8%96%e7%95%8c%e3%81%ae%e5%ad%98%e5%9c%a8%e8%ab%96%ef%bc%8f%e4%ba%8c%e5%ae%ae%e9%a3%9b%e9%b3%a5%ef%bc%88%e9%9d%92%e6%9c%a8%e5%bf%97%e8%b2%b4%ef%bc%89(2ch).mp4'>【アイドルマスター シンデレラガールズ スターライトステージ】共鳴世界の存在論／二宮飛鳥（青木志貴）(2ch).mp4</a></div>
+  </div>
+</div>
+<div class='card' data-year='2017' data-yearband='2019-2015' data-updated='20170505' data-priority='2'>
+  <div class='card-title'>
+    <a data-q='%e3%80%90%e3%82%a2%e3%82%a4%e3%83%89%e3%83%ab%e3%83%9e%e3%82%b9%e3%82%bf%e3%83%bc+%e3%82%b7%e3%83%b3%e3%83%87%e3%83%ac%e3%83%a9%e3%82%ac%e3%83%bc%e3%83%ab%e3%82%ba+%e3%82%b9%e3%82%bf%e3%83%bc%e3%83%a9%e3%82%a4%e3%83%88%e3%82%b9%e3%83%86%e3%83%bc%e3%82%b8%e3%80%91%e3%81%8d%e3%81%bf%e3%81%ab%e3%81%84%e3%81%a3%e3%81%b1%e3%81%84%e2%98%86%ef%bc%8f%e5%a7%ab%e5%b7%9d%e5%8f%8b%e7%b4%80%e3%80%81%e5%b8%82%e5%8e%9f%e4%bb%81%e5%a5%88%e3%80%81%e7%89%87%e6%a1%90%e6%97%a9%e8%8b%97%e3%80%81%e5%a4%a7%e6%a7%bb%e5%94%af%e3%80%81%e7%9b%b8%e8%91%89%e5%a4%95%e7%be%8e.mp4'>きみにいっぱい☆</a>
+  </div>
+  <div class='card-body'>
+    <div class='meta'><span class='label'>作品名</span> <a href='search_all.html?q=%e3%82%a2%e3%82%a4%e3%83%89%e3%83%ab%e3%83%9e%e3%82%b9%e3%82%bf%e3%83%bc+%e3%82%b7%e3%83%b3%e3%83%87%e3%83%ac%e3%83%a9%e3%82%ac%e3%83%bc%e3%83%ab%e3%82%ba+%e3%82%b9%e3%82%bf%e3%83%bc%e3%83%a9%e3%82%a4%e3%83%88%e3%82%b9%e3%83%86%e3%83%bc%e3%82%b8'>アイドルマスター シンデレラガールズ スターライトステージ</a></div>
+    <div class='meta'><span class='label'>歌い手</span> 姫川友紀、市原仁奈、片桐早苗、大槻唯、相葉夕美</div>
+    <div class='meta'><span class='label'>制作者</span> タマ兄</div>
+    <div class='meta'><span class='label'>最終更新日</span> 2017/05/05</div>
+    <div class='meta'><span class='label'>ファイル名</span> <a data-q='%e3%80%90%e3%82%a2%e3%82%a4%e3%83%89%e3%83%ab%e3%83%9e%e3%82%b9%e3%82%bf%e3%83%bc+%e3%82%b7%e3%83%b3%e3%83%87%e3%83%ac%e3%83%a9%e3%82%ac%e3%83%bc%e3%83%ab%e3%82%ba+%e3%82%b9%e3%82%bf%e3%83%bc%e3%83%a9%e3%82%a4%e3%83%88%e3%82%b9%e3%83%86%e3%83%bc%e3%82%b8%e3%80%91%e3%81%8d%e3%81%bf%e3%81%ab%e3%81%84%e3%81%a3%e3%81%b1%e3%81%84%e2%98%86%ef%bc%8f%e5%a7%ab%e5%b7%9d%e5%8f%8b%e7%b4%80%e3%80%81%e5%b8%82%e5%8e%9f%e4%bb%81%e5%a5%88%e3%80%81%e7%89%87%e6%a1%90%e6%97%a9%e8%8b%97%e3%80%81%e5%a4%a7%e6%a7%bb%e5%94%af%e3%80%81%e7%9b%b8%e8%91%89%e5%a4%95%e7%be%8e.mp4'>【アイドルマスター シンデレラガールズ スターライトステージ】きみにいっぱい☆／姫川友紀、市原仁奈、片桐早苗、大槻唯、相葉夕美.mp4</a></div>
+  </div>
+</div>
+<div class='card' data-year='2017' data-yearband='2019-2015' data-updated='20170503' data-priority='2'>
+  <div class='card-title'>
+    <a data-q='%e3%80%90%e3%82%a2%e3%82%a4%e3%83%89%e3%83%ab%e3%83%9e%e3%82%b9%e3%82%bf%e3%83%bc+%e3%82%b7%e3%83%b3%e3%83%87%e3%83%ac%e3%83%a9%e3%82%ac%e3%83%bc%e3%83%ab%e3%82%ba+%e3%82%b9%e3%82%bf%e3%83%bc%e3%83%a9%e3%82%a4%e3%83%88%e3%82%b9%e3%83%86%e3%83%bc%e3%82%b8%e3%80%91Jet+to+the+Future(%e3%83%91%e3%83%bc%e3%83%88%e5%88%86)%ef%bc%8f%e5%a4%9a%e7%94%b0%e6%9d%8e%e8%a1%a3%e8%8f%9c%ef%bc%86%e6%9c%a8%e6%9d%91%e5%a4%8f%e6%a8%b9(2ch).mp4'>Jet to the Future(パート分)</a>
+  </div>
+  <div class='card-body'>
+    <div class='meta'><span class='label'>作品名</span> <a href='search_all.html?q=%e3%82%a2%e3%82%a4%e3%83%89%e3%83%ab%e3%83%9e%e3%82%b9%e3%82%bf%e3%83%bc+%e3%82%b7%e3%83%b3%e3%83%87%e3%83%ac%e3%83%a9%e3%82%ac%e3%83%bc%e3%83%ab%e3%82%ba+%e3%82%b9%e3%82%bf%e3%83%bc%e3%83%a9%e3%82%a4%e3%83%88%e3%82%b9%e3%83%86%e3%83%bc%e3%82%b8'>アイドルマスター シンデレラガールズ スターライトステージ</a></div>
+    <div class='meta'><span class='label'>歌い手</span> 多田李衣菜＆木村夏樹</div>
+    <div class='meta'><span class='label'>制作者</span> タマ兄</div>
+    <div class='meta'><span class='label'>最終更新日</span> 2017/05/03</div>
+    <div class='meta'><span class='label'>ファイル名</span> <a data-q='%e3%80%90%e3%82%a2%e3%82%a4%e3%83%89%e3%83%ab%e3%83%9e%e3%82%b9%e3%82%bf%e3%83%bc+%e3%82%b7%e3%83%b3%e3%83%87%e3%83%ac%e3%83%a9%e3%82%ac%e3%83%bc%e3%83%ab%e3%82%ba+%e3%82%b9%e3%82%bf%e3%83%bc%e3%83%a9%e3%82%a4%e3%83%88%e3%82%b9%e3%83%86%e3%83%bc%e3%82%b8%e3%80%91Jet+to+the+Future(%e3%83%91%e3%83%bc%e3%83%88%e5%88%86)%ef%bc%8f%e5%a4%9a%e7%94%b0%e6%9d%8e%e8%a1%a3%e8%8f%9c%ef%bc%86%e6%9c%a8%e6%9d%91%e5%a4%8f%e6%a8%b9(2ch).mp4'>【アイドルマスター シンデレラガールズ スターライトステージ】Jet to the Future(パート分)／多田李衣菜＆木村夏樹(2ch).mp4</a></div>
+  </div>
+</div>
+<div class='card' data-year='2017' data-yearband='2019-2015' data-updated='20170428' data-priority='2'>
+  <div class='card-title'>
+    <a data-q='%e3%80%90%e3%82%a2%e3%82%a4%e3%83%89%e3%83%ab%e3%83%9e%e3%82%b9%e3%82%bf%e3%83%bc+%e3%82%b7%e3%83%b3%e3%83%87%e3%83%ac%e3%83%a9%e3%82%ac%e3%83%bc%e3%83%ab%e3%82%ba+%e3%82%b9%e3%82%bf%e3%83%bc%e3%83%a9%e3%82%a4%e3%83%88%e3%82%b9%e3%83%86%e3%83%bc%e3%82%b8%e3%80%91%e3%82%a8%e3%83%b3%e3%82%b8%e3%82%a7%e3%83%ab+%e3%83%89%e3%83%aa%e3%83%bc%e3%83%a0%ef%bc%8f%e7%b7%92%e6%96%b9%e6%99%ba%e7%b5%b5%e9%87%8c%e3%80%81%e5%a4%9a%e7%94%b0%e6%9d%8e%e8%a1%a3%e8%8f%9c%e3%80%81%e5%9f%8e%e3%83%b6%e5%b4%8e%e8%8e%89%e5%98%89.mp4'>エンジェル ドリーム</a>
+  </div>
+  <div class='card-body'>
+    <div class='meta'><span class='label'>作品名</span> <a href='search_all.html?q=%e3%82%a2%e3%82%a4%e3%83%89%e3%83%ab%e3%83%9e%e3%82%b9%e3%82%bf%e3%83%bc+%e3%82%b7%e3%83%b3%e3%83%87%e3%83%ac%e3%83%a9%e3%82%ac%e3%83%bc%e3%83%ab%e3%82%ba+%e3%82%b9%e3%82%bf%e3%83%bc%e3%83%a9%e3%82%a4%e3%83%88%e3%82%b9%e3%83%86%e3%83%bc%e3%82%b8'>アイドルマスター シンデレラガールズ スターライトステージ</a></div>
+    <div class='meta'><span class='label'>歌い手</span> 緒方智絵里、多田李衣菜、城ヶ崎莉嘉</div>
+    <div class='meta'><span class='label'>制作者</span> タマ兄</div>
+    <div class='meta'><span class='label'>最終更新日</span> 2017/04/28</div>
+    <div class='meta'><span class='label'>ファイル名</span> <a data-q='%e3%80%90%e3%82%a2%e3%82%a4%e3%83%89%e3%83%ab%e3%83%9e%e3%82%b9%e3%82%bf%e3%83%bc+%e3%82%b7%e3%83%b3%e3%83%87%e3%83%ac%e3%83%a9%e3%82%ac%e3%83%bc%e3%83%ab%e3%82%ba+%e3%82%b9%e3%82%bf%e3%83%bc%e3%83%a9%e3%82%a4%e3%83%88%e3%82%b9%e3%83%86%e3%83%bc%e3%82%b8%e3%80%91%e3%82%a8%e3%83%b3%e3%82%b8%e3%82%a7%e3%83%ab+%e3%83%89%e3%83%aa%e3%83%bc%e3%83%a0%ef%bc%8f%e7%b7%92%e6%96%b9%e6%99%ba%e7%b5%b5%e9%87%8c%e3%80%81%e5%a4%9a%e7%94%b0%e6%9d%8e%e8%a1%a3%e8%8f%9c%e3%80%81%e5%9f%8e%e3%83%b6%e5%b4%8e%e8%8e%89%e5%98%89.mp4'>【アイドルマスター シンデレラガールズ スターライトステージ】エンジェル ドリーム／緒方智絵里、多田李衣菜、城ヶ崎莉嘉.mp4</a></div>
+  </div>
+</div>
+<div class='card' data-year='2017' data-yearband='2019-2015' data-updated='20170417' data-priority='2'>
+  <div class='card-title'>
+    <a data-q='%e3%80%90AKIBA%27S+TRIP+-THE+ANIMATION-%e3%80%91%e3%82%b5%e3%83%b3%e3%82%ad%e3%83%88%e3%82%a6%e3%82%bb%e3%83%b3%ef%bc%81%ef%bc%8f%e3%82%a4%e3%83%a4%e3%83%9b%e3%83%b3%e3%82%ba.mp4'>サンキトウセン！</a>
+  </div>
+  <div class='card-body'>
+    <div class='meta'><span class='label'>作品名</span> <a href='search_all.html?q=AKIBA%27S+TRIP+-THE+ANIMATION-'>AKIBA&#39;S TRIP -THE ANIMATION-</a></div>
+    <div class='meta'><span class='label'>歌い手</span> イヤホンズ</div>
+    <div class='meta'><span class='label'>制作者</span> タマ兄</div>
+    <div class='meta'><span class='label'>最終更新日</span> 2017/04/17</div>
+    <div class='meta'><span class='label'>ファイル名</span> <a data-q='%e3%80%90AKIBA%27S+TRIP+-THE+ANIMATION-%e3%80%91%e3%82%b5%e3%83%b3%e3%82%ad%e3%83%88%e3%82%a6%e3%82%bb%e3%83%b3%ef%bc%81%ef%bc%8f%e3%82%a4%e3%83%a4%e3%83%9b%e3%83%b3%e3%82%ba.mp4'>【AKIBA&#39;S TRIP -THE ANIMATION-】サンキトウセン！／イヤホンズ.mp4</a></div>
+  </div>
+</div>
+<div class='card' data-year='2017' data-yearband='2019-2015' data-updated='20170416' data-priority='2'>
+  <div class='card-title'>
+    <a data-q='%e3%80%90%e3%82%a2%e3%82%a4%e3%83%89%e3%83%ab%e3%83%9e%e3%82%b9%e3%82%bf%e3%83%bc+%e3%82%b7%e3%83%b3%e3%83%87%e3%83%ac%e3%83%a9%e3%82%ac%e3%83%bc%e3%83%ab%e3%82%ba+%e3%82%b9%e3%82%bf%e3%83%bc%e3%83%a9%e3%82%a4%e3%83%88%e3%82%b9%e3%83%86%e3%83%bc%e3%82%b8%e3%80%91%e6%81%8b%e3%81%aeHamburg%e2%99%aa%ef%bc%8f%e4%ba%94%e5%8d%81%e5%b5%90%e9%9f%bf%e5%ad%90(%e7%a8%ae%e5%b4%8e%e6%95%a6%e7%be%8e).mp4'>恋のHamburg♪</a>
+  </div>
+  <div class='card-body'>
+    <div class='meta'><span class='label'>作品名</span> <a href='search_all.html?q=%e3%82%a2%e3%82%a4%e3%83%89%e3%83%ab%e3%83%9e%e3%82%b9%e3%82%bf%e3%83%bc+%e3%82%b7%e3%83%b3%e3%83%87%e3%83%ac%e3%83%a9%e3%82%ac%e3%83%bc%e3%83%ab%e3%82%ba+%e3%82%b9%e3%82%bf%e3%83%bc%e3%83%a9%e3%82%a4%e3%83%88%e3%82%b9%e3%83%86%e3%83%bc%e3%82%b8'>アイドルマスター シンデレラガールズ スターライトステージ</a></div>
+    <div class='meta'><span class='label'>歌い手</span> 五十嵐響子</div>
+    <div class='meta'><span class='label'>制作者</span> タマ兄</div>
+    <div class='meta'><span class='label'>最終更新日</span> 2017/04/16</div>
+    <div class='meta'><span class='label'>ファイル名</span> <a data-q='%e3%80%90%e3%82%a2%e3%82%a4%e3%83%89%e3%83%ab%e3%83%9e%e3%82%b9%e3%82%bf%e3%83%bc+%e3%82%b7%e3%83%b3%e3%83%87%e3%83%ac%e3%83%a9%e3%82%ac%e3%83%bc%e3%83%ab%e3%82%ba+%e3%82%b9%e3%82%bf%e3%83%bc%e3%83%a9%e3%82%a4%e3%83%88%e3%82%b9%e3%83%86%e3%83%bc%e3%82%b8%e3%80%91%e6%81%8b%e3%81%aeHamburg%e2%99%aa%ef%bc%8f%e4%ba%94%e5%8d%81%e5%b5%90%e9%9f%bf%e5%ad%90(%e7%a8%ae%e5%b4%8e%e6%95%a6%e7%be%8e).mp4'>【アイドルマスター シンデレラガールズ スターライトステージ】恋のHamburg♪／五十嵐響子(種崎敦美).mp4</a></div>
+  </div>
+</div>
+<div class='card' data-year='2017' data-yearband='2019-2015' data-updated='20170409' data-priority='2'>
+  <div class='card-title'>
+    <a data-q='%e3%80%90%e3%81%8d%e3%82%93%e3%81%84%e3%82%8d%e3%83%a2%e3%82%b6%e3%82%a4%e3%82%af+Pretty+Days+ED2%e3%80%91Starring!!%ef%bc%8fRhodanthe(2ch).mp4'>Starring!!</a>
+  </div>
+  <div class='card-body'>
+    <div class='meta'><span class='label'>作品名</span> <a href='search_all.html?q=%e3%81%8d%e3%82%93%e3%81%84%e3%82%8d%e3%83%a2%e3%82%b6%e3%82%a4%e3%82%af+Pretty+Days+ED2'>きんいろモザイク Pretty Days ED2</a></div>
+    <div class='meta'><span class='label'>歌い手</span> Rhodanthe</div>
+    <div class='meta'><span class='label'>制作者</span> タマ兄</div>
+    <div class='meta'><span class='label'>最終更新日</span> 2017/04/09</div>
+    <div class='meta'><span class='label'>ファイル名</span> <a data-q='%e3%80%90%e3%81%8d%e3%82%93%e3%81%84%e3%82%8d%e3%83%a2%e3%82%b6%e3%82%a4%e3%82%af+Pretty+Days+ED2%e3%80%91Starring!!%ef%bc%8fRhodanthe(2ch).mp4'>【きんいろモザイク Pretty Days ED2】Starring!!／Rhodanthe(2ch).mp4</a></div>
+  </div>
+</div>
+<div class='card' data-year='2017' data-yearband='2019-2015' data-updated='20170407' data-priority='2'>
+  <div class='card-title'>
+    <a data-q='%e3%80%90%e3%81%8d%e3%82%93%e3%81%84%e3%82%8d%e3%83%a2%e3%82%b6%e3%82%a4%e3%82%af+Pretty+Days+ED1%e3%80%91Shining+Star%ef%bc%8fRhodanthe(2ch).mp4'>Shining Star</a>
+  </div>
+  <div class='card-body'>
+    <div class='meta'><span class='label'>作品名</span> <a href='search_all.html?q=%e3%81%8d%e3%82%93%e3%81%84%e3%82%8d%e3%83%a2%e3%82%b6%e3%82%a4%e3%82%af+Pretty+Days+ED1'>きんいろモザイク Pretty Days ED1</a></div>
+    <div class='meta'><span class='label'>歌い手</span> Rhodanthe</div>
+    <div class='meta'><span class='label'>制作者</span> タマ兄</div>
+    <div class='meta'><span class='label'>最終更新日</span> 2017/04/07</div>
+    <div class='meta'><span class='label'>ファイル名</span> <a data-q='%e3%80%90%e3%81%8d%e3%82%93%e3%81%84%e3%82%8d%e3%83%a2%e3%82%b6%e3%82%a4%e3%82%af+Pretty+Days+ED1%e3%80%91Shining+Star%ef%bc%8fRhodanthe(2ch).mp4'>【きんいろモザイク Pretty Days ED1】Shining Star／Rhodanthe(2ch).mp4</a></div>
+  </div>
+</div>
+<div class='card' data-year='2017' data-yearband='2019-2015' data-updated='20170402' data-priority='2'>
+  <div class='card-title'>
+    <a data-q='%e3%80%90%e3%81%8d%e3%82%93%e3%81%84%e3%82%8d%e3%83%a2%e3%82%b6%e3%82%a4%e3%82%af+Pretty+Days+OP%e3%80%91Happy%e2%98%85Pretty%e2%98%85Clover%ef%bc%8fRhodanthe(2ch).mp4'>Happy★Pretty★Clover</a>
+  </div>
+  <div class='card-body'>
+    <div class='meta'><span class='label'>作品名</span> <a href='search_all.html?q=%e3%81%8d%e3%82%93%e3%81%84%e3%82%8d%e3%83%a2%e3%82%b6%e3%82%a4%e3%82%af+Pretty+Days+OP'>きんいろモザイク Pretty Days OP</a></div>
+    <div class='meta'><span class='label'>歌い手</span> Rhodanthe</div>
+    <div class='meta'><span class='label'>制作者</span> タマ兄</div>
+    <div class='meta'><span class='label'>最終更新日</span> 2017/04/02</div>
+    <div class='meta'><span class='label'>ファイル名</span> <a data-q='%e3%80%90%e3%81%8d%e3%82%93%e3%81%84%e3%82%8d%e3%83%a2%e3%82%b6%e3%82%a4%e3%82%af+Pretty+Days+OP%e3%80%91Happy%e2%98%85Pretty%e2%98%85Clover%ef%bc%8fRhodanthe(2ch).mp4'>【きんいろモザイク Pretty Days OP】Happy★Pretty★Clover／Rhodanthe(2ch).mp4</a></div>
+  </div>
+</div>
+<div class='card' data-year='2017' data-yearband='2019-2015' data-updated='20170401' data-priority='2'>
+  <div class='card-title'>
+    <a data-q='%e3%80%90%e3%82%b9%e3%82%af%e3%83%bc%e3%83%ab%e3%82%ac%e3%83%bc%e3%83%ab%e3%82%b9%e3%83%88%e3%83%a9%e3%82%a4%e3%82%ab%e3%83%bc%e3%82%ba+Animation+Channel%e3%80%91%e3%81%8d%e3%81%a3%e3%81%a8%e3%83%af%e3%83%b3%e3%83%80%e3%83%95%e3%82%a9%e3%83%bc!%ef%bc%8f%e6%be%84%e5%8e%9f%e3%82%b5%e3%83%88%e3%82%ab+(%e6%97%a5%e9%ab%98%e9%87%8c%e8%8f%9c)+%26+%e8%8f%9c%e6%a3%ae%e3%81%be%e3%81%aa+(%e5%b0%8f%e5%80%89%e5%94%af)(2ch).mp4'>きっとワンダフォー!</a>
+  </div>
+  <div class='card-body'>
+    <div class='meta'><span class='label'>作品名</span> <a href='search_all.html?q=%e3%82%b9%e3%82%af%e3%83%bc%e3%83%ab%e3%82%ac%e3%83%bc%e3%83%ab%e3%82%b9%e3%83%88%e3%83%a9%e3%82%a4%e3%82%ab%e3%83%bc%e3%82%ba+Animation+Channel'>スクールガールストライカーズ Animation Channel</a></div>
+    <div class='meta'><span class='label'>歌い手</span> 澄原サトカ  &amp; 菜森まな</div>
+    <div class='meta'><span class='label'>制作者</span> タマ兄</div>
+    <div class='meta'><span class='label'>最終更新日</span> 2017/04/01</div>
+    <div class='meta'><span class='label'>ファイル名</span> <a data-q='%e3%80%90%e3%82%b9%e3%82%af%e3%83%bc%e3%83%ab%e3%82%ac%e3%83%bc%e3%83%ab%e3%82%b9%e3%83%88%e3%83%a9%e3%82%a4%e3%82%ab%e3%83%bc%e3%82%ba+Animation+Channel%e3%80%91%e3%81%8d%e3%81%a3%e3%81%a8%e3%83%af%e3%83%b3%e3%83%80%e3%83%95%e3%82%a9%e3%83%bc!%ef%bc%8f%e6%be%84%e5%8e%9f%e3%82%b5%e3%83%88%e3%82%ab+(%e6%97%a5%e9%ab%98%e9%87%8c%e8%8f%9c)+%26+%e8%8f%9c%e6%a3%ae%e3%81%be%e3%81%aa+(%e5%b0%8f%e5%80%89%e5%94%af)(2ch).mp4'>【スクールガールストライカーズ Animation Channel】きっとワンダフォー!／澄原サトカ (日高里菜) &amp; 菜森まな (小倉唯)(2ch).mp4</a></div>
+  </div>
+</div>
+<div class='card' data-year='2017' data-yearband='2019-2015' data-updated='20170325' data-priority='2'>
+  <div class='card-title'>
+    <a data-q='%e3%80%90NEW+GAME!+-THE+CHALLENGE+STAGE%ef%bc%81-%e3%80%91%e3%82%b0%e3%82%b0%e3%83%83%e3%81%a8%e3%83%af%e3%83%bc%e3%82%af%e2%98%86%e5%bd%a1%ef%bc%8ffourfolium.mp4'>ググッとワーク☆彡</a>
+  </div>
+  <div class='card-body'>
+    <div class='meta'><span class='label'>作品名</span> <a href='search_all.html?q=NEW+GAME!+-THE+CHALLENGE+STAGE%ef%bc%81-'>NEW GAME! -THE CHALLENGE STAGE！-</a></div>
+    <div class='meta'><span class='label'>歌い手</span> fourfolium</div>
+    <div class='meta'><span class='label'>制作者</span> タマ兄</div>
+    <div class='meta'><span class='label'>最終更新日</span> 2017/03/25</div>
+    <div class='meta'><span class='label'>ファイル名</span> <a data-q='%e3%80%90NEW+GAME!+-THE+CHALLENGE+STAGE%ef%bc%81-%e3%80%91%e3%82%b0%e3%82%b0%e3%83%83%e3%81%a8%e3%83%af%e3%83%bc%e3%82%af%e2%98%86%e5%bd%a1%ef%bc%8ffourfolium.mp4'>【NEW GAME! -THE CHALLENGE STAGE！-】ググッとワーク☆彡／fourfolium.mp4</a></div>
+  </div>
+</div>
+<div class='card' data-year='2017' data-yearband='2019-2015' data-updated='20170318' data-priority='2'>
+  <div class='card-title'>
+    <a data-q='%e3%80%90%e3%82%ac%e3%82%a6%e3%83%aa%e3%83%bc%e3%83%ab%e3%83%89%e3%83%ad%e3%83%83%e3%83%97%e3%82%a2%e3%82%a6%e3%83%88%e3%80%91%e3%83%8f%e3%83%ac%e3%83%ab%e3%83%a4%e2%98%86%e3%82%a8%e3%83%83%e3%82%b5%e3%82%a4%e3%83%a0%ef%bc%882%e4%ba%ba%e7%94%a8%ef%bc%89%ef%bc%8f%e3%82%ac%e3%83%b4%e3%83%aa%e3%83%bc%e3%83%ab(%e5%af%8c%e7%94%b0%e7%be%8e%e6%86%82)%e3%80%81%e3%83%b4%e3%82%a3%e3%83%bc%e3%83%8d(%e5%a4%a7%e8%a5%bf%e6%b2%99%e7%b9%94)%e3%80%81%e3%82%b5%e3%82%bf%e3%83%bc%e3%83%8b%e3%83%a3(%e5%a4%a7%e7%a9%ba%e7%9b%b4%e7%be%8e)%e3%80%81%e3%83%a9%e3%83%95%e3%82%a3%e3%82%a8%e3%83%ab(%e8%8a%b1%e6%be%a4%e9%a6%99%e8%8f%9c).mp4'>ハレルヤ☆エッサイム（2人用）</a>
+  </div>
+  <div class='card-body'>
+    <div class='meta'><span class='label'>作品名</span> <a href='search_all.html?q=%e3%82%ac%e3%82%a6%e3%83%aa%e3%83%bc%e3%83%ab%e3%83%89%e3%83%ad%e3%83%83%e3%83%97%e3%82%a2%e3%82%a6%e3%83%88'>ガウリールドロップアウト</a></div>
+    <div class='meta'><span class='label'>歌い手</span> ガヴリール、ヴィーネ、サターニャ、ラフィエル</div>
+    <div class='meta'><span class='label'>制作者</span> タマ兄</div>
+    <div class='meta'><span class='label'>最終更新日</span> 2017/03/18</div>
+    <div class='meta'><span class='label'>ファイル名</span> <a data-q='%e3%80%90%e3%82%ac%e3%82%a6%e3%83%aa%e3%83%bc%e3%83%ab%e3%83%89%e3%83%ad%e3%83%83%e3%83%97%e3%82%a2%e3%82%a6%e3%83%88%e3%80%91%e3%83%8f%e3%83%ac%e3%83%ab%e3%83%a4%e2%98%86%e3%82%a8%e3%83%83%e3%82%b5%e3%82%a4%e3%83%a0%ef%bc%882%e4%ba%ba%e7%94%a8%ef%bc%89%ef%bc%8f%e3%82%ac%e3%83%b4%e3%83%aa%e3%83%bc%e3%83%ab(%e5%af%8c%e7%94%b0%e7%be%8e%e6%86%82)%e3%80%81%e3%83%b4%e3%82%a3%e3%83%bc%e3%83%8d(%e5%a4%a7%e8%a5%bf%e6%b2%99%e7%b9%94)%e3%80%81%e3%82%b5%e3%82%bf%e3%83%bc%e3%83%8b%e3%83%a3(%e5%a4%a7%e7%a9%ba%e7%9b%b4%e7%be%8e)%e3%80%81%e3%83%a9%e3%83%95%e3%82%a3%e3%82%a8%e3%83%ab(%e8%8a%b1%e6%be%a4%e9%a6%99%e8%8f%9c).mp4'>【ガウリールドロップアウト】ハレルヤ☆エッサイム（2人用）／ガヴリール(富田美憂)、ヴィーネ(大西沙織)、サターニャ(大空直美)、ラフィエル(花澤香菜).mp4</a></div>
+  </div>
+</div>
+<div class='card' data-year='2017' data-yearband='2019-2015' data-updated='20170318' data-priority='2'>
+  <div class='card-title'>
+    <a data-q='%e3%80%90%e3%82%a2%e3%82%a4%e3%83%89%e3%83%ab%e3%83%9e%e3%82%b9%e3%82%bf%e3%83%bc+%e3%82%b7%e3%83%b3%e3%83%87%e3%83%ac%e3%83%a9%e3%82%ac%e3%83%bc%e3%83%ab%e3%82%ba+%e3%82%b9%e3%82%bf%e3%83%bc%e3%83%a9%e3%82%a4%e3%83%88%e3%82%b9%e3%83%86%e3%83%bc%e3%82%b8%e3%80%91EVERMORE%ef%bc%8f%e5%9f%8e%e3%83%b6%e5%b4%8e%e7%be%8e%e5%98%89%e3%80%81%e5%89%8d%e5%b7%9d%e3%81%bf%e3%81%8f%e3%80%81%e4%b8%80%e3%83%8e%e7%80%ac%e5%bf%97%e5%b8%8c%e3%80%81%e7%a5%9e%e5%b4%8e%e8%98%ad%e5%ad%90%e3%80%81%e4%ba%8c%e5%ae%ae%e9%a3%9b%e9%b3%a5.mp4'>EVERMORE</a>
+  </div>
+  <div class='card-body'>
+    <div class='meta'><span class='label'>作品名</span> <a href='search_all.html?q=%e3%82%a2%e3%82%a4%e3%83%89%e3%83%ab%e3%83%9e%e3%82%b9%e3%82%bf%e3%83%bc+%e3%82%b7%e3%83%b3%e3%83%87%e3%83%ac%e3%83%a9%e3%82%ac%e3%83%bc%e3%83%ab%e3%82%ba+%e3%82%b9%e3%82%bf%e3%83%bc%e3%83%a9%e3%82%a4%e3%83%88%e3%82%b9%e3%83%86%e3%83%bc%e3%82%b8'>アイドルマスター シンデレラガールズ スターライトステージ</a></div>
+    <div class='meta'><span class='label'>歌い手</span> 城ヶ崎美嘉、前川みく、一ノ瀬志希、神崎蘭子、二宮飛鳥</div>
+    <div class='meta'><span class='label'>制作者</span> タマ兄</div>
+    <div class='meta'><span class='label'>最終更新日</span> 2017/03/18</div>
+    <div class='meta'><span class='label'>ファイル名</span> <a data-q='%e3%80%90%e3%82%a2%e3%82%a4%e3%83%89%e3%83%ab%e3%83%9e%e3%82%b9%e3%82%bf%e3%83%bc+%e3%82%b7%e3%83%b3%e3%83%87%e3%83%ac%e3%83%a9%e3%82%ac%e3%83%bc%e3%83%ab%e3%82%ba+%e3%82%b9%e3%82%bf%e3%83%bc%e3%83%a9%e3%82%a4%e3%83%88%e3%82%b9%e3%83%86%e3%83%bc%e3%82%b8%e3%80%91EVERMORE%ef%bc%8f%e5%9f%8e%e3%83%b6%e5%b4%8e%e7%be%8e%e5%98%89%e3%80%81%e5%89%8d%e5%b7%9d%e3%81%bf%e3%81%8f%e3%80%81%e4%b8%80%e3%83%8e%e7%80%ac%e5%bf%97%e5%b8%8c%e3%80%81%e7%a5%9e%e5%b4%8e%e8%98%ad%e5%ad%90%e3%80%81%e4%ba%8c%e5%ae%ae%e9%a3%9b%e9%b3%a5.mp4'>【アイドルマスター シンデレラガールズ スターライトステージ】EVERMORE／城ヶ崎美嘉、前川みく、一ノ瀬志希、神崎蘭子、二宮飛鳥.mp4</a></div>
+  </div>
+</div>
+<div class='card' data-year='2017' data-yearband='2019-2015' data-updated='20170312' data-priority='2'>
+  <div class='card-title'>
+    <a data-q='%e3%80%90%e3%81%ab%e3%82%83%e3%82%93%e3%81%93%e3%83%87%e3%82%a4%e3%82%ba%e3%80%91What+is+LOVE%ef%bc%9f(%e3%81%ab%e3%82%83%e3%82%93%e3%81%93+is+LOVE%e5%85%83%e6%9b%b2)%ef%bc%8feverying!.mp4'>What is LOVE？(にゃんこ is LOVE元曲)</a>
+  </div>
+  <div class='card-body'>
+    <div class='meta'><span class='label'>作品名</span> <a href='search_all.html?q=%e3%81%ab%e3%82%83%e3%82%93%e3%81%93%e3%83%87%e3%82%a4%e3%82%ba'>にゃんこデイズ</a></div>
+    <div class='meta'><span class='label'>歌い手</span> everying!</div>
+    <div class='meta'><span class='label'>制作者</span> タマ兄</div>
+    <div class='meta'><span class='label'>最終更新日</span> 2017/03/12</div>
+    <div class='meta'><span class='label'>ファイル名</span> <a data-q='%e3%80%90%e3%81%ab%e3%82%83%e3%82%93%e3%81%93%e3%83%87%e3%82%a4%e3%82%ba%e3%80%91What+is+LOVE%ef%bc%9f(%e3%81%ab%e3%82%83%e3%82%93%e3%81%93+is+LOVE%e5%85%83%e6%9b%b2)%ef%bc%8feverying!.mp4'>【にゃんこデイズ】What is LOVE？(にゃんこ is LOVE元曲)／everying!.mp4</a></div>
+  </div>
+</div>
+<div class='card' data-year='2017' data-yearband='2019-2015' data-updated='20170311' data-priority='2'>
+  <div class='card-title'>
+    <a data-q='%e3%80%90%e3%82%a2%e3%82%a4%e3%83%89%e3%83%ab%e3%83%9e%e3%82%b9%e3%82%bf%e3%83%bc+%e3%82%b7%e3%83%b3%e3%83%87%e3%83%ac%e3%83%a9%e3%82%ac%e3%83%bc%e3%83%ab%e3%82%ba+%e3%82%b9%e3%82%bf%e3%83%bc%e3%83%a9%e3%82%a4%e3%83%88%e3%82%b9%e3%83%86%e3%83%bc%e3%82%b8%e3%80%91%e3%83%a9%e3%83%96%e3%83%ac%e3%82%bf%e3%83%bc(%e3%83%91%e3%83%bc%e3%83%88%e5%88%86)%ef%bc%8f%e5%b3%b6%e6%9d%91%e5%8d%af%e6%9c%88%e3%80%81%e5%b0%8f%e6%97%a5%e5%90%91%e7%be%8e%e7%a9%82%e3%80%81%e4%ba%94%e5%8d%81%e5%b5%90%e9%9f%bf%e5%ad%90.mp4'>ラブレター(パート分)</a>
+  </div>
+  <div class='card-body'>
+    <div class='meta'><span class='label'>作品名</span> <a href='search_all.html?q=%e3%82%a2%e3%82%a4%e3%83%89%e3%83%ab%e3%83%9e%e3%82%b9%e3%82%bf%e3%83%bc+%e3%82%b7%e3%83%b3%e3%83%87%e3%83%ac%e3%83%a9%e3%82%ac%e3%83%bc%e3%83%ab%e3%82%ba+%e3%82%b9%e3%82%bf%e3%83%bc%e3%83%a9%e3%82%a4%e3%83%88%e3%82%b9%e3%83%86%e3%83%bc%e3%82%b8'>アイドルマスター シンデレラガールズ スターライトステージ</a></div>
+    <div class='meta'><span class='label'>歌い手</span> 島村卯月、小日向美穂、五十嵐響子</div>
+    <div class='meta'><span class='label'>制作者</span> タマ兄</div>
+    <div class='meta'><span class='label'>最終更新日</span> 2017/03/11</div>
+    <div class='meta'><span class='label'>ファイル名</span> <a data-q='%e3%80%90%e3%82%a2%e3%82%a4%e3%83%89%e3%83%ab%e3%83%9e%e3%82%b9%e3%82%bf%e3%83%bc+%e3%82%b7%e3%83%b3%e3%83%87%e3%83%ac%e3%83%a9%e3%82%ac%e3%83%bc%e3%83%ab%e3%82%ba+%e3%82%b9%e3%82%bf%e3%83%bc%e3%83%a9%e3%82%a4%e3%83%88%e3%82%b9%e3%83%86%e3%83%bc%e3%82%b8%e3%80%91%e3%83%a9%e3%83%96%e3%83%ac%e3%82%bf%e3%83%bc(%e3%83%91%e3%83%bc%e3%83%88%e5%88%86)%ef%bc%8f%e5%b3%b6%e6%9d%91%e5%8d%af%e6%9c%88%e3%80%81%e5%b0%8f%e6%97%a5%e5%90%91%e7%be%8e%e7%a9%82%e3%80%81%e4%ba%94%e5%8d%81%e5%b5%90%e9%9f%bf%e5%ad%90.mp4'>【アイドルマスター シンデレラガールズ スターライトステージ】ラブレター(パート分)／島村卯月、小日向美穂、五十嵐響子.mp4</a></div>
+  </div>
+</div>
+<div class='card' data-year='2017' data-yearband='2019-2015' data-updated='20170305' data-priority='2'>
+  <div class='card-title'>
+    <a data-q='%e3%80%90%e3%82%ac%e3%82%a6%e3%83%aa%e3%83%bc%e3%83%ab%e3%83%89%e3%83%ad%e3%83%83%e3%83%97%e3%82%a2%e3%82%a6%e3%83%88%e3%80%91%e3%82%ac%e3%83%b4%e3%83%aa%e3%83%bc%e3%83%ab%e3%83%89%e3%83%ad%e3%83%83%e3%83%97%e3%82%ad%e3%83%83%e3%82%af(%e3%83%91%e3%83%bc%e3%83%88%e5%88%86%e3%81%91)%ef%bc%8f%e3%82%ac%e3%83%b4%e3%83%aa%e3%83%bc%e3%83%ab(%e5%af%8c%e7%94%b0%e7%be%8e%e6%86%82)%e3%80%81%e3%83%b4%e3%82%a3%e3%83%bc%e3%83%8d(%e5%a4%a7%e8%a5%bf%e6%b2%99%e7%b9%94)%e3%80%81%e3%82%b5%e3%82%bf%e3%83%bc%e3%83%8b%e3%83%a3(%e5%a4%a7%e7%a9%ba%e7%9b%b4%e7%be%8e)%e3%80%81%e3%83%a9%e3%83%95%e3%82%a3%e3%82%a8%e3%83%ab(%e8%8a%b1%e6%be%a4%e9%a6%99%e8%8f%9c).mp4'>ガヴリールドロップキック(パート分け)</a>
+  </div>
+  <div class='card-body'>
+    <div class='meta'><span class='label'>作品名</span> <a href='search_all.html?q=%e3%82%ac%e3%82%a6%e3%83%aa%e3%83%bc%e3%83%ab%e3%83%89%e3%83%ad%e3%83%83%e3%83%97%e3%82%a2%e3%82%a6%e3%83%88'>ガウリールドロップアウト</a></div>
+    <div class='meta'><span class='label'>歌い手</span> ガヴリール、ヴィーネ、サターニャ、ラフィエル</div>
+    <div class='meta'><span class='label'>制作者</span> タマ兄</div>
+    <div class='meta'><span class='label'>最終更新日</span> 2017/03/05</div>
+    <div class='meta'><span class='label'>ファイル名</span> <a data-q='%e3%80%90%e3%82%ac%e3%82%a6%e3%83%aa%e3%83%bc%e3%83%ab%e3%83%89%e3%83%ad%e3%83%83%e3%83%97%e3%82%a2%e3%82%a6%e3%83%88%e3%80%91%e3%82%ac%e3%83%b4%e3%83%aa%e3%83%bc%e3%83%ab%e3%83%89%e3%83%ad%e3%83%83%e3%83%97%e3%82%ad%e3%83%83%e3%82%af(%e3%83%91%e3%83%bc%e3%83%88%e5%88%86%e3%81%91)%ef%bc%8f%e3%82%ac%e3%83%b4%e3%83%aa%e3%83%bc%e3%83%ab(%e5%af%8c%e7%94%b0%e7%be%8e%e6%86%82)%e3%80%81%e3%83%b4%e3%82%a3%e3%83%bc%e3%83%8d(%e5%a4%a7%e8%a5%bf%e6%b2%99%e7%b9%94)%e3%80%81%e3%82%b5%e3%82%bf%e3%83%bc%e3%83%8b%e3%83%a3(%e5%a4%a7%e7%a9%ba%e7%9b%b4%e7%be%8e)%e3%80%81%e3%83%a9%e3%83%95%e3%82%a3%e3%82%a8%e3%83%ab(%e8%8a%b1%e6%be%a4%e9%a6%99%e8%8f%9c).mp4'>【ガウリールドロップアウト】ガヴリールドロップキック(パート分け)／ガヴリール(富田美憂)、ヴィーネ(大西沙織)、サターニャ(大空直美)、ラフィエル(花澤香菜).mp4</a></div>
+  </div>
+</div>
+<div class='card' data-year='2017' data-yearband='2019-2015' data-updated='20170219' data-priority='2'>
+  <div class='card-title'>
+    <a data-q='%e3%80%90%e3%82%b9%e3%82%af%e3%83%bc%e3%83%ab%e3%82%ac%e3%83%bc%e3%83%ab%e3%82%b9%e3%83%88%e3%83%a9%e3%82%a4%e3%82%ab%e3%83%bc%e3%82%ba+Animation+Channel%e3%80%91%e6%9c%aa%e6%9d%a5%e7%b3%bb%e3%82%b9%e3%83%88%e3%83%a9%e3%82%a4%e3%82%ab%e3%83%bc%e3%82%ba%ef%bc%8f%e3%82%a2%e3%83%ab%e3%82%bf%e3%82%a4%e3%83%ab%e3%83%bb%e3%83%88%e3%83%ab%e3%83%86(%e7%9f%b3%e5%8e%9f%e5%a4%8f%e7%b9%94%e3%80%81%e6%97%a5%e9%ab%98%e9%87%8c%e8%8f%9c%e3%80%81%e6%b2%a2%e5%9f%8e%e3%81%bf%e3%82%86%e3%81%8d%e3%80%81%e8%8a%b1%e6%be%a4%e9%a6%99%e8%8f%9c%e3%80%81%e5%b0%8f%e5%80%89%e5%94%af)(2ch).mp4'>未来系ストライカーズ</a>
+  </div>
+  <div class='card-body'>
+    <div class='meta'><span class='label'>作品名</span> <a href='search_all.html?q=%e3%82%b9%e3%82%af%e3%83%bc%e3%83%ab%e3%82%ac%e3%83%bc%e3%83%ab%e3%82%b9%e3%83%88%e3%83%a9%e3%82%a4%e3%82%ab%e3%83%bc%e3%82%ba+Animation+Channel'>スクールガールストライカーズ Animation Channel</a></div>
+    <div class='meta'><span class='label'>歌い手</span> アルタイル・トルテ</div>
+    <div class='meta'><span class='label'>制作者</span> タマ兄</div>
+    <div class='meta'><span class='label'>最終更新日</span> 2017/02/19</div>
+    <div class='meta'><span class='label'>ファイル名</span> <a data-q='%e3%80%90%e3%82%b9%e3%82%af%e3%83%bc%e3%83%ab%e3%82%ac%e3%83%bc%e3%83%ab%e3%82%b9%e3%83%88%e3%83%a9%e3%82%a4%e3%82%ab%e3%83%bc%e3%82%ba+Animation+Channel%e3%80%91%e6%9c%aa%e6%9d%a5%e7%b3%bb%e3%82%b9%e3%83%88%e3%83%a9%e3%82%a4%e3%82%ab%e3%83%bc%e3%82%ba%ef%bc%8f%e3%82%a2%e3%83%ab%e3%82%bf%e3%82%a4%e3%83%ab%e3%83%bb%e3%83%88%e3%83%ab%e3%83%86(%e7%9f%b3%e5%8e%9f%e5%a4%8f%e7%b9%94%e3%80%81%e6%97%a5%e9%ab%98%e9%87%8c%e8%8f%9c%e3%80%81%e6%b2%a2%e5%9f%8e%e3%81%bf%e3%82%86%e3%81%8d%e3%80%81%e8%8a%b1%e6%be%a4%e9%a6%99%e8%8f%9c%e3%80%81%e5%b0%8f%e5%80%89%e5%94%af)(2ch).mp4'>【スクールガールストライカーズ Animation Channel】未来系ストライカーズ／アルタイル・トルテ(石原夏織、日高里菜、沢城みゆき、花澤香菜、小倉唯)(2ch).mp4</a></div>
+  </div>
+</div>
+<div class='card' data-year='2017' data-yearband='2019-2015' data-updated='20170212' data-priority='2'>
+  <div class='card-title'>
+    <a data-q='%e3%80%90%e3%82%a2%e3%82%a4%e3%83%89%e3%83%ab%e3%83%9e%e3%82%b9%e3%82%bf%e3%83%bc+%e3%82%b7%e3%83%b3%e3%83%87%e3%83%ac%e3%83%a9%e3%82%ac%e3%83%bc%e3%83%ab%e3%82%ba+%e3%82%b9%e3%82%bf%e3%83%bc%e3%83%a9%e3%82%a4%e3%83%88%e3%82%b9%e3%83%86%e3%83%bc%e3%82%b8%e3%80%91BEYOND+THE+STARLIGHT%ef%bc%8f%e5%9f%8e%e3%83%b6%e5%b4%8e%e8%8e%89%e5%98%89%e3%80%81%e7%b7%92%e6%96%b9%e6%99%ba%e7%b5%b5%e9%87%8c%e3%80%81%e5%8c%97%e6%9d%a1%e5%8a%a0%e8%93%ae%e3%80%81%e5%b7%9d%e5%b3%b6%e7%91%9e%e6%a8%b9%e3%80%81%e5%a4%a7%e6%a7%bb%e5%94%af(2ch).mp4'>BEYOND THE STARLIGHT</a>
+  </div>
+  <div class='card-body'>
+    <div class='meta'><span class='label'>作品名</span> <a href='search_all.html?q=%e3%82%a2%e3%82%a4%e3%83%89%e3%83%ab%e3%83%9e%e3%82%b9%e3%82%bf%e3%83%bc+%e3%82%b7%e3%83%b3%e3%83%87%e3%83%ac%e3%83%a9%e3%82%ac%e3%83%bc%e3%83%ab%e3%82%ba+%e3%82%b9%e3%82%bf%e3%83%bc%e3%83%a9%e3%82%a4%e3%83%88%e3%82%b9%e3%83%86%e3%83%bc%e3%82%b8'>アイドルマスター シンデレラガールズ スターライトステージ</a></div>
+    <div class='meta'><span class='label'>歌い手</span> 城ヶ崎莉嘉、緒方智絵里、北条加蓮、川島瑞樹、大槻唯</div>
+    <div class='meta'><span class='label'>制作者</span> タマ兄</div>
+    <div class='meta'><span class='label'>最終更新日</span> 2017/02/12</div>
+    <div class='meta'><span class='label'>ファイル名</span> <a data-q='%e3%80%90%e3%82%a2%e3%82%a4%e3%83%89%e3%83%ab%e3%83%9e%e3%82%b9%e3%82%bf%e3%83%bc+%e3%82%b7%e3%83%b3%e3%83%87%e3%83%ac%e3%83%a9%e3%82%ac%e3%83%bc%e3%83%ab%e3%82%ba+%e3%82%b9%e3%82%bf%e3%83%bc%e3%83%a9%e3%82%a4%e3%83%88%e3%82%b9%e3%83%86%e3%83%bc%e3%82%b8%e3%80%91BEYOND+THE+STARLIGHT%ef%bc%8f%e5%9f%8e%e3%83%b6%e5%b4%8e%e8%8e%89%e5%98%89%e3%80%81%e7%b7%92%e6%96%b9%e6%99%ba%e7%b5%b5%e9%87%8c%e3%80%81%e5%8c%97%e6%9d%a1%e5%8a%a0%e8%93%ae%e3%80%81%e5%b7%9d%e5%b3%b6%e7%91%9e%e6%a8%b9%e3%80%81%e5%a4%a7%e6%a7%bb%e5%94%af(2ch).mp4'>【アイドルマスター シンデレラガールズ スターライトステージ】BEYOND THE STARLIGHT／城ヶ崎莉嘉、緒方智絵里、北条加蓮、川島瑞樹、大槻唯(2ch).mp4</a></div>
+  </div>
+</div>
+<div class='card' data-year='2017' data-yearband='2019-2015' data-updated='20170211' data-priority='2'>
+  <div class='card-title'>
+    <a data-q='%e3%80%90%e3%81%93%e3%81%ae%e7%b4%a0%e6%99%b4%e3%82%89%e3%81%97%e3%81%84%e4%b8%96%e7%95%8c%e3%81%ab%e7%a5%9d%e7%a6%8f%e3%82%92%ef%bc%81%ef%bc%92%e3%80%91%e3%81%8a%e3%81%86%e3%81%a1%e3%81%ab%e5%b8%b0%e3%82%8a%e3%81%9f%e3%81%84(%e3%83%91%e3%83%bc%e3%83%88%e5%88%86%e3%81%91)%ef%bc%8f%e9%9b%a8%e5%ae%ae%e5%a4%a9%e3%80%81%e9%ab%98%e6%a9%8b%e6%9d%8e%e4%be%9d%e3%80%81%e8%8c%85%e9%87%8e%e6%84%9b%e8%a1%a3(2ch).mp4'>おうちに帰りたい(パート分け)</a>
+  </div>
+  <div class='card-body'>
+    <div class='meta'><span class='label'>作品名</span> <a href='search_all.html?q=%e3%81%93%e3%81%ae%e7%b4%a0%e6%99%b4%e3%82%89%e3%81%97%e3%81%84%e4%b8%96%e7%95%8c%e3%81%ab%e7%a5%9d%e7%a6%8f%e3%82%92%ef%bc%81%ef%bc%92'>この素晴らしい世界に祝福を！２</a></div>
+    <div class='meta'><span class='label'>歌い手</span> 雨宮天、高橋李依、茅野愛衣</div>
+    <div class='meta'><span class='label'>制作者</span> タマ兄</div>
+    <div class='meta'><span class='label'>最終更新日</span> 2017/02/11</div>
+    <div class='meta'><span class='label'>ファイル名</span> <a data-q='%e3%80%90%e3%81%93%e3%81%ae%e7%b4%a0%e6%99%b4%e3%82%89%e3%81%97%e3%81%84%e4%b8%96%e7%95%8c%e3%81%ab%e7%a5%9d%e7%a6%8f%e3%82%92%ef%bc%81%ef%bc%92%e3%80%91%e3%81%8a%e3%81%86%e3%81%a1%e3%81%ab%e5%b8%b0%e3%82%8a%e3%81%9f%e3%81%84(%e3%83%91%e3%83%bc%e3%83%88%e5%88%86%e3%81%91)%ef%bc%8f%e9%9b%a8%e5%ae%ae%e5%a4%a9%e3%80%81%e9%ab%98%e6%a9%8b%e6%9d%8e%e4%be%9d%e3%80%81%e8%8c%85%e9%87%8e%e6%84%9b%e8%a1%a3(2ch).mp4'>【この素晴らしい世界に祝福を！２】おうちに帰りたい(パート分け)／雨宮天、高橋李依、茅野愛衣(2ch).mp4</a></div>
+  </div>
+</div>
+<div class='card' data-year='2017' data-yearband='2019-2015' data-updated='20170208' data-priority='2'>
+  <div class='card-title'>
+    <a data-q='%e3%80%90%e3%81%93%e3%81%ae%e7%b4%a0%e6%99%b4%e3%82%89%e3%81%97%e3%81%84%e4%b8%96%e7%95%8c%e3%81%ab%e7%a5%9d%e7%a6%8f%e3%82%92%ef%bc%81%ef%bc%92%e3%80%91TOMORROW%ef%bc%8fMachico(2ch).mp4'>TOMORROW</a>
+  </div>
+  <div class='card-body'>
+    <div class='meta'><span class='label'>作品名</span> <a href='search_all.html?q=%e3%81%93%e3%81%ae%e7%b4%a0%e6%99%b4%e3%82%89%e3%81%97%e3%81%84%e4%b8%96%e7%95%8c%e3%81%ab%e7%a5%9d%e7%a6%8f%e3%82%92%ef%bc%81%ef%bc%92'>この素晴らしい世界に祝福を！２</a></div>
+    <div class='meta'><span class='label'>歌い手</span> Machico</div>
+    <div class='meta'><span class='label'>制作者</span> タマ兄</div>
+    <div class='meta'><span class='label'>最終更新日</span> 2017/02/08</div>
+    <div class='meta'><span class='label'>ファイル名</span> <a data-q='%e3%80%90%e3%81%93%e3%81%ae%e7%b4%a0%e6%99%b4%e3%82%89%e3%81%97%e3%81%84%e4%b8%96%e7%95%8c%e3%81%ab%e7%a5%9d%e7%a6%8f%e3%82%92%ef%bc%81%ef%bc%92%e3%80%91TOMORROW%ef%bc%8fMachico(2ch).mp4'>【この素晴らしい世界に祝福を！２】TOMORROW／Machico(2ch).mp4</a></div>
+  </div>
+</div>
+<div class='card' data-year='2017' data-yearband='2019-2015' data-updated='20170204' data-priority='2'>
+  <div class='card-title'>
+    <a data-q='%e3%80%90%e3%82%a2%e3%82%a4%e3%83%89%e3%83%ab%e3%83%9e%e3%82%b9%e3%82%bf%e3%83%bc+%e3%82%b7%e3%83%b3%e3%83%87%e3%83%ac%e3%83%a9%e3%82%ac%e3%83%bc%e3%83%ab%e3%82%ba+%e3%82%b9%e3%82%bf%e3%83%bc%e3%83%a9%e3%82%a4%e3%83%88%e3%82%b9%e3%83%86%e3%83%bc%e3%82%b8%e3%80%91%e6%98%8e%e6%97%a5%e3%81%be%e3%81%9f%e4%bc%9a%e3%81%88%e3%82%8b%e3%82%88%e3%81%ad%ef%bc%8f%e5%ae%ae%e6%9c%ac%e3%83%95%e3%83%ac%e3%83%87%e3%83%aa%e3%82%ab%e3%80%81%e4%b8%80%e3%83%8e%e7%80%ac%e5%bf%97%e5%b8%8c%e3%80%81%e6%ab%bb%e4%ba%95%e6%a1%83%e8%8f%af%e3%80%81%e4%b8%ad%e9%87%8e%e6%9c%89%e9%a6%99%e3%80%81%e4%ba%94%e5%8d%81%e5%b5%90%e9%9f%bf%e5%ad%90(2ch).mp4'>明日また会えるよね</a>
+  </div>
+  <div class='card-body'>
+    <div class='meta'><span class='label'>作品名</span> <a href='search_all.html?q=%e3%82%a2%e3%82%a4%e3%83%89%e3%83%ab%e3%83%9e%e3%82%b9%e3%82%bf%e3%83%bc+%e3%82%b7%e3%83%b3%e3%83%87%e3%83%ac%e3%83%a9%e3%82%ac%e3%83%bc%e3%83%ab%e3%82%ba+%e3%82%b9%e3%82%bf%e3%83%bc%e3%83%a9%e3%82%a4%e3%83%88%e3%82%b9%e3%83%86%e3%83%bc%e3%82%b8'>アイドルマスター シンデレラガールズ スターライトステージ</a></div>
+    <div class='meta'><span class='label'>歌い手</span> 宮本フレデリカ、一ノ瀬志希、櫻井桃華、中野有香、五十嵐響子</div>
+    <div class='meta'><span class='label'>制作者</span> タマ兄</div>
+    <div class='meta'><span class='label'>最終更新日</span> 2017/02/04</div>
+    <div class='meta'><span class='label'>ファイル名</span> <a data-q='%e3%80%90%e3%82%a2%e3%82%a4%e3%83%89%e3%83%ab%e3%83%9e%e3%82%b9%e3%82%bf%e3%83%bc+%e3%82%b7%e3%83%b3%e3%83%87%e3%83%ac%e3%83%a9%e3%82%ac%e3%83%bc%e3%83%ab%e3%82%ba+%e3%82%b9%e3%82%bf%e3%83%bc%e3%83%a9%e3%82%a4%e3%83%88%e3%82%b9%e3%83%86%e3%83%bc%e3%82%b8%e3%80%91%e6%98%8e%e6%97%a5%e3%81%be%e3%81%9f%e4%bc%9a%e3%81%88%e3%82%8b%e3%82%88%e3%81%ad%ef%bc%8f%e5%ae%ae%e6%9c%ac%e3%83%95%e3%83%ac%e3%83%87%e3%83%aa%e3%82%ab%e3%80%81%e4%b8%80%e3%83%8e%e7%80%ac%e5%bf%97%e5%b8%8c%e3%80%81%e6%ab%bb%e4%ba%95%e6%a1%83%e8%8f%af%e3%80%81%e4%b8%ad%e9%87%8e%e6%9c%89%e9%a6%99%e3%80%81%e4%ba%94%e5%8d%81%e5%b5%90%e9%9f%bf%e5%ad%90(2ch).mp4'>【アイドルマスター シンデレラガールズ スターライトステージ】明日また会えるよね／宮本フレデリカ、一ノ瀬志希、櫻井桃華、中野有香、五十嵐響子(2ch).mp4</a></div>
+  </div>
+</div>
+<div class='card' data-year='2017' data-yearband='2019-2015' data-updated='20170128' data-priority='2'>
+  <div class='card-title'>
+    <a data-q='%e3%80%90%e3%82%a2%e3%82%a4%e3%83%89%e3%83%ab%e3%83%9e%e3%82%b9%e3%82%bf%e3%83%bc+%e3%82%b7%e3%83%b3%e3%83%87%e3%83%ac%e3%83%a9%e3%82%ac%e3%83%bc%e3%83%ab%e3%82%ba+%e3%82%b9%e3%82%bf%e3%83%bc%e3%83%a9%e3%82%a4%e3%83%88%e3%82%b9%e3%83%86%e3%83%bc%e3%82%b8%e3%80%91Lunatic+Show(%e3%83%91%e3%83%bc%e3%83%88%e5%88%86)%ef%bc%8f%e6%98%9f%e8%bc%9d%e5%ad%90+(%e6%9d%be%e7%94%b0%e9%a2%af%e6%b0%b4)%c3%97%e7%99%bd%e5%9d%82%e5%b0%8f%e6%a2%85+(%e6%a1%9c%e5%92%b2%e5%8d%83%e4%be%9d).mp4'>Lunatic Show(パート分)</a>
+  </div>
+  <div class='card-body'>
+    <div class='meta'><span class='label'>作品名</span> <a href='search_all.html?q=%e3%82%a2%e3%82%a4%e3%83%89%e3%83%ab%e3%83%9e%e3%82%b9%e3%82%bf%e3%83%bc+%e3%82%b7%e3%83%b3%e3%83%87%e3%83%ac%e3%83%a9%e3%82%ac%e3%83%bc%e3%83%ab%e3%82%ba+%e3%82%b9%e3%82%bf%e3%83%bc%e3%83%a9%e3%82%a4%e3%83%88%e3%82%b9%e3%83%86%e3%83%bc%e3%82%b8'>アイドルマスター シンデレラガールズ スターライトステージ</a></div>
+    <div class='meta'><span class='label'>歌い手</span> 星輝子 &#215;白坂小梅</div>
+    <div class='meta'><span class='label'>制作者</span> タマ兄</div>
+    <div class='meta'><span class='label'>最終更新日</span> 2017/01/28</div>
+    <div class='meta'><span class='label'>ファイル名</span> <a data-q='%e3%80%90%e3%82%a2%e3%82%a4%e3%83%89%e3%83%ab%e3%83%9e%e3%82%b9%e3%82%bf%e3%83%bc+%e3%82%b7%e3%83%b3%e3%83%87%e3%83%ac%e3%83%a9%e3%82%ac%e3%83%bc%e3%83%ab%e3%82%ba+%e3%82%b9%e3%82%bf%e3%83%bc%e3%83%a9%e3%82%a4%e3%83%88%e3%82%b9%e3%83%86%e3%83%bc%e3%82%b8%e3%80%91Lunatic+Show(%e3%83%91%e3%83%bc%e3%83%88%e5%88%86)%ef%bc%8f%e6%98%9f%e8%bc%9d%e5%ad%90+(%e6%9d%be%e7%94%b0%e9%a2%af%e6%b0%b4)%c3%97%e7%99%bd%e5%9d%82%e5%b0%8f%e6%a2%85+(%e6%a1%9c%e5%92%b2%e5%8d%83%e4%be%9d).mp4'>【アイドルマスター シンデレラガールズ スターライトステージ】Lunatic Show(パート分)／星輝子 (松田颯水)&#215;白坂小梅 (桜咲千依).mp4</a></div>
+  </div>
+</div>
+<div class='card' data-year='2017' data-yearband='2019-2015' data-updated='20170128' data-priority='2'>
+  <div class='card-title'>
+    <a data-q='%e3%80%90%e3%82%a2%e3%82%a4%e3%83%89%e3%83%ab%e3%83%9e%e3%82%b9%e3%82%bf%e3%83%bc+%e3%82%b7%e3%83%b3%e3%83%87%e3%83%ac%e3%83%a9%e3%82%ac%e3%83%bc%e3%83%ab%e3%82%ba+%e3%82%b9%e3%82%bf%e3%83%bc%e3%83%a9%e3%82%a4%e3%83%88%e3%82%b9%e3%83%86%e3%83%bc%e3%82%b8%e3%80%91Flip+Flop(%e3%83%91%e3%83%bc%e3%83%88%e5%88%86)%ef%bc%8f%e6%97%a5%e9%87%8e%e8%8c%9c(%e8%b5%a4%ef%a8%91%e5%8d%83%e5%a4%8f)%e3%80%81%e9%ab%98%e6%a3%ae%e8%97%8d%e5%ad%90(%e9%87%91%e5%ad%90%e6%9c%89%e5%b8%8c).mp4'>Flip Flop(パート分)</a>
+  </div>
+  <div class='card-body'>
+    <div class='meta'><span class='label'>作品名</span> <a href='search_all.html?q=%e3%82%a2%e3%82%a4%e3%83%89%e3%83%ab%e3%83%9e%e3%82%b9%e3%82%bf%e3%83%bc+%e3%82%b7%e3%83%b3%e3%83%87%e3%83%ac%e3%83%a9%e3%82%ac%e3%83%bc%e3%83%ab%e3%82%ba+%e3%82%b9%e3%82%bf%e3%83%bc%e3%83%a9%e3%82%a4%e3%83%88%e3%82%b9%e3%83%86%e3%83%bc%e3%82%b8'>アイドルマスター シンデレラガールズ スターライトステージ</a></div>
+    <div class='meta'><span class='label'>歌い手</span> 日野茜、高森藍子</div>
+    <div class='meta'><span class='label'>制作者</span> タマ兄</div>
+    <div class='meta'><span class='label'>最終更新日</span> 2017/01/28</div>
+    <div class='meta'><span class='label'>ファイル名</span> <a data-q='%e3%80%90%e3%82%a2%e3%82%a4%e3%83%89%e3%83%ab%e3%83%9e%e3%82%b9%e3%82%bf%e3%83%bc+%e3%82%b7%e3%83%b3%e3%83%87%e3%83%ac%e3%83%a9%e3%82%ac%e3%83%bc%e3%83%ab%e3%82%ba+%e3%82%b9%e3%82%bf%e3%83%bc%e3%83%a9%e3%82%a4%e3%83%88%e3%82%b9%e3%83%86%e3%83%bc%e3%82%b8%e3%80%91Flip+Flop(%e3%83%91%e3%83%bc%e3%83%88%e5%88%86)%ef%bc%8f%e6%97%a5%e9%87%8e%e8%8c%9c(%e8%b5%a4%ef%a8%91%e5%8d%83%e5%a4%8f)%e3%80%81%e9%ab%98%e6%a3%ae%e8%97%8d%e5%ad%90(%e9%87%91%e5%ad%90%e6%9c%89%e5%b8%8c).mp4'>【アイドルマスター シンデレラガールズ スターライトステージ】Flip Flop(パート分)／日野茜(赤﨑千夏)、高森藍子(金子有希).mp4</a></div>
+  </div>
+</div>
+<div class='card' data-year='2017' data-yearband='2019-2015' data-updated='20170112' data-priority='2'>
+  <div class='card-title'>
+    <a data-q='%e3%80%90%e5%85%ad%e9%96%80%e5%a4%a9%e5%a4%96%e3%83%a2%e3%83%b3%e3%82%b3%e3%83%ac%e3%83%8a%e3%82%a4%e3%83%88+OP2%e3%80%91Returun+to+Myself%ef%bc%8f%e7%b1%b3%e5%80%89%e5%8d%83%e5%b0%8b.mp4'>Returun to Myself</a>
+  </div>
+  <div class='card-body'>
+    <div class='meta'><span class='label'>作品名</span> <a href='search_all.html?q=%e5%85%ad%e9%96%80%e5%a4%a9%e5%a4%96%e3%83%a2%e3%83%b3%e3%82%b3%e3%83%ac%e3%83%8a%e3%82%a4%e3%83%88+OP2'>六門天外モンコレナイト OP2</a></div>
+    <div class='meta'><span class='label'>歌い手</span> 米倉千尋</div>
+    <div class='meta'><span class='label'>制作者</span> タマ兄</div>
+    <div class='meta'><span class='label'>最終更新日</span> 2017/01/12</div>
+    <div class='meta'><span class='label'>ファイル名</span> <a data-q='%e3%80%90%e5%85%ad%e9%96%80%e5%a4%a9%e5%a4%96%e3%83%a2%e3%83%b3%e3%82%b3%e3%83%ac%e3%83%8a%e3%82%a4%e3%83%88+OP2%e3%80%91Returun+to+Myself%ef%bc%8f%e7%b1%b3%e5%80%89%e5%8d%83%e5%b0%8b.mp4'>【六門天外モンコレナイト OP2】Returun to Myself／米倉千尋.mp4</a></div>
+  </div>
+</div>
+<div class='card' data-year='2017' data-yearband='2019-2015' data-updated='20170109' data-priority='2'>
+  <div class='card-title'>
+    <a data-q='%e3%80%90%e7%81%bc%e7%86%b1%e3%81%ae%e5%8d%93%e7%90%83%e5%a8%98%e3%80%91V%e5%ad%97%e4%b8%8a%e6%98%87Victory%ef%bc%8f%e9%9b%80%e3%81%8c%e5%8e%9f%e4%b8%ad%e5%ad%a6%e5%8d%93%e7%90%83%e9%83%a8.mp4'>V字上昇Victory</a>
+  </div>
+  <div class='card-body'>
+    <div class='meta'><span class='label'>作品名</span> <a href='search_all.html?q=%e7%81%bc%e7%86%b1%e3%81%ae%e5%8d%93%e7%90%83%e5%a8%98'>灼熱の卓球娘</a></div>
+    <div class='meta'><span class='label'>歌い手</span> 雀が原中学卓球部</div>
+    <div class='meta'><span class='label'>制作者</span> タマ兄</div>
+    <div class='meta'><span class='label'>最終更新日</span> 2017/01/09</div>
+    <div class='meta'><span class='label'>ファイル名</span> <a data-q='%e3%80%90%e7%81%bc%e7%86%b1%e3%81%ae%e5%8d%93%e7%90%83%e5%a8%98%e3%80%91V%e5%ad%97%e4%b8%8a%e6%98%87Victory%ef%bc%8f%e9%9b%80%e3%81%8c%e5%8e%9f%e4%b8%ad%e5%ad%a6%e5%8d%93%e7%90%83%e9%83%a8.mp4'>【灼熱の卓球娘】V字上昇Victory／雀が原中学卓球部.mp4</a></div>
+  </div>
+</div>
+<div class='card' data-year='2017' data-yearband='2019-2015' data-updated='20170107' data-priority='2'>
+  <div class='card-title'>
+    <a data-q='%e3%80%90%e3%82%ac%e3%83%bc%e3%83%aa%e3%83%83%e3%82%b7%e3%83%a5+%e3%83%8a%e3%83%b3%e3%83%90%e3%83%bc%e3%80%91%e6%98%8e%e6%97%a5%e3%81%b8%e3%81%ae%e9%80%94%e4%b8%ad%e3%81%a7%ef%bc%8f%e3%82%ac%e3%83%bc%e3%83%aa%e3%83%83%e3%82%b7%e3%83%a5+%e3%83%8a%e3%83%b3%e3%83%90%e3%83%bc(2ch).mp4'>明日への途中で</a>
+  </div>
+  <div class='card-body'>
+    <div class='meta'><span class='label'>作品名</span> <a href='search_all.html?q=%e3%82%ac%e3%83%bc%e3%83%aa%e3%83%83%e3%82%b7%e3%83%a5+%e3%83%8a%e3%83%b3%e3%83%90%e3%83%bc'>ガーリッシュ ナンバー</a></div>
+    <div class='meta'><span class='label'>歌い手</span> ガーリッシュ ナンバー</div>
+    <div class='meta'><span class='label'>制作者</span> タマ兄</div>
+    <div class='meta'><span class='label'>最終更新日</span> 2017/01/07</div>
+    <div class='meta'><span class='label'>ファイル名</span> <a data-q='%e3%80%90%e3%82%ac%e3%83%bc%e3%83%aa%e3%83%83%e3%82%b7%e3%83%a5+%e3%83%8a%e3%83%b3%e3%83%90%e3%83%bc%e3%80%91%e6%98%8e%e6%97%a5%e3%81%b8%e3%81%ae%e9%80%94%e4%b8%ad%e3%81%a7%ef%bc%8f%e3%82%ac%e3%83%bc%e3%83%aa%e3%83%83%e3%82%b7%e3%83%a5+%e3%83%8a%e3%83%b3%e3%83%90%e3%83%bc(2ch).mp4'>【ガーリッシュ ナンバー】明日への途中で／ガーリッシュ ナンバー(2ch).mp4</a></div>
+  </div>
+</div>
+<div class='card' data-year='2017' data-yearband='2019-2015' data-updated='20170104' data-priority='2'>
+  <div class='card-title'>
+    <a data-q='%e3%80%90%e9%9f%bf%e3%81%91%ef%bc%81%e3%83%a6%e3%83%bc%e3%83%95%e3%82%a9%e3%83%8b%e3%82%a2%e3%83%a02%e3%80%91%e3%82%b5%e3%82%a6%e3%83%b3%e3%83%89%e3%82%b9%e3%82%b1%e3%83%bc%e3%83%97+(ver2)%ef%bc%8fTRUE(2ch).mp4'>サウンドスケープ (ver2)</a>
+  </div>
+  <div class='card-body'>
+    <div class='meta'><span class='label'>作品名</span> <a href='search_all.html?q=%e9%9f%bf%e3%81%91%ef%bc%81%e3%83%a6%e3%83%bc%e3%83%95%e3%82%a9%e3%83%8b%e3%82%a2%e3%83%a02'>響け！ユーフォニアム2</a></div>
+    <div class='meta'><span class='label'>歌い手</span> TRUE</div>
+    <div class='meta'><span class='label'>制作者</span> タマ兄</div>
+    <div class='meta'><span class='label'>最終更新日</span> 2017/01/04</div>
+    <div class='meta'><span class='label'>ファイル名</span> <a data-q='%e3%80%90%e9%9f%bf%e3%81%91%ef%bc%81%e3%83%a6%e3%83%bc%e3%83%95%e3%82%a9%e3%83%8b%e3%82%a2%e3%83%a02%e3%80%91%e3%82%b5%e3%82%a6%e3%83%b3%e3%83%89%e3%82%b9%e3%82%b1%e3%83%bc%e3%83%97+(ver2)%ef%bc%8fTRUE(2ch).mp4'>【響け！ユーフォニアム2】サウンドスケープ (ver2)／TRUE(2ch).mp4</a></div>
+  </div>
+</div>
+<div class='card' data-year='2016' data-yearband='2019-2015' data-updated='20161230' data-priority='2'>
+  <div class='card-title'>
+    <a data-q='%e3%80%90%e7%81%bc%e7%86%b1%e3%81%ae%e5%8d%93%e7%90%83%e5%a8%98%e3%80%91%e5%83%95%e3%82%89%e3%81%ae%e3%83%95%e3%83%ad%e3%83%b3%e3%83%86%e3%82%a3%e3%82%a2%ef%bc%8fWake+Up%2c+Girls!(2ch).mp4'>僕らのフロンティア</a>
+  </div>
+  <div class='card-body'>
+    <div class='meta'><span class='label'>作品名</span> <a href='search_all.html?q=%e7%81%bc%e7%86%b1%e3%81%ae%e5%8d%93%e7%90%83%e5%a8%98'>灼熱の卓球娘</a></div>
+    <div class='meta'><span class='label'>歌い手</span> Wake Up, Girls!</div>
+    <div class='meta'><span class='label'>制作者</span> タマ兄</div>
+    <div class='meta'><span class='label'>最終更新日</span> 2016/12/30</div>
+    <div class='meta'><span class='label'>ファイル名</span> <a data-q='%e3%80%90%e7%81%bc%e7%86%b1%e3%81%ae%e5%8d%93%e7%90%83%e5%a8%98%e3%80%91%e5%83%95%e3%82%89%e3%81%ae%e3%83%95%e3%83%ad%e3%83%b3%e3%83%86%e3%82%a3%e3%82%a2%ef%bc%8fWake+Up%2c+Girls!(2ch).mp4'>【灼熱の卓球娘】僕らのフロンティア／Wake Up, Girls!(2ch).mp4</a></div>
+  </div>
+</div>
+<div class='card' data-year='2016' data-yearband='2019-2015' data-updated='20161225' data-priority='2'>
+  <div class='card-title'>
+    <a data-q='%e3%80%90%e3%81%82%e3%81%ab%e3%83%88%e3%83%ac%ef%bc%81XX%e3%80%91Cheer+for+you%e2%99%aa%ef%bc%8f%e4%bc%8a%e8%97%a4%e7%be%8e%e6%9d%a5%e3%80%81%e5%92%8c%e6%b0%a3%e3%81%82%e3%81%9a%e6%9c%aa%e3%80%81%e5%b0%8f%e7%89%a7%e6%9c%aa%e4%be%91%e3%80%81%e9%95%b7%e7%b8%84%e3%81%be%e3%82%8a%e3%81%82%e3%80%81%e9%ab%98%e5%b0%be%e5%a5%8f%e9%9f%b3%e3%80%81%e9%88%b4%e6%9c%a8%e7%b5%b5%e7%90%86(2ch).mp4'>Cheer for you♪</a>
+  </div>
+  <div class='card-body'>
+    <div class='meta'><span class='label'>作品名</span> <a href='search_all.html?q=%e3%81%82%e3%81%ab%e3%83%88%e3%83%ac%ef%bc%81XX'>あにトレ！XX</a></div>
+    <div class='meta'><span class='label'>歌い手</span> 伊藤美来、和氣あず未、小牧未侑、長縄まりあ、高尾奏音、鈴木絵理</div>
+    <div class='meta'><span class='label'>制作者</span> タマ兄</div>
+    <div class='meta'><span class='label'>最終更新日</span> 2016/12/25</div>
+    <div class='meta'><span class='label'>ファイル名</span> <a data-q='%e3%80%90%e3%81%82%e3%81%ab%e3%83%88%e3%83%ac%ef%bc%81XX%e3%80%91Cheer+for+you%e2%99%aa%ef%bc%8f%e4%bc%8a%e8%97%a4%e7%be%8e%e6%9d%a5%e3%80%81%e5%92%8c%e6%b0%a3%e3%81%82%e3%81%9a%e6%9c%aa%e3%80%81%e5%b0%8f%e7%89%a7%e6%9c%aa%e4%be%91%e3%80%81%e9%95%b7%e7%b8%84%e3%81%be%e3%82%8a%e3%81%82%e3%80%81%e9%ab%98%e5%b0%be%e5%a5%8f%e9%9f%b3%e3%80%81%e9%88%b4%e6%9c%a8%e7%b5%b5%e7%90%86(2ch).mp4'>【あにトレ！XX】Cheer for you♪／伊藤美来、和氣あず未、小牧未侑、長縄まりあ、高尾奏音、鈴木絵理(2ch).mp4</a></div>
+  </div>
+</div>
+<div class='card' data-year='2016' data-yearband='2019-2015' data-updated='20161224' data-priority='2'>
+  <div class='card-title'>
+    <a data-q='%e3%80%90%e3%82%ac%e3%83%bc%e3%83%aa%e3%83%83%e3%82%b7%e3%83%a5+%e3%83%8a%e3%83%b3%e3%83%90%e3%83%bc%e3%80%91%e3%81%84%e3%81%9f%e3%81%a0%e3%81%8d%e2%98%86%e3%83%8f%e3%82%a4%e3%83%86%e3%83%b3%e3%82%b7%e3%83%a7%e3%83%b3%ef%bc%8f%e3%82%ac%e3%83%bc%e3%83%aa%e3%83%83%e3%82%b7%e3%83%a5+%e3%83%8a%e3%83%b3%e3%83%90%e3%83%bc.mp4'>いただき☆ハイテンション</a>
+  </div>
+  <div class='card-body'>
+    <div class='meta'><span class='label'>作品名</span> <a href='search_all.html?q=%e3%82%ac%e3%83%bc%e3%83%aa%e3%83%83%e3%82%b7%e3%83%a5+%e3%83%8a%e3%83%b3%e3%83%90%e3%83%bc'>ガーリッシュ ナンバー</a></div>
+    <div class='meta'><span class='label'>歌い手</span> ガーリッシュ ナンバー</div>
+    <div class='meta'><span class='label'>制作者</span> タマ兄</div>
+    <div class='meta'><span class='label'>最終更新日</span> 2016/12/24</div>
+    <div class='meta'><span class='label'>ファイル名</span> <a data-q='%e3%80%90%e3%82%ac%e3%83%bc%e3%83%aa%e3%83%83%e3%82%b7%e3%83%a5+%e3%83%8a%e3%83%b3%e3%83%90%e3%83%bc%e3%80%91%e3%81%84%e3%81%9f%e3%81%a0%e3%81%8d%e2%98%86%e3%83%8f%e3%82%a4%e3%83%86%e3%83%b3%e3%82%b7%e3%83%a7%e3%83%b3%ef%bc%8f%e3%82%ac%e3%83%bc%e3%83%aa%e3%83%83%e3%82%b7%e3%83%a5+%e3%83%8a%e3%83%b3%e3%83%90%e3%83%bc.mp4'>【ガーリッシュ ナンバー】いただき☆ハイテンション／ガーリッシュ ナンバー.mp4</a></div>
+  </div>
+</div>
+<div class='card' data-year='2016' data-yearband='2019-2015' data-updated='20161224' data-priority='2'>
+  <div class='card-title'>
+    <a data-q='%e3%80%90%e3%82%a2%e3%82%a4%e3%83%89%e3%83%ab%e3%83%9e%e3%82%b9%e3%82%bf%e3%83%bc+%e3%82%b7%e3%83%b3%e3%83%87%e3%83%ac%e3%83%a9%e3%82%ac%e3%83%bc%e3%83%ab%e3%82%ba+%e3%82%b9%e3%82%bf%e3%83%bc%e3%83%a9%e3%82%a4%e3%83%88%e3%82%b9%e3%83%86%e3%83%bc%e3%82%b8%e3%80%91%e3%82%b5%e3%83%9e%e3%82%ab%e3%83%8b!!%ef%bc%8f%e5%b7%9d%e5%b3%b6%e7%91%9e%e6%a8%b9%e3%80%81%e6%97%a5%e9%87%8e%e8%8c%9c%e3%80%81%e5%a0%80%e8%a3%95%e5%ad%90%e3%80%81%e4%b8%8a%e7%94%b0%e9%88%b4%e5%b8%86%e3%80%81%e9%9b%a3%e6%b3%a2%e7%ac%91%e7%be%8e.mp4'>サマカニ!!</a>
+  </div>
+  <div class='card-body'>
+    <div class='meta'><span class='label'>作品名</span> <a href='search_all.html?q=%e3%82%a2%e3%82%a4%e3%83%89%e3%83%ab%e3%83%9e%e3%82%b9%e3%82%bf%e3%83%bc+%e3%82%b7%e3%83%b3%e3%83%87%e3%83%ac%e3%83%a9%e3%82%ac%e3%83%bc%e3%83%ab%e3%82%ba+%e3%82%b9%e3%82%bf%e3%83%bc%e3%83%a9%e3%82%a4%e3%83%88%e3%82%b9%e3%83%86%e3%83%bc%e3%82%b8'>アイドルマスター シンデレラガールズ スターライトステージ</a></div>
+    <div class='meta'><span class='label'>歌い手</span> 川島瑞樹、日野茜、堀裕子、上田鈴帆、難波笑美</div>
+    <div class='meta'><span class='label'>制作者</span> タマ兄</div>
+    <div class='meta'><span class='label'>最終更新日</span> 2016/12/24</div>
+    <div class='meta'><span class='label'>ファイル名</span> <a data-q='%e3%80%90%e3%82%a2%e3%82%a4%e3%83%89%e3%83%ab%e3%83%9e%e3%82%b9%e3%82%bf%e3%83%bc+%e3%82%b7%e3%83%b3%e3%83%87%e3%83%ac%e3%83%a9%e3%82%ac%e3%83%bc%e3%83%ab%e3%82%ba+%e3%82%b9%e3%82%bf%e3%83%bc%e3%83%a9%e3%82%a4%e3%83%88%e3%82%b9%e3%83%86%e3%83%bc%e3%82%b8%e3%80%91%e3%82%b5%e3%83%9e%e3%82%ab%e3%83%8b!!%ef%bc%8f%e5%b7%9d%e5%b3%b6%e7%91%9e%e6%a8%b9%e3%80%81%e6%97%a5%e9%87%8e%e8%8c%9c%e3%80%81%e5%a0%80%e8%a3%95%e5%ad%90%e3%80%81%e4%b8%8a%e7%94%b0%e9%88%b4%e5%b8%86%e3%80%81%e9%9b%a3%e6%b3%a2%e7%ac%91%e7%be%8e.mp4'>【アイドルマスター シンデレラガールズ スターライトステージ】サマカニ!!／川島瑞樹、日野茜、堀裕子、上田鈴帆、難波笑美.mp4</a></div>
+  </div>
+</div>
+<div class='card' data-year='2016' data-yearband='2019-2015' data-updated='20161217' data-priority='2'>
+  <div class='card-title'>
+    <a data-q='%e3%80%90%e3%82%ac%e3%83%bc%e3%83%aa%e3%83%83%e3%82%b7%e3%83%a5+%e3%83%8a%e3%83%b3%e3%83%90%e3%83%bc%e3%80%91%e6%b1%ba%e6%84%8f%e3%81%ae%e3%83%80%e3%82%a4%e3%83%a4(%e3%83%91%e3%83%bc%e3%83%88%e5%88%86%e3%81%91)%ef%bc%8fkohaluna%ef%bc%88%e8%8b%91%e7%94%9f%e7%99%be%e8%8a%b1%e3%83%bb%e6%9f%b4%e5%b4%8e%e4%b8%87%e8%91%89%ef%bc%89(2ch).mp4'>決意のダイヤ(パート分け)</a>
+  </div>
+  <div class='card-body'>
+    <div class='meta'><span class='label'>作品名</span> <a href='search_all.html?q=%e3%82%ac%e3%83%bc%e3%83%aa%e3%83%83%e3%82%b7%e3%83%a5+%e3%83%8a%e3%83%b3%e3%83%90%e3%83%bc'>ガーリッシュ ナンバー</a></div>
+    <div class='meta'><span class='label'>歌い手</span> kohaluna（苑生百花・柴崎万葉）</div>
+    <div class='meta'><span class='label'>制作者</span> タマ兄</div>
+    <div class='meta'><span class='label'>最終更新日</span> 2016/12/17</div>
+    <div class='meta'><span class='label'>ファイル名</span> <a data-q='%e3%80%90%e3%82%ac%e3%83%bc%e3%83%aa%e3%83%83%e3%82%b7%e3%83%a5+%e3%83%8a%e3%83%b3%e3%83%90%e3%83%bc%e3%80%91%e6%b1%ba%e6%84%8f%e3%81%ae%e3%83%80%e3%82%a4%e3%83%a4(%e3%83%91%e3%83%bc%e3%83%88%e5%88%86%e3%81%91)%ef%bc%8fkohaluna%ef%bc%88%e8%8b%91%e7%94%9f%e7%99%be%e8%8a%b1%e3%83%bb%e6%9f%b4%e5%b4%8e%e4%b8%87%e8%91%89%ef%bc%89(2ch).mp4'>【ガーリッシュ ナンバー】決意のダイヤ(パート分け)／kohaluna（苑生百花・柴崎万葉）(2ch).mp4</a></div>
+  </div>
+</div>
+<div class='card' data-year='2016' data-yearband='2019-2015' data-updated='20161214' data-priority='2'>
+  <div class='card-title'>
+    <a data-q='%e3%80%90%e3%82%ac%e3%83%bc%e3%83%aa%e3%83%83%e3%82%b7%e3%83%a5+%e3%83%8a%e3%83%b3%e3%83%90%e3%83%bc%e3%80%91%e4%bb%8a%e3%81%af%e7%9f%ad%e3%81%97%e5%a4%a2%e8%a6%8b%e3%82%88%e4%b9%99%e5%a5%b3%ef%bc%8f%e3%82%ac%e3%83%bc%e3%83%aa%e3%83%83%e3%82%b7%e3%83%a5+%e3%83%8a%e3%83%b3%e3%83%90%e3%83%bc.mp4'>今は短し夢見よ乙女</a>
+  </div>
+  <div class='card-body'>
+    <div class='meta'><span class='label'>作品名</span> <a href='search_all.html?q=%e3%82%ac%e3%83%bc%e3%83%aa%e3%83%83%e3%82%b7%e3%83%a5+%e3%83%8a%e3%83%b3%e3%83%90%e3%83%bc'>ガーリッシュ ナンバー</a></div>
+    <div class='meta'><span class='label'>歌い手</span> ガーリッシュ ナンバー</div>
+    <div class='meta'><span class='label'>制作者</span> タマ兄</div>
+    <div class='meta'><span class='label'>最終更新日</span> 2016/12/14</div>
+    <div class='meta'><span class='label'>ファイル名</span> <a data-q='%e3%80%90%e3%82%ac%e3%83%bc%e3%83%aa%e3%83%83%e3%82%b7%e3%83%a5+%e3%83%8a%e3%83%b3%e3%83%90%e3%83%bc%e3%80%91%e4%bb%8a%e3%81%af%e7%9f%ad%e3%81%97%e5%a4%a2%e8%a6%8b%e3%82%88%e4%b9%99%e5%a5%b3%ef%bc%8f%e3%82%ac%e3%83%bc%e3%83%aa%e3%83%83%e3%82%b7%e3%83%a5+%e3%83%8a%e3%83%b3%e3%83%90%e3%83%bc.mp4'>【ガーリッシュ ナンバー】今は短し夢見よ乙女／ガーリッシュ ナンバー.mp4</a></div>
+  </div>
+</div>
+<div class='card' data-year='2016' data-yearband='2019-2015' data-updated='20161210' data-priority='2'>
+  <div class='card-title'>
+    <a data-q='%e3%80%90%e7%81%bc%e7%86%b1%e3%81%ae%e5%8d%93%e7%90%83%e5%a8%98%e3%80%91%e7%81%bc%e7%86%b1%e3%82%b9%e3%82%a4%e3%83%83%e3%83%81%ef%bc%8f%e9%9b%80%e3%81%8c%e5%8e%9f%e4%b8%ad%e5%ad%a6%e5%8d%93%e7%90%83%e9%83%a8(2ch).mp4'>灼熱スイッチ</a>
+  </div>
+  <div class='card-body'>
+    <div class='meta'><span class='label'>作品名</span> <a href='search_all.html?q=%e7%81%bc%e7%86%b1%e3%81%ae%e5%8d%93%e7%90%83%e5%a8%98'>灼熱の卓球娘</a></div>
+    <div class='meta'><span class='label'>歌い手</span> 雀が原中学卓球部</div>
+    <div class='meta'><span class='label'>制作者</span> タマ兄</div>
+    <div class='meta'><span class='label'>最終更新日</span> 2016/12/10</div>
+    <div class='meta'><span class='label'>ファイル名</span> <a data-q='%e3%80%90%e7%81%bc%e7%86%b1%e3%81%ae%e5%8d%93%e7%90%83%e5%a8%98%e3%80%91%e7%81%bc%e7%86%b1%e3%82%b9%e3%82%a4%e3%83%83%e3%83%81%ef%bc%8f%e9%9b%80%e3%81%8c%e5%8e%9f%e4%b8%ad%e5%ad%a6%e5%8d%93%e7%90%83%e9%83%a8(2ch).mp4'>【灼熱の卓球娘】灼熱スイッチ／雀が原中学卓球部(2ch).mp4</a></div>
+  </div>
+</div>
+    </div>
+  </div>
+
+  <div class='pager' id='pager-list-year-3'><a href='year_2019-2015_2.html'>前へ</a>
+<a href='year_2019-2015.html'>1</a>
+<a href='year_2019-2015_2.html'>2</a>
+<span class='current'>3</span>
+<a href='year_2019-2015_4.html'>4</a>
+<a href='year_2019-2015_5.html'>5</a>
+<a href='year_2019-2015_4.html'>次へ</a></div>
+</div>
+<script>
+  const init = qparam('q').trim();
+  if(init){
+    document.getElementById('q-list-year-3').value = init.replace(/\+/g,' ');
+    filterCards('list-year-3','q-list-year-3');
+  }else{
+    document.getElementById('count-list-year-3').textContent = '表示件数: ' + document.querySelectorAll('#list-year-3 .card').length;
+  }
+</script>
+</div>
+</body></html>

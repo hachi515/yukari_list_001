@@ -1,0 +1,394 @@
+﻿<!DOCTYPE html>
+<html lang='ja'>
+<head>
+<meta charset='UTF-8'>
+<title>年別：2014〜2010</title>
+<meta name='viewport' content='width=device-width, initial-scale=1.0'>
+<meta property='og:title' content='つぼはち・オフライン検索'>
+<meta property='og:description' content='ゆかりのオフライン時に検索可能のサイトです'>
+<meta property='og:image' content='https://raw.githubusercontent.com/hachi515/yukari_list_001/main/Hasunosora_3.png'>
+<meta property='og:url' content=''>
+<meta name='twitter:card' content='summary_large_image'>
+<meta name='twitter:title' content='つぼはち・オフライン検索'>
+<meta name='twitter:description' content='ゆかりのオフライン時に検索可能のサイトです'>
+<meta name='twitter:image' content='https://raw.githubusercontent.com/hachi515/yukari_list_001/main/Hasunosora_3.png'>
+<style>:root{
+  --accent:#1B64C2;
+  --accent-50: rgba(27,100,194,.50);
+  --accent-70: rgba(27,100,194,.70);
+  --accent-90: rgba(27,100,194,.90);
+  --border:#1B64C2;
+  --panel:rgba(255,255,255,.55);
+  --panel-strong:rgba(255,255,255,.60);
+  --ui-gray:#a1a1a1;
+}
+*{box-sizing:border-box}
+html,body{width:100%}
+body{
+  font-family:'ヒラギノ角ゴ ProN W3','Hiragino Kaku Gothic ProN','Hiragino Sans','ヒラギノ角ゴシック','Yu Gothic','メイリオ',Meiryo,Arial,sans-serif;
+  font-size:14px; color:#222; background:#eef2f5; font-weight:400;
+  background-image:url('https://raw.githubusercontent.com/hachi515/yukari_list_001/main/Hasunosora_1.png'); background-size:cover; background-attachment:fixed; background-position:center; margin:0;
+}
+.wrap{ max-width:1100px; margin:24px auto; padding:12px; background:var(--panel); border:0; border-radius:0; box-shadow:none; overflow-x:auto; }
+
+h1{ display:inline-block; margin:0 0 14px 0; padding:4px 0; background:transparent; color:#0b1b2e; font-size:18px; font-weight:500 }
+h2{ margin:10px 0 8px; padding:0; color:#0b1b2e; font-size:18px; font-weight:500; background:transparent } /* ← h1と同サイズ */
+
+.back{ text-align:right; margin:-6px 0 6px 0 }
+.back a{ color:var(--accent); text-decoration:none; border-bottom:1px dotted var(--accent) }
+
+.section{margin:10px 0 18px}
+.search{display:flex; gap:8px; margin:8px 0 4px; align-items:center; justify-content:flex-start}
+.search select{ padding:8px 10px; font-size:14px; background:var(--panel); border:1px solid var(--ui-gray); border-radius:0; font-weight:400 }
+.search input[type=text]{ flex:0 0 260px; width:260px; padding:8px; font-size:14px; background:var(--panel); border:1px solid var(--ui-gray); border-radius:0; font-weight:400 }
+.search button{ padding:8px 12px; font-size:14px; color:#fff; background:var(--accent-90); border:1px solid var(--ui-gray); border-radius:0; cursor:pointer }
+.count{font-size:12px; color:#222; margin:4px 0 8px}
+a{ color:var(--accent); }
+
+.btn{display:inline-block; padding:8px 10px; background:var(--accent-70); color:#fff; text-decoration:none; border:1px solid var(--border); border-radius:0; font-weight:400 }
+.btn-outline{background:var(--panel); color:#1b1b1b; border:1px solid var(--border)}
+.year-buttons,.new-buttons{display:flex; flex-wrap:wrap; gap:8px}
+
+.kana-row{display:flex; gap:24px; margin-bottom:8px}
+.kana-group{display:flex; gap:6px}
+.kana-btn{display:inline-block; padding:6px 10px; background:var(--accent-70); color:#fff; text-decoration:none; border:1px solid var(--border); border-radius:0; font-size:14px; font-weight:400}
+.kana-btn.disabled{opacity:.35; pointer-events:none}
+
+/* 作品名グリッド：1行2個 */
+.prog-grid{display:grid; grid-template-columns:repeat(2, minmax(0,1fr)); gap:8px}
+.prog-grid a{display:block}
+
+/* カード */
+.card{margin:12px 0; border:0; background:transparent}
+.card-title{padding:0; background:transparent}
+.card-title a{display:block; padding:8px 10px; background:var(--accent-70); color:#fff; text-decoration:none; white-space:normal; font-weight:500}
+.card-body{padding:10px; background:var(--panel-strong)}
+.meta{margin:3px 0; font-weight:400}
+.meta .label{display:inline-block; min-width:84px; color:#0b1b2e; font-weight:400}
+
+/* ページャ */
+.pager{display:flex; gap:6px; flex-wrap:wrap; margin:14px 0}
+.pager a,.pager span{padding:6px 10px; border:1px solid var(--border); text-decoration:none; color:#fff; background:var(--accent-70); font-weight:400}
+.pager .current{background:var(--accent-90); color:#fff}
+
+/* スクロール枠（search_all / 年別 / 新着 / 五十音） */
+.list-container{max-height:900px; overflow-y:auto; border:1px solid var(--ui-gray); background:rgba(255,255,255,.35); padding:8px; box-shadow:0 4px 8px rgba(0,0,0,.06)}
+.stickybar{position:sticky; top:0; z-index:20; background:rgba(255,255,255,.6); border-bottom:1px solid var(--ui-gray); padding:8px; margin:-8px -8px 8px -8px}
+.stickybar.no-bg{background:transparent; border:none; padding:0; margin:0 0 8px 0}
+
+@media (max-width:768px){
+  body{ background-image:url('https://raw.githubusercontent.com/hachi515/yukari_list_001/main/Hasunosora_2.png'); font-size:13px }
+  .search select, .search input[type=text], .search button{ font-size:13px; padding:7px 10px }
+  /* 入力幅をスマホではやや広めに */
+  .search input[type=text]{ flex:0 0 56vw; width:56vw }
+  .list-container{ max-height:450px }
+}
+  .search select, .search input[type=text], .search button{ font-size:13px; padding:7px 10px }
+  .list-container{ max-height:450px }
+}</style>
+<script>const SEARCH_BASE = 'http://ykr.moe:11059/';
+
+function tokensHalf(v){return v.toLowerCase().trim().split(/ +/).filter(Boolean)}
+function qparam(name){ const m = location.search.match(new RegExp('[?&]'+name+'=([^&]+)')); return m ? decodeURIComponent(m[1]) : ''; }
+
+// 軽量リンク化：data-q を href に展開
+document.addEventListener('DOMContentLoaded', ()=>{
+  document.querySelectorAll('a[data-q]').forEach(a=>{
+    try{
+      const q = a.getAttribute('data-q')||'';
+      a.href = SEARCH_BASE + 'search.php?searchword=' + q;
+      a.target = '_blank';
+    }catch(e){}
+  });
+});
+
+function filterCards(listId, boxId){
+  const q = tokensHalf(document.getElementById(boxId).value);
+  const list = document.getElementById(listId);
+  if(!list){return}
+  const cards = list.querySelectorAll('.card');
+  let vis = 0;
+  cards.forEach(c=>{
+    const hit = q.every(tok => c.innerText.toLowerCase().includes(tok));
+    c.style.display = hit ? '' : 'none';
+    if(hit) vis++;
+  });
+  const cEl = document.getElementById('count-'+listId);
+  if(cEl){ cEl.textContent = '表示件数: ' + vis; }
+  const pager = document.getElementById('pager-'+listId);
+  const per = parseInt(list.dataset.per || '100',10);
+  if(pager){ if(q.length===0){ pager.style.display = ''; } else { pager.style.display = (vis<=per) ? 'none' : ''; } }
+}
+
+/* ===== 検索結果専用：表示中カードを「制作者優先度→日付」で並べ替え ===== */
+const DEFAULT_PRIO = 999;
+function reorderByPriority(listId){
+  const list = document.getElementById(listId);
+  if(!list){return}
+  const visible = Array.from(list.querySelectorAll('.card')).filter(c => c.style.display !== 'none');
+  visible.sort((a,b)=>{
+    const pa = parseInt(a.dataset.priority||DEFAULT_PRIO);
+    const pb = parseInt(b.dataset.priority||DEFAULT_PRIO);
+    if(pa !== pb) return pa - pb;
+    const da = parseInt(a.dataset.updated||0); // yyyymmdd
+    const db = parseInt(b.dataset.updated||0);
+    return db - da;
+  });
+  visible.forEach(c => list.appendChild(c));
+}
+
+function filterCardsAdv(listId, boxId, yearId){
+  const q = tokensHalf(document.getElementById(boxId).value);
+  const yEl = document.getElementById(yearId);
+  const y = yEl ? (yEl.value||'').trim() : '';
+  const list = document.getElementById(listId);
+  if(!list){return}
+  const cards = list.querySelectorAll('.card');
+  let vis = 0;
+  cards.forEach(c=>{
+    const okText = q.every(tok => c.innerText.toLowerCase().includes(tok));
+    const band = (c.dataset.yearband||'');
+    const yr = (c.dataset.year||'');
+    const okYear = (y==='' || yr===y || band===y);
+    const show = okText && okYear;
+    c.style.display = show ? '' : 'none';
+    if(show) vis++;
+  });
+  const cEl = document.getElementById('count-'+listId);
+  if(cEl){ cEl.textContent = '表示件数: ' + vis; }
+
+  // ★検索（キーワード or 年帯）を使ったときだけ優先度並び替えを実施
+  if(q.length>0 || y!==''){ reorderByPriority(listId); }
+}
+
+function filterGrid(gridSel, boxId, countId){
+  const q = tokensHalf(document.getElementById(boxId).value);
+  const nodes = document.querySelectorAll(gridSel+' a');
+  let vis=0; nodes.forEach(a=>{ const hit=q.every(t=>a.innerText.toLowerCase().includes(t)); a.style.display=hit?'':'none'; if(hit) vis++; });
+  if(countId){ const el=document.getElementById(countId); if(el){ el.textContent='表示件数: '+vis; } }
+}</script>
+</head>
+<body>
+<div class='wrap'>
+<h1>年別：2014〜2010</h1>
+<div class='back'><a href='index.html'>一覧に戻る</a></div>
+
+<div class='section'>
+  <div class='search'>
+    <input type='text' id='q-list-year-2' placeholder='キーワード（半角スペースAND）'>
+    <button onclick="filterCards('list-year-2','q-list-year-2')">検索</button>
+  </div>
+  <div class='count' id='count-list-year-2'></div>
+
+  <div class='list-container'>
+    <div id='list-year-2' data-per='100'>
+<div class='card' data-year='2011' data-yearband='2014-2010' data-updated='20110919' data-priority='2'>
+  <div class='card-title'>
+    <a data-q='%e3%80%90%e3%83%ad%e3%82%a6%e3%81%8d%e3%82%85%e3%83%bc%e3%81%b6%ef%bc%81%e3%80%91+Party+Love+%ef%bd%9e%e3%81%8a%e3%81%a3%e3%81%8d%e3%81%8f%e3%81%aa%e3%82%8a%e3%81%9f%e3%81%84%ef%bd%9e%ef%bc%8fRO-KYU-BU!(%e8%8a%b1%e6%be%a4%e9%a6%99%e8%8f%9c%e3%80%81%e4%ba%95%e5%8f%a3%e8%a3%95%e9%a6%99%e3%80%81%e6%97%a5%e7%ac%a0%e9%99%bd%e5%ad%90%e3%80%81%e6%97%a5%e9%ab%98%e9%87%8c%e8%8f%9c%e3%80%81%e5%b0%8f%e5%80%89%e5%94%af).MP4'>Party Love ～おっきくなりたい～</a>
+  </div>
+  <div class='card-body'>
+    <div class='meta'><span class='label'>作品名</span> <a href='search_all.html?q=%e3%83%ad%e3%82%a6%e3%81%8d%e3%82%85%e3%83%bc%e3%81%b6%ef%bc%81'>ロウきゅーぶ！</a></div>
+    <div class='meta'><span class='label'>歌い手</span> RO</div>
+    <div class='meta'><span class='label'>制作者</span> タマ兄</div>
+    <div class='meta'><span class='label'>最終更新日</span> 2011/09/19</div>
+    <div class='meta'><span class='label'>ファイル名</span> <a data-q='%e3%80%90%e3%83%ad%e3%82%a6%e3%81%8d%e3%82%85%e3%83%bc%e3%81%b6%ef%bc%81%e3%80%91+Party+Love+%ef%bd%9e%e3%81%8a%e3%81%a3%e3%81%8d%e3%81%8f%e3%81%aa%e3%82%8a%e3%81%9f%e3%81%84%ef%bd%9e%ef%bc%8fRO-KYU-BU!(%e8%8a%b1%e6%be%a4%e9%a6%99%e8%8f%9c%e3%80%81%e4%ba%95%e5%8f%a3%e8%a3%95%e9%a6%99%e3%80%81%e6%97%a5%e7%ac%a0%e9%99%bd%e5%ad%90%e3%80%81%e6%97%a5%e9%ab%98%e9%87%8c%e8%8f%9c%e3%80%81%e5%b0%8f%e5%80%89%e5%94%af).MP4'>【ロウきゅーぶ！】 Party Love ～おっきくなりたい～／RO-KYU-BU!(花澤香菜、井口裕香、日笠陽子、日高里菜、小倉唯).MP4</a></div>
+  </div>
+</div>
+<div class='card' data-year='2011' data-yearband='2014-2010' data-updated='20110919' data-priority='2'>
+  <div class='card-title'>
+    <a data-q='%e3%80%90%e6%b6%bc%e9%a2%a8%e3%81%ae%e3%83%a1%e3%83%ab%e3%83%88%e3%80%91Believe+Forever%ef%bc%8f%e4%bd%90%e8%97%a4%e3%81%b2%e3%82%8d%e7%be%8e.MP4'>Believe Forever</a>
+  </div>
+  <div class='card-body'>
+    <div class='meta'><span class='label'>作品名</span> <a href='search_all.html?q=%e6%b6%bc%e9%a2%a8%e3%81%ae%e3%83%a1%e3%83%ab%e3%83%88'>涼風のメルト</a></div>
+    <div class='meta'><span class='label'>歌い手</span> 佐藤ひろ美</div>
+    <div class='meta'><span class='label'>制作者</span> タマ兄</div>
+    <div class='meta'><span class='label'>最終更新日</span> 2011/09/19</div>
+    <div class='meta'><span class='label'>ファイル名</span> <a data-q='%e3%80%90%e6%b6%bc%e9%a2%a8%e3%81%ae%e3%83%a1%e3%83%ab%e3%83%88%e3%80%91Believe+Forever%ef%bc%8f%e4%bd%90%e8%97%a4%e3%81%b2%e3%82%8d%e7%be%8e.MP4'>【涼風のメルト】Believe Forever／佐藤ひろ美.MP4</a></div>
+  </div>
+</div>
+<div class='card' data-year='2011' data-yearband='2014-2010' data-updated='20110825' data-priority='2'>
+  <div class='card-title'>
+    <a data-q='%e3%80%90%e3%82%86%e3%82%8b%e3%82%86%e3%82%8a%e3%80%91+%e3%82%86%e3%82%8b%e3%82%86%e3%82%8aI%e2%96%bcU%ef%bc%8f%e4%b8%83%e6%a3%ae%e4%b8%ad%e2%98%86%e3%81%94%e3%82%89%e3%81%8f%e9%83%a8.MP4'>ゆるゆりI▼U</a>
+  </div>
+  <div class='card-body'>
+    <div class='meta'><span class='label'>作品名</span> <a href='search_all.html?q=%e3%82%86%e3%82%8b%e3%82%86%e3%82%8a'>ゆるゆり</a></div>
+    <div class='meta'><span class='label'>歌い手</span> 七森中☆ごらく部</div>
+    <div class='meta'><span class='label'>制作者</span> タマ兄</div>
+    <div class='meta'><span class='label'>最終更新日</span> 2011/08/25</div>
+    <div class='meta'><span class='label'>ファイル名</span> <a data-q='%e3%80%90%e3%82%86%e3%82%8b%e3%82%86%e3%82%8a%e3%80%91+%e3%82%86%e3%82%8b%e3%82%86%e3%82%8aI%e2%96%bcU%ef%bc%8f%e4%b8%83%e6%a3%ae%e4%b8%ad%e2%98%86%e3%81%94%e3%82%89%e3%81%8f%e9%83%a8.MP4'>【ゆるゆり】 ゆるゆりI▼U／七森中☆ごらく部.MP4</a></div>
+  </div>
+</div>
+<div class='card' data-year='2011' data-yearband='2014-2010' data-updated='20110801' data-priority='2'>
+  <div class='card-title'>
+    <a data-q='%e3%80%90%e3%82%a2%e3%82%a4%e3%83%89%e3%83%ab%e3%83%9e%e3%82%b9%e3%82%bf%e3%83%bc(%e3%82%a2%e3%83%8b%e3%83%a1)%e3%80%91The+world+is+all+one!!%ef%bc%8f765PRO+ALLSTAR.MP4'>The world is all one!!</a>
+  </div>
+  <div class='card-body'>
+    <div class='meta'><span class='label'>作品名</span> <a href='search_all.html?q=%e3%82%a2%e3%82%a4%e3%83%89%e3%83%ab%e3%83%9e%e3%82%b9%e3%82%bf%e3%83%bc(%e3%82%a2%e3%83%8b%e3%83%a1)'>アイドルマスター(アニメ)</a></div>
+    <div class='meta'><span class='label'>歌い手</span> 765PRO ALLSTAR</div>
+    <div class='meta'><span class='label'>制作者</span> タマ兄</div>
+    <div class='meta'><span class='label'>最終更新日</span> 2011/08/01</div>
+    <div class='meta'><span class='label'>ファイル名</span> <a data-q='%e3%80%90%e3%82%a2%e3%82%a4%e3%83%89%e3%83%ab%e3%83%9e%e3%82%b9%e3%82%bf%e3%83%bc(%e3%82%a2%e3%83%8b%e3%83%a1)%e3%80%91The+world+is+all+one!!%ef%bc%8f765PRO+ALLSTAR.MP4'>【アイドルマスター(アニメ)】The world is all one!!／765PRO ALLSTAR.MP4</a></div>
+  </div>
+</div>
+<div class='card' data-year='2011' data-yearband='2014-2010' data-updated='20110709' data-priority='2'>
+  <div class='card-title'>
+    <a data-q='%e3%80%90DEARDROPS%e3%80%91+%e5%b8%8c%e6%9c%9b%e3%81%ae%e6%97%8b%e5%be%8b%ef%bc%8fDEARDROPS.MP4'>希望の旋律</a>
+  </div>
+  <div class='card-body'>
+    <div class='meta'><span class='label'>作品名</span> <a href='search_all.html?q=DEARDROPS'>DEARDROPS</a></div>
+    <div class='meta'><span class='label'>歌い手</span> DEARDROPS</div>
+    <div class='meta'><span class='label'>制作者</span> タマ兄</div>
+    <div class='meta'><span class='label'>最終更新日</span> 2011/07/09</div>
+    <div class='meta'><span class='label'>ファイル名</span> <a data-q='%e3%80%90DEARDROPS%e3%80%91+%e5%b8%8c%e6%9c%9b%e3%81%ae%e6%97%8b%e5%be%8b%ef%bc%8fDEARDROPS.MP4'>【DEARDROPS】 希望の旋律／DEARDROPS.MP4</a></div>
+  </div>
+</div>
+<div class='card' data-year='2011' data-yearband='2014-2010' data-updated='20110625' data-priority='2'>
+  <div class='card-title'>
+    <a data-q='%e3%80%90fortissimo+EXA+AkkordBsusvier%e3%80%91+fortissimo+-the+ultimate+crisis-%ef%bc%8ffripSide.MP4'>fortissimo -the ultimate crisis-</a>
+  </div>
+  <div class='card-body'>
+    <div class='meta'><span class='label'>作品名</span> <a href='search_all.html?q=fortissimo+EXA+AkkordBsusvier'>fortissimo EXA AkkordBsusvier</a></div>
+    <div class='meta'><span class='label'>歌い手</span> fripSide</div>
+    <div class='meta'><span class='label'>制作者</span> タマ兄</div>
+    <div class='meta'><span class='label'>最終更新日</span> 2011/06/25</div>
+    <div class='meta'><span class='label'>ファイル名</span> <a data-q='%e3%80%90fortissimo+EXA+AkkordBsusvier%e3%80%91+fortissimo+-the+ultimate+crisis-%ef%bc%8ffripSide.MP4'>【fortissimo EXA AkkordBsusvier】 fortissimo -the ultimate crisis-／fripSide.MP4</a></div>
+  </div>
+</div>
+<div class='card' data-year='2011' data-yearband='2014-2010' data-updated='20110615' data-priority='2'>
+  <div class='card-title'>
+    <a data-q='%e3%80%90%e6%98%9f%e7%a9%ba%e3%81%b8%e6%9e%b6%e3%81%8b%e3%82%8b%e6%a9%8b%e3%80%91+%e6%98%9f%e7%a9%ba%e3%81%b8%e6%9e%b6%e3%81%8b%e3%82%8b%e6%a9%8b%ef%bc%8f%e3%81%ae%e3%81%bf%e3%81%93.MP4'>星空へ架かる橋</a>
+  </div>
+  <div class='card-body'>
+    <div class='meta'><span class='label'>作品名</span> <a href='search_all.html?q=%e6%98%9f%e7%a9%ba%e3%81%b8%e6%9e%b6%e3%81%8b%e3%82%8b%e6%a9%8b'>星空へ架かる橋</a></div>
+    <div class='meta'><span class='label'>歌い手</span> のみこ</div>
+    <div class='meta'><span class='label'>制作者</span> タマ兄</div>
+    <div class='meta'><span class='label'>最終更新日</span> 2011/06/15</div>
+    <div class='meta'><span class='label'>ファイル名</span> <a data-q='%e3%80%90%e6%98%9f%e7%a9%ba%e3%81%b8%e6%9e%b6%e3%81%8b%e3%82%8b%e6%a9%8b%e3%80%91+%e6%98%9f%e7%a9%ba%e3%81%b8%e6%9e%b6%e3%81%8b%e3%82%8b%e6%a9%8b%ef%bc%8f%e3%81%ae%e3%81%bf%e3%81%93.MP4'>【星空へ架かる橋】 星空へ架かる橋／のみこ.MP4</a></div>
+  </div>
+</div>
+<div class='card' data-year='2011' data-yearband='2014-2010' data-updated='20110615' data-priority='2'>
+  <div class='card-title'>
+    <a data-q='%e3%80%90Hello%2cgood-bye%e3%80%91+Good-bye+crisis%ef%bc%8f%e5%a5%a5%e4%ba%95%e9%9b%85%e7%be%8e.MP4'>Good-bye crisis</a>
+  </div>
+  <div class='card-body'>
+    <div class='meta'><span class='label'>作品名</span> <a href='search_all.html?q=Hello%2cgood-bye'>Hello,good-bye</a></div>
+    <div class='meta'><span class='label'>歌い手</span> 奥井雅美</div>
+    <div class='meta'><span class='label'>制作者</span> タマ兄</div>
+    <div class='meta'><span class='label'>最終更新日</span> 2011/06/15</div>
+    <div class='meta'><span class='label'>ファイル名</span> <a data-q='%e3%80%90Hello%2cgood-bye%e3%80%91+Good-bye+crisis%ef%bc%8f%e5%a5%a5%e4%ba%95%e9%9b%85%e7%be%8e.MP4'>【Hello,good-bye】 Good-bye crisis／奥井雅美.MP4</a></div>
+  </div>
+</div>
+<div class='card' data-year='2011' data-yearband='2014-2010' data-updated='20110615' data-priority='2'>
+  <div class='card-title'>
+    <a data-q='%e3%80%90%e5%92%b2+-Saki-%e3%80%91+%e6%ae%8b%e9%85%b7%e3%81%aa%e9%a1%98%e3%81%84%e3%81%ae%e4%b8%ad%e3%81%a7%ef%bc%8f%e6%a4%8d%e7%94%b0%e4%bd%b3%e5%a5%88%26%e5%b0%8f%e6%b8%85%e6%b0%b4%e4%ba%9c%e7%be%8e.MP4'>残酷な願いの中で</a>
+  </div>
+  <div class='card-body'>
+    <div class='meta'><span class='label'>作品名</span> <a href='search_all.html?q=%e5%92%b2+-Saki-'>咲 -Saki-</a></div>
+    <div class='meta'><span class='label'>歌い手</span> 植田佳奈&amp;小清水亜美</div>
+    <div class='meta'><span class='label'>制作者</span> タマ兄</div>
+    <div class='meta'><span class='label'>最終更新日</span> 2011/06/15</div>
+    <div class='meta'><span class='label'>ファイル名</span> <a data-q='%e3%80%90%e5%92%b2+-Saki-%e3%80%91+%e6%ae%8b%e9%85%b7%e3%81%aa%e9%a1%98%e3%81%84%e3%81%ae%e4%b8%ad%e3%81%a7%ef%bc%8f%e6%a4%8d%e7%94%b0%e4%bd%b3%e5%a5%88%26%e5%b0%8f%e6%b8%85%e6%b0%b4%e4%ba%9c%e7%be%8e.MP4'>【咲 -Saki-】 残酷な願いの中で／植田佳奈&amp;小清水亜美.MP4</a></div>
+  </div>
+</div>
+<div class='card' data-year='2011' data-yearband='2014-2010' data-updated='20110614' data-priority='2'>
+  <div class='card-title'>
+    <a data-q='%e3%80%90%e3%82%b7%e3%83%a5%e3%82%ac%e3%83%bc%e3%82%b3%e3%83%bc%e3%83%88%e3%83%95%e3%83%aa%e3%83%bc%e3%82%af%e3%82%b9%e3%80%91+%e5%88%9d%e6%81%8bcarnival%ef%bc%8f%e6%a1%9c%e5%b7%9d%e3%82%81%e3%81%90.MP4'>初恋carnival</a>
+  </div>
+  <div class='card-body'>
+    <div class='meta'><span class='label'>作品名</span> <a href='search_all.html?q=%e3%82%b7%e3%83%a5%e3%82%ac%e3%83%bc%e3%82%b3%e3%83%bc%e3%83%88%e3%83%95%e3%83%aa%e3%83%bc%e3%82%af%e3%82%b9'>シュガーコートフリークス</a></div>
+    <div class='meta'><span class='label'>歌い手</span> 桜川めぐ</div>
+    <div class='meta'><span class='label'>制作者</span> タマ兄</div>
+    <div class='meta'><span class='label'>最終更新日</span> 2011/06/14</div>
+    <div class='meta'><span class='label'>ファイル名</span> <a data-q='%e3%80%90%e3%82%b7%e3%83%a5%e3%82%ac%e3%83%bc%e3%82%b3%e3%83%bc%e3%83%88%e3%83%95%e3%83%aa%e3%83%bc%e3%82%af%e3%82%b9%e3%80%91+%e5%88%9d%e6%81%8bcarnival%ef%bc%8f%e6%a1%9c%e5%b7%9d%e3%82%81%e3%81%90.MP4'>【シュガーコートフリークス】 初恋carnival／桜川めぐ.MP4</a></div>
+  </div>
+</div>
+<div class='card' data-year='2011' data-yearband='2014-2010' data-updated='20110613' data-priority='2'>
+  <div class='card-title'>
+    <a data-q='%e3%80%90%e4%bf%ba%e3%81%ae%e5%bd%bc%e5%a5%b3%e3%81%af%e3%83%92%e3%83%88%e3%81%a7%e3%81%aa%e3%81%97%e3%80%91+%e8%b6%85%e8%b6%8a%e2%86%91%e2%86%91%e6%81%8b%e3%81%97%e3%81%a6%e3%83%8a%e3%82%a4%e3%81%97%e3%82%87%e2%98%86%e3%83%a1%e3%82%a2%ef%bc%81%ef%bc%81%ef%bc%8f%e3%81%82%e3%81%b9%e3%81%ab%e3%82%85%e3%81%86%e3%81%b7%e3%82%8d%e3%81%98%e3%81%87%e3%81%8f%e3%81%a8+feat.%e4%bd%90%e5%80%89%e7%b4%97%e7%b9%94%ef%bc%86%e4%ba%95%e4%b8%8a%e3%81%bf%e3%82%86.MP4'>超越↑↑恋してナイしょ☆メア！！</a>
+  </div>
+  <div class='card-body'>
+    <div class='meta'><span class='label'>作品名</span> <a href='search_all.html?q=%e4%bf%ba%e3%81%ae%e5%bd%bc%e5%a5%b3%e3%81%af%e3%83%92%e3%83%88%e3%81%a7%e3%81%aa%e3%81%97'>俺の彼女はヒトでなし</a></div>
+    <div class='meta'><span class='label'>歌い手</span> あべにゅうぷろじぇくと feat.佐倉紗織＆井上みゆ</div>
+    <div class='meta'><span class='label'>制作者</span> タマ兄</div>
+    <div class='meta'><span class='label'>最終更新日</span> 2011/06/13</div>
+    <div class='meta'><span class='label'>ファイル名</span> <a data-q='%e3%80%90%e4%bf%ba%e3%81%ae%e5%bd%bc%e5%a5%b3%e3%81%af%e3%83%92%e3%83%88%e3%81%a7%e3%81%aa%e3%81%97%e3%80%91+%e8%b6%85%e8%b6%8a%e2%86%91%e2%86%91%e6%81%8b%e3%81%97%e3%81%a6%e3%83%8a%e3%82%a4%e3%81%97%e3%82%87%e2%98%86%e3%83%a1%e3%82%a2%ef%bc%81%ef%bc%81%ef%bc%8f%e3%81%82%e3%81%b9%e3%81%ab%e3%82%85%e3%81%86%e3%81%b7%e3%82%8d%e3%81%98%e3%81%87%e3%81%8f%e3%81%a8+feat.%e4%bd%90%e5%80%89%e7%b4%97%e7%b9%94%ef%bc%86%e4%ba%95%e4%b8%8a%e3%81%bf%e3%82%86.MP4'>【俺の彼女はヒトでなし】 超越↑↑恋してナイしょ☆メア！！／あべにゅうぷろじぇくと feat.佐倉紗織＆井上みゆ.MP4</a></div>
+  </div>
+</div>
+<div class='card' data-year='2011' data-yearband='2014-2010' data-updated='20110612' data-priority='2'>
+  <div class='card-title'>
+    <a data-q='%e3%80%90%e5%92%b2+-Saki-%e3%80%91+%e9%ba%bb%e9%9b%80%e5%a4%a9%e4%bd%bf%e3%81%ab%e3%81%8b%e3%81%93%e3%81%be%e3%82%8c%e3%81%a1%e3%82%83%e3%81%86%ef%bc%8f%e5%ae%ae%e6%b0%b8%e5%92%b2(%e6%a4%8d%e7%94%b0%e4%bd%b3%e5%a5%88)%26%e5%a4%a9%e6%b1%9f%e8%a1%a3(%e7%a6%8f%e5%8e%9f%e9%a6%99%e7%b9%94)%26%e6%b1%a0%e7%94%b0%e8%8f%af%e8%8f%9c(%e6%a3%ae%e6%b0%b8%e7%90%86%e7%a7%91)%26%e5%8a%a0%e6%b2%bb%e6%9c%a8%e3%82%86%e3%81%bf(%e5%b0%8f%e6%9e%97%e3%82%86%e3%81%86).MP4'>麻雀天使にかこまれちゃう</a>
+  </div>
+  <div class='card-body'>
+    <div class='meta'><span class='label'>作品名</span> <a href='search_all.html?q=%e5%92%b2+-Saki-'>咲 -Saki-</a></div>
+    <div class='meta'><span class='label'>歌い手</span> 宮永咲&amp;天江衣&amp;池田華菜&amp;加治木ゆみ</div>
+    <div class='meta'><span class='label'>制作者</span> タマ兄</div>
+    <div class='meta'><span class='label'>最終更新日</span> 2011/06/12</div>
+    <div class='meta'><span class='label'>ファイル名</span> <a data-q='%e3%80%90%e5%92%b2+-Saki-%e3%80%91+%e9%ba%bb%e9%9b%80%e5%a4%a9%e4%bd%bf%e3%81%ab%e3%81%8b%e3%81%93%e3%81%be%e3%82%8c%e3%81%a1%e3%82%83%e3%81%86%ef%bc%8f%e5%ae%ae%e6%b0%b8%e5%92%b2(%e6%a4%8d%e7%94%b0%e4%bd%b3%e5%a5%88)%26%e5%a4%a9%e6%b1%9f%e8%a1%a3(%e7%a6%8f%e5%8e%9f%e9%a6%99%e7%b9%94)%26%e6%b1%a0%e7%94%b0%e8%8f%af%e8%8f%9c(%e6%a3%ae%e6%b0%b8%e7%90%86%e7%a7%91)%26%e5%8a%a0%e6%b2%bb%e6%9c%a8%e3%82%86%e3%81%bf(%e5%b0%8f%e6%9e%97%e3%82%86%e3%81%86).MP4'>【咲 -Saki-】 麻雀天使にかこまれちゃう／宮永咲(植田佳奈)&amp;天江衣(福原香織)&amp;池田華菜(森永理科)&amp;加治木ゆみ(小林ゆう).MP4</a></div>
+  </div>
+</div>
+<div class='card' data-year='2011' data-yearband='2014-2010' data-updated='20110612' data-priority='2'>
+  <div class='card-title'>
+    <a data-q='%e3%80%90%e3%82%88%e3%81%a4%e3%81%ae%e3%81%af%e3%80%91+%e3%82%88%e3%81%a4%e3%81%ae%e3%81%af%ef%bc%8f%e8%8c%b6%e5%a4%aa.MP4'>よつのは</a>
+  </div>
+  <div class='card-body'>
+    <div class='meta'><span class='label'>作品名</span> <a href='search_all.html?q=%e3%82%88%e3%81%a4%e3%81%ae%e3%81%af'>よつのは</a></div>
+    <div class='meta'><span class='label'>歌い手</span> 茶太</div>
+    <div class='meta'><span class='label'>制作者</span> タマ兄</div>
+    <div class='meta'><span class='label'>最終更新日</span> 2011/06/12</div>
+    <div class='meta'><span class='label'>ファイル名</span> <a data-q='%e3%80%90%e3%82%88%e3%81%a4%e3%81%ae%e3%81%af%e3%80%91+%e3%82%88%e3%81%a4%e3%81%ae%e3%81%af%ef%bc%8f%e8%8c%b6%e5%a4%aa.MP4'>【よつのは】 よつのは／茶太.MP4</a></div>
+  </div>
+</div>
+<div class='card' data-year='2011' data-yearband='2014-2010' data-updated='20110612' data-priority='2'>
+  <div class='card-title'>
+    <a data-q='%e3%80%90%e3%82%b0%e3%83%aa%e3%82%b6%e3%82%a4%e3%82%a2%e3%81%ae%e6%9e%9c%e5%ae%9f%e3%80%91%e7%b5%82%e6%9c%ab%e3%81%ae%e3%83%95%e3%83%a9%e3%82%af%e3%82%bf%e3%83%ab%ef%bc%8f%e9%a3%9b%e8%98%ad.MP4'>終末のフラクタル</a>
+  </div>
+  <div class='card-body'>
+    <div class='meta'><span class='label'>作品名</span> <a href='search_all.html?q=%e3%82%b0%e3%83%aa%e3%82%b6%e3%82%a4%e3%82%a2%e3%81%ae%e6%9e%9c%e5%ae%9f'>グリザイアの果実</a></div>
+    <div class='meta'><span class='label'>歌い手</span> 飛蘭</div>
+    <div class='meta'><span class='label'>制作者</span> タマ兄</div>
+    <div class='meta'><span class='label'>最終更新日</span> 2011/06/12</div>
+    <div class='meta'><span class='label'>ファイル名</span> <a data-q='%e3%80%90%e3%82%b0%e3%83%aa%e3%82%b6%e3%82%a4%e3%82%a2%e3%81%ae%e6%9e%9c%e5%ae%9f%e3%80%91%e7%b5%82%e6%9c%ab%e3%81%ae%e3%83%95%e3%83%a9%e3%82%af%e3%82%bf%e3%83%ab%ef%bc%8f%e9%a3%9b%e8%98%ad.MP4'>【グリザイアの果実】終末のフラクタル／飛蘭.MP4</a></div>
+  </div>
+</div>
+<div class='card' data-year='2011' data-yearband='2014-2010' data-updated='20110612' data-priority='2'>
+  <div class='card-title'>
+    <a data-q='%e3%80%90%e5%a4%a7%e5%b8%9d%e5%9b%bd%e3%80%91The+Day+Takeoff%ef%bc%8f%e6%a9%8b%e6%9c%ac%e3%81%bf%e3%82%86%e3%81%8d.MP4'>The Day Takeoff</a>
+  </div>
+  <div class='card-body'>
+    <div class='meta'><span class='label'>作品名</span> <a href='search_all.html?q=%e5%a4%a7%e5%b8%9d%e5%9b%bd'>大帝国</a></div>
+    <div class='meta'><span class='label'>歌い手</span> 橋本みゆき</div>
+    <div class='meta'><span class='label'>制作者</span> タマ兄</div>
+    <div class='meta'><span class='label'>最終更新日</span> 2011/06/12</div>
+    <div class='meta'><span class='label'>ファイル名</span> <a data-q='%e3%80%90%e5%a4%a7%e5%b8%9d%e5%9b%bd%e3%80%91The+Day+Takeoff%ef%bc%8f%e6%a9%8b%e6%9c%ac%e3%81%bf%e3%82%86%e3%81%8d.MP4'>【大帝国】The Day Takeoff／橋本みゆき.MP4</a></div>
+  </div>
+</div>
+<div class='card' data-year='2011' data-yearband='2014-2010' data-updated='20110604' data-priority='2'>
+  <div class='card-title'>
+    <a data-q='%e3%80%90%e7%a5%9e%e3%81%ae%e3%81%bf%e3%81%9e%e7%9f%a5%e3%82%8b%e3%82%bb%e3%82%ab%e3%82%a4%e2%85%a1%e3%80%91%e3%82%a2%e3%82%a4%e3%83%8e%e3%83%a8%e3%82%ab%e3%83%b3+from+%e9%a7%86%e3%81%91%e9%ad%82%e9%9a%8a(%e3%83%91%e3%83%bc%e3%83%88%e5%88%86%e3%81%91)%ef%bc%8f%e4%bc%8a%e8%97%a4%e3%81%8b%e3%81%aa%e6%81%b5%26%e6%97%a9%e8%a6%8b%e6%b2%99%e7%b9%94.mp4'>アイノヨカン from 駆け魂隊(パート分け)</a>
+  </div>
+  <div class='card-body'>
+    <div class='meta'><span class='label'>作品名</span> <a href='search_all.html?q=%e7%a5%9e%e3%81%ae%e3%81%bf%e3%81%9e%e7%9f%a5%e3%82%8b%e3%82%bb%e3%82%ab%e3%82%a4%e2%85%a1'>神のみぞ知るセカイⅡ</a></div>
+    <div class='meta'><span class='label'>歌い手</span> 伊藤かな恵&amp;早見沙織</div>
+    <div class='meta'><span class='label'>制作者</span> タマ兄</div>
+    <div class='meta'><span class='label'>最終更新日</span> 2011/06/04</div>
+    <div class='meta'><span class='label'>ファイル名</span> <a data-q='%e3%80%90%e7%a5%9e%e3%81%ae%e3%81%bf%e3%81%9e%e7%9f%a5%e3%82%8b%e3%82%bb%e3%82%ab%e3%82%a4%e2%85%a1%e3%80%91%e3%82%a2%e3%82%a4%e3%83%8e%e3%83%a8%e3%82%ab%e3%83%b3+from+%e9%a7%86%e3%81%91%e9%ad%82%e9%9a%8a(%e3%83%91%e3%83%bc%e3%83%88%e5%88%86%e3%81%91)%ef%bc%8f%e4%bc%8a%e8%97%a4%e3%81%8b%e3%81%aa%e6%81%b5%26%e6%97%a9%e8%a6%8b%e6%b2%99%e7%b9%94.mp4'>【神のみぞ知るセカイⅡ】アイノヨカン from 駆け魂隊(パート分け)／伊藤かな恵&amp;早見沙織.mp4</a></div>
+  </div>
+</div>
+    </div>
+  </div>
+
+  <div class='pager' id='pager-list-year-2'><a href='year_2014-2010.html'>前へ</a>
+<a href='year_2014-2010.html'>1</a>
+<span class='current'>2</span></div>
+</div>
+<script>
+  const init = qparam('q').trim();
+  if(init){
+    document.getElementById('q-list-year-2').value = init.replace(/\+/g,' ');
+    filterCards('list-year-2','q-list-year-2');
+  }else{
+    document.getElementById('count-list-year-2').textContent = '表示件数: ' + document.querySelectorAll('#list-year-2 .card').length;
+  }
+</script>
+</div>
+</body></html>
