@@ -1,0 +1,330 @@
+﻿<!DOCTYPE html>
+<html lang='ja'>
+<head>
+<meta charset='UTF-8'>
+<title>作品名（し 行）</title>
+<meta name='viewport' content='width=device-width, initial-scale=1.0'>
+<meta property='og:title' content='つぼはち・オフライン検索'>
+<meta property='og:description' content='ゆかりのオフライン時に検索可能のサイトです'>
+<meta property='og:image' content='https://raw.githubusercontent.com/hachi515/yukari_list_001/main/Hasunosora_3.png'>
+<meta property='og:url' content=''>
+<meta name='twitter:card' content='summary_large_image'>
+<meta name='twitter:title' content='つぼはち・オフライン検索'>
+<meta name='twitter:description' content='ゆかりのオフライン時に検索可能のサイトです'>
+<meta name='twitter:image' content='https://raw.githubusercontent.com/hachi515/yukari_list_001/main/Hasunosora_3.png'>
+<style>:root{
+  --accent:#1B64C2;
+  --accent-50: rgba(27,100,194,.50);
+  --accent-70: rgba(27,100,194,.70);
+  --accent-90: rgba(27,100,194,.90);
+  --border:#1B64C2;
+  --panel:rgba(255,255,255,.55);
+  --panel-strong:rgba(255,255,255,.60);
+  --ui-gray:#a1a1a1;
+}
+*{box-sizing:border-box}
+html,body{width:100%}
+body{
+  font-family:'ヒラギノ角ゴ ProN W3','Hiragino Kaku Gothic ProN','Hiragino Sans','ヒラギノ角ゴシック','Yu Gothic','メイリオ',Meiryo,Arial,sans-serif;
+  font-size:14px; color:#222; background:#eef2f5; font-weight:400;
+  background-image:url('https://raw.githubusercontent.com/hachi515/yukari_list_001/main/Hasunosora_1.png'); background-size:cover; background-attachment:fixed; background-position:center; margin:0;
+}
+.wrap{ max-width:1100px; margin:24px auto; padding:12px; background:var(--panel); border:0; border-radius:0; box-shadow:none; overflow-x:auto; }
+
+h1{ display:inline-block; margin:0 0 14px 0; padding:4px 0; background:transparent; color:#0b1b2e; font-size:18px; font-weight:500 }
+h2{ margin:10px 0 8px; padding:0; color:#0b1b2e; font-size:18px; font-weight:500; background:transparent } /* ← h1と同サイズ */
+
+.back{ text-align:right; margin:-6px 0 6px 0 }
+.back a{ color:var(--accent); text-decoration:none; border-bottom:1px dotted var(--accent) }
+
+.section{margin:10px 0 18px}
+.search{display:flex; gap:8px; margin:8px 0 4px; align-items:center; justify-content:flex-start}
+.search select{ padding:8px 10px; font-size:14px; background:var(--panel); border:1px solid var(--ui-gray); border-radius:0; font-weight:400 }
+.search input[type=text]{ flex:0 0 260px; width:260px; padding:8px; font-size:14px; background:var(--panel); border:1px solid var(--ui-gray); border-radius:0; font-weight:400 }
+.search button{ padding:8px 12px; font-size:14px; color:#fff; background:var(--accent-90); border:1px solid var(--ui-gray); border-radius:0; cursor:pointer }
+.count{font-size:11px; color:#222; margin:4px 0 8px}
+a{ color:var(--accent); }
+
+.btn{display:inline-block; padding:8px 10px; background:var(--accent-70); color:#fff; text-decoration:none; border:1px solid var(--border); border-radius:0; font-weight:400 }
+.btn-outline{background:var(--panel); color:#1b1b1b; border:1px solid var(--border)}
+.year-buttons,.new-buttons{display:flex; flex-wrap:wrap; gap:8px}
+
+.kana-row{display:flex; gap:24px; margin-bottom:8px}
+.kana-group{display:flex; gap:6px}
+.kana-btn{display:inline-block; padding:6px 10px; background:var(--accent-70); color:#fff; text-decoration:none; border:1px solid var(--border); border-radius:0; font-size:14px; font-weight:400}
+.kana-btn.disabled{opacity:.35; pointer-events:none}
+
+/* 作品名グリッド：1行2個 */
+.prog-grid{display:grid; grid-template-columns:repeat(2, minmax(0,1fr)); gap:8px}
+.prog-grid a{display:block}
+
+/* カード */
+.card{margin:12px 0; border:0; background:transparent}
+.card-title{padding:0; background:transparent}
+.card-title a{display:block; padding:8px 10px; background:var(--accent-70); color:#fff; text-decoration:none; white-space:normal; font-weight:500}
+.card-body{padding:10px; background:var(--panel-strong)}
+.meta{margin:3px 0; font-weight:400}
+.meta .label{display:inline-block; min-width:84px; color:#0b1b2e; font-weight:400}
+
+/* ページャ */
+.pager{display:flex; gap:6px; flex-wrap:wrap; margin:14px 0}
+.pager a,.pager span{padding:6px 10px; border:1px solid var(--border); text-decoration:none; color:#fff; background:var(--accent-70); font-weight:400}
+.pager .current{background:var(--accent-90); color:#fff}
+
+/* スクロール枠（search_all / 年別 / 新着 / 五十音） */
+.list-container{max-height:900px; overflow-y:auto; border:1px solid var(--ui-gray); background:rgba(255,255,255,.35); padding:8px; box-shadow:0 4px 8px rgba(0,0,0,.06)}
+.stickybar{position:sticky; top:0; z-index:20; background:rgba(255,255,255,.6); border-bottom:1px solid var(--ui-gray); padding:8px; margin:-8px -8px 8px -8px}
+.stickybar.no-bg{background:transparent; border:none; padding:0; margin:0 0 8px 0}
+
+@media (max-width:768px){
+  body{ background-image:url('https://raw.githubusercontent.com/hachi515/yukari_list_001/main/Hasunosora_2.png'); font-size:13px }
+  .search select, .search input[type=text], .search button{ font-size:13px; padding:7px 10px }
+  /* 入力幅をスマホではやや広めに */
+  .search input[type=text]{ flex:0 0 56vw; width:56vw }
+  .list-container{ max-height:450px }
+}
+  .search select, .search input[type=text], .search button{ font-size:13px; padding:7px 10px }
+  .list-container{ max-height:450px }
+}</style>
+<script>const SEARCH_BASE = 'http://ykr.moe:11059/';
+
+function tokensHalf(v){return v.toLowerCase().trim().split(/ +/).filter(Boolean)}
+function qparam(name){ const m = location.search.match(new RegExp('[?&]'+name+'=([^&]+)')); return m ? decodeURIComponent(m[1]) : ''; }
+
+// 軽量リンク化：data-q を href に展開
+document.addEventListener('DOMContentLoaded', ()=>{
+  document.querySelectorAll('a[data-q]').forEach(a=>{
+    try{
+      const q = a.getAttribute('data-q')||'';
+      a.href = SEARCH_BASE + 'search.php?searchword=' + q;
+      a.target = '_blank';
+    }catch(e){}
+  });
+});
+
+function filterCards(listId, boxId){
+  const q = tokensHalf(document.getElementById(boxId).value);
+  const list = document.getElementById(listId);
+  if(!list){return}
+  const cards = list.querySelectorAll('.card');
+  let vis = 0;
+  cards.forEach(c=>{
+    const hit = q.every(tok => c.innerText.toLowerCase().includes(tok));
+    c.style.display = hit ? '' : 'none';
+    if(hit) vis++;
+  });
+  const cEl = document.getElementById('count-'+listId);
+  if(cEl){ cEl.textContent = '表示件数: ' + vis; }
+  const pager = document.getElementById('pager-'+listId);
+  const per = parseInt(list.dataset.per || '100',10);
+  if(pager){ if(q.length===0){ pager.style.display = ''; } else { pager.style.display = (vis<=per) ? 'none' : ''; } }
+}
+
+/* ===== 検索結果専用：表示中カードを「制作者優先度→日付」で並べ替え ===== */
+const DEFAULT_PRIO = 999;
+function reorderByPriority(listId){
+  const list = document.getElementById(listId);
+  if(!list){return}
+  const visible = Array.from(list.querySelectorAll('.card')).filter(c => c.style.display !== 'none');
+  visible.sort((a,b)=>{
+    const pa = parseInt(a.dataset.priority||DEFAULT_PRIO);
+    const pb = parseInt(b.dataset.priority||DEFAULT_PRIO);
+    if(pa !== pb) return pa - pb;
+    const da = parseInt(a.dataset.updated||0); // yyyymmdd
+    const db = parseInt(b.dataset.updated||0);
+    return db - da;
+  });
+  visible.forEach(c => list.appendChild(c));
+}
+
+function filterCardsAdv(listId, boxId, yearId){
+  const q = tokensHalf(document.getElementById(boxId).value);
+  const yEl = document.getElementById(yearId);
+  const y = yEl ? (yEl.value||'').trim() : '';
+  const list = document.getElementById(listId);
+  if(!list){return}
+  const cards = list.querySelectorAll('.card');
+  let vis = 0;
+  cards.forEach(c=>{
+    const okText = q.every(tok => c.innerText.toLowerCase().includes(tok));
+    const band = (c.dataset.yearband||'');
+    const yr = (c.dataset.year||'');
+    const okYear = (y==='' || yr===y || band===y);
+    const show = okText && okYear;
+    c.style.display = show ? '' : 'none';
+    if(show) vis++;
+  });
+  const cEl = document.getElementById('count-'+listId);
+  if(cEl){ cEl.textContent = '表示件数: ' + vis; }
+
+  // ★検索（キーワード or 年帯）を使ったときだけ優先度並び替えを実施
+  if(q.length>0 || y!==''){ reorderByPriority(listId); }
+}
+
+function filterGrid(gridSel, boxId, countId){
+  const q = tokensHalf(document.getElementById(boxId).value);
+  const nodes = document.querySelectorAll(gridSel+' a');
+  let vis=0; nodes.forEach(a=>{ const hit=q.every(t=>a.innerText.toLowerCase().includes(t)); a.style.display=hit?'':'none'; if(hit) vis++; });
+  if(countId){ const el=document.getElementById(countId); if(el){ el.textContent='表示件数: '+vis; } }
+}</script>
+</head>
+<body>
+<div class='wrap'>
+<h1>作品名（し 行）</h1>
+<div class='back'><a href='index.html'>一覧に戻る</a></div>
+
+<div class='section'>
+  <div class='search'>
+    <input type='text' id='q-し' placeholder='この行の作品名を絞り込み（半角スペースAND）'>
+    <button onclick="filterGrid('.list-し a','q-し','count-list-し')">検索</button>
+  </div>
+  <div class='count' id='count-list-し'></div>
+
+  <div class='list-container'>
+    <div class='prog-grid list-し'><a class='btn' href='search_all.html?q=%e3%80%8e%e3%82%b7%e3%83%a3%e3%83%89%e3%82%a6%e3%83%90%e3%83%bc%e3%82%b9F%e3%80%8f%ef%bc%88%e3%82%b7%e3%83%a3%e3%83%89%e3%82%a6%e3%83%90%e3%83%bc%e3%82%b9%e3%83%95%e3%83%ac%e3%82%a4%e3%83%a0%ef%bc%89'>『シャドウバースF』（シャドウバースフレイム）</a>
+<a class='btn' href='search_all.html?q=%e3%81%97%ef%bc%89shuffle!'>し）shuffle!</a>
+<a class='btn' href='search_all.html?q=%e3%81%97%ef%bc%89SIMOUN'>し）SIMOUN</a>
+<a class='btn' href='search_all.html?q=%e3%81%97%ef%bc%89%e7%81%bc%e7%9c%bc%e3%81%ae%e3%82%b7%e3%83%a3%e3%83%8a'>し）灼眼のシャナ</a>
+<a class='btn' href='search_all.html?q=%e3%81%98%ef%bc%89%e5%a5%b3%e5%ad%90%e9%ab%98%e7%94%9fGIRL%27S_HIGH'>じ）女子高生GIRL&#39;S_HIGH</a>
+<a class='btn' href='search_all.html?q=%e3%81%97%ef%bc%89%e5%b0%91%e5%a5%b3%e3%82%bb%e3%82%af%e3%83%88'>し）少女セクト</a>
+<a class='btn' href='search_all.html?q=%e3%82%b7%e3%82%a2%e3%83%af%e3%82%bb%e3%82%b9%e3%83%91%e3%82%a4%e3%82%b9%ef%bc%8f%e9%88%b4%e6%9c%a8%e3%81%93%e3%81%ae%e3%81%bf'>シアワセスパイス／鈴木このみ</a>
+<a class='btn' href='search_all.html?q=%e3%81%97%e3%81%82%e3%82%8f%e3%81%9b%e5%ae%b6%e6%97%8f%e9%83%a8'>しあわせ家族部</a>
+<a class='btn' href='search_all.html?q=%e3%82%b7%e3%83%bc%e3%82%af%e3%83%ac%e3%83%83%e3%83%88%e3%82%b2%e3%83%bc%e3%83%a0-KILLER+QUEEN-'>シークレットゲーム-KILLER QUEEN-</a>
+<a class='btn' href='search_all.html?q=%e3%81%98%e3%81%84%e3%81%95%e3%82%93%e3%81%b0%e3%81%82%e3%81%95%e3%82%93%e8%8b%a5%e8%bf%94%e3%82%8b'>じいさんばあさん若返る</a>
+<a class='btn' href='search_all.html?q=%e3%81%98%e3%81%84%e3%81%95%e3%82%93%e3%81%b0%e3%81%82%e3%81%95%e3%82%93%e8%8b%a5%e8%bf%94%e3%82%8b+ED'>じいさんばあさん若返る ED</a>
+<a class='btn' href='search_all.html?q=%e3%81%98%e3%81%84%e3%81%95%e3%82%93%e3%81%b0%e3%81%82%e3%81%95%e3%82%93%e8%8b%a5%e8%bf%94%e3%82%8b+OP'>じいさんばあさん若返る OP</a>
+<a class='btn' href='search_all.html?q=%e3%82%b7%e3%83%bc%e3%82%b8%e3%82%a7%e3%83%83%e3%82%bf%e3%83%bc%e6%b5%b7%e6%96%97%e3%83%bb%e9%81%a0%e8%97%a4%e6%ad%a3%e6%98%8e%e3%80%81%e5%bd%b1%e5%b1%b1%e3%83%92%e3%83%ad%e3%83%8e%e3%83%96%e3%80%81%e3%81%8d%e3%81%9f%e3%81%a0%e3%81%ab%e3%81%b2%e3%82%8d%e3%81%97'>シージェッター海斗・遠藤正明、影山ヒロノブ、きただにひろし</a>
+<a class='btn' href='search_all.html?q=%e3%82%b7%e3%82%a7%e3%82%b1%e3%83%8a%e3%83%bc%e3%83%ac%ef%bc%8fOCHA+NORMA'>シェケナーレ／OCHA NORMA</a>
+<a class='btn' href='search_all.html?q=%e3%82%b7%e3%82%a8%e3%83%ab(CV%ef%bc%9a%e4%bd%90%e4%bc%af%e4%bc%8a%e7%b9%94)+%e3%82%a2%e3%83%8d%e3%83%a2%e3%83%8d(CV%ef%bc%9a%e4%b8%8a%e7%94%b0+%e7%9e%b3)+%e3%82%b4%e3%82%a2(CV%ef%bc%9a%e7%99%bd%e7%9f%b3%e6%99%b4%e9%a6%99)'>シエル(CV：佐伯伊織) アネモネ(CV：上田 瞳) ゴア(CV：白石晴香)</a>
+<a class='btn' href='search_all.html?q=%e3%81%97%e3%81%8b%e3%81%ae%e3%81%93%e3%81%ae%e3%81%93%e3%81%ae%e3%81%93%e3%81%93%e3%81%97%e3%81%9f%e3%82%93%e3%81%9f%e3%82%93'>しかのこのこのここしたんたん</a>
+<a class='btn' href='search_all.html?q=%e3%82%b7%e3%82%ad%e3%82%b6%e3%82%af%e3%83%a9'>シキザクラ</a>
+<a class='btn' href='search_all.html?q=%e3%82%b8%e3%82%ae%e3%83%ab%e3%82%a2%e3%83%ac%e3%83%b3%e3%82%b8'>ジギルアレンジ</a>
+<a class='btn' href='search_all.html?q=%e3%82%b8%e3%82%b0'>ジグ</a>
+<a class='btn' href='search_all.html?q=%e3%81%97%e3%81%90%e3%82%8c%e3%81%86%e3%81%84'>しぐれうい</a>
+<a class='btn' href='search_all.html?q=%e3%82%b7%e3%82%b4%e3%83%95%e3%83%9f'>シゴフミ</a>
+<a class='btn' href='search_all.html?q=%e3%82%b8%e3%82%b5%e3%83%84%e3%81%ae%e3%81%9f%e3%82%81%e3%81%ae101%e3%81%ae%e6%96%b9%e6%b3%95'>ジサツのための101の方法</a>
+<a class='btn' href='search_all.html?q=%e3%82%b7%e3%82%b7%e3%83%89'>シシド</a>
+<a class='btn' href='search_all.html?q=%e3%81%97%e3%81%98%e3%81%be'>しじま</a>
+<a class='btn' href='search_all.html?q=%e3%82%b7%e3%82%b9%e3%82%bf%e3%83%bc%e3%83%bb%e3%83%97%e3%83%aa%e3%83%b3%e3%82%bb%e3%82%b9'>シスター・プリンセス</a>
+<a class='btn' href='search_all.html?q=%e3%82%b7%e3%82%b9%e3%82%bf%e3%83%bc%e3%82%af%e3%82%a8%e3%82%b9%e3%83%882+%ef%bd%9e%e9%ad%94%e5%89%a3%e3%81%ae%e9%a8%8e%e5%a3%ab%e3%81%a8%e7%99%bd%e9%8a%80%e3%81%ae%e5%b7%ab%e5%a5%b3%ef%bd%9e'>シスタークエスト2 ～魔剣の騎士と白銀の巫女～</a>
+<a class='btn' href='search_all.html?q=%e3%82%b7%e3%82%b9%e3%82%bf%e3%83%bc%e3%83%97%e3%83%aa%e3%83%b3%e3%82%bb%e3%82%b9'>シスタープリンセス</a>
+<a class='btn' href='search_all.html?q=%e3%82%b7%e3%82%b9%e3%82%bf%e3%83%bc%e3%83%97%e3%83%aa%e3%83%b3%e3%82%bb%e3%82%b9%ef%bd%9e%e3%83%aa%e3%83%94%e3%83%a5%e3%82%a2%ef%bd%9e'>シスタープリンセス～リピュア～</a>
+<a class='btn' href='search_all.html?q=%e3%82%b7%e3%83%86%e3%82%a3%e3%83%bc%e3%83%8f%e3%83%b3%e3%82%bf%e3%83%bc%e3%82%b9%e3%83%9a%e3%82%b7%e3%83%a3%e3%83%ab+%e7%b7%8a%e6%80%a5%e7%94%9f%e4%b8%ad%e7%b6%99!%e5%87%b6%e6%82%aa%e7%8a%af%e5%86%b4%e7%be%bd%e7%8d%a0%e3%81%ae%e6%9c%80%e6%9c%9f'>シティーハンタースペシャル 緊急生中継!凶悪犯冴羽獠の最期</a>
+<a class='btn' href='search_all.html?q=%e3%82%b7%e3%83%86%e3%82%a3%e3%83%8f%e3%83%b3%e3%82%bf%e3%83%bc'>シティハンター</a>
+<a class='btn' href='search_all.html?q=%e3%82%b7%e3%83%89'>シド</a>
+<a class='btn' href='search_all.html?q=%e3%82%b7%e3%83%89%e3%83%8b%e3%82%a2%e3%81%ae%e9%a8%8e%e5%a3%ab'>シドニアの騎士</a>
+<a class='btn' href='search_all.html?q=%e3%82%b7%e3%83%89%e3%83%8b%e3%82%a2%e3%81%ae%e9%a8%8e%e5%a3%ab+%e3%81%82%e3%81%84%e3%81%a4%e3%82%80%e3%81%90%e3%81%bb%e3%81%97'>シドニアの騎士 あいつむぐほし</a>
+<a class='btn' href='search_all.html?q=%e3%82%b7%e3%83%89%e3%83%8b%e3%82%a2%e3%81%ae%e9%a8%8e%e5%a3%ab+%e7%ac%ac%e4%b9%9d%e6%83%91%e6%98%9f%e6%88%a6%e5%bd%b9'>シドニアの騎士 第九惑星戦役</a>
+<a class='btn' href='search_all.html?q=%e3%81%97%e3%81%ab%e3%81%8c%e3%81%bf%e3%81%ae%e3%83%90%e3%83%a9%e3%83%bc%e3%83%89'>しにがみのバラード</a>
+<a class='btn' href='search_all.html?q=%e3%82%b8%e3%83%93%e3%82%a2(CV%ef%bc%9a%e6%9d%b1%e5%b1%b1%e5%a5%88%e5%a4%ae)'>ジビア(CV：東山奈央)</a>
+<a class='btn' href='search_all.html?q=%e3%82%b8%e3%83%96%e3%83%aa%e5%ae%9f%e9%a8%93%e5%8a%87%e5%a0%b4'>ジブリ実験劇場</a>
+<a class='btn' href='search_all.html?q=%e3%82%b8%e3%83%96%e3%83%aa%e5%ae%9f%e9%a8%93%e5%8a%87%e5%a0%b4+On+Your+Mark'>ジブリ実験劇場 On Your Mark</a>
+<a class='btn' href='search_all.html?q=%e3%81%97%e3%81%be%e3%81%97%e3%81%be%e3%81%a8%e3%82%89%e3%81%ae%e3%81%97%e3%81%be%e3%81%98%e3%82%8d%e3%81%86'>しましまとらのしまじろう</a>
+<a class='btn' href='search_all.html?q=%e3%82%b8%e3%83%9f%e3%83%bc%e3%82%b5%e3%83%a0P'>ジミーサムP</a>
+<a class='btn' href='search_all.html?q=%e3%82%b8%e3%83%9f%e3%83%bc%e3%82%b5%e3%83%a0P%ef%bc%bf+%e5%b7%a1%e9%9f%b3%e3%83%ab%e3%82%ab'>ジミーサムP＿ 巡音ルカ</a>
+<a class='btn' href='search_all.html?q=%e3%82%b8%e3%83%9f%e3%83%bc%e3%82%b5%e3%83%a0P%ef%bc%bf%e5%88%9d%e9%9f%b3%e3%83%9f%e3%82%af'>ジミーサムP＿初音ミク</a>
+<a class='btn' href='search_all.html?q=%e3%82%b8%e3%83%9f%e3%83%bc%e3%82%b5%e3%83%a0P%ef%bc%bf%e5%88%9d%e9%9f%b3%e3%83%9f%e3%82%af%ef%bc%8f%e5%b7%a1%e9%9f%b3%e3%83%ab%e3%82%ab%ef%bc%8f%e5%af%92%e9%9f%b3%e3%82%b8%e3%83%9f%e3%82%aa'>ジミーサムP＿初音ミク／巡音ルカ／寒音ジミオ</a>
+<a class='btn' href='search_all.html?q=%e3%82%b8%e3%83%a0%e3%83%9c%e3%82%bf%e3%83%b3+ED'>ジムボタン ED</a>
+<a class='btn' href='search_all.html?q=%e3%82%b8%e3%83%a0%e3%83%9c%e3%82%bf%e3%83%b3+OP'>ジムボタン OP</a>
+<a class='btn' href='search_all.html?q=%e3%82%b7%e3%83%a3%e3%83%bc%e3%83%9e%e3%83%b3%e3%82%ad%e3%83%b3%e3%82%b0'>シャーマンキング</a>
+<a class='btn' href='search_all.html?q=%e3%82%b7%e3%83%a3%e3%83%bc%e3%83%9e%e3%83%b3%e3%82%ad%e3%83%b3%e3%82%b0+%e3%81%b5%e3%82%93%e3%81%b0%e3%82%8a%e3%82%b9%e3%83%94%e3%83%aa%e3%83%83%e3%83%84'>シャーマンキング ふんばりスピリッツ</a>
+<a class='btn' href='search_all.html?q=%e3%82%b7%e3%83%a3%e3%83%bc%e3%83%ad%e3%83%83%e3%83%88%e3%83%bb%e3%82%a8%e3%83%b4%e3%82%a1%e3%83%b3%e3%82%ba(CV%ef%bc%9a%e6%97%a9%e8%a6%8b%e6%b2%99%e7%b9%94)'>シャーロット・エヴァンズ(CV：早見沙織)</a>
+<a class='btn' href='search_all.html?q=%e3%82%b7%e3%83%a3%e3%83%bc%e3%83%ad%e3%83%83%e3%83%88%e3%83%bb%e3%82%a8%e3%83%b4%e3%82%a1%e3%83%b3%e3%82%ba(CV%e6%97%a9%e8%a6%8b%e6%b2%99%e7%b9%94)'>シャーロット・エヴァンズ(CV早見沙織)</a>
+<a class='btn' href='search_all.html?q=%e3%82%b7%e3%83%a3%e3%82%a4%ef%bc%8f%e7%b4%85%e8%91%89%e5%b1%b1%e3%83%86%e3%83%ab(CV%ef%bc%9a%e4%b8%8b%e5%9c%b0%e7%b4%ab%e9%87%8e)'>シャイ／紅葉山テル(CV：下地紫野)</a>
+<a class='btn' href='search_all.html?q=%e3%82%b8%e3%83%a3%e3%82%a4%e3%82%a2%e3%83%b3%e3%83%88%e3%83%bb%e3%83%ad%e3%83%9c+ED'>ジャイアント・ロボ ED</a>
+<a class='btn' href='search_all.html?q=%e3%82%b8%e3%83%a3%e3%82%a4%e3%82%a2%e3%83%b3%e3%83%88%e3%83%bb%e3%83%ad%e3%83%9c+OP'>ジャイアント・ロボ OP</a>
+<a class='btn' href='search_all.html?q=%e3%82%b7%e3%83%a3%e3%82%a4%e3%83%88%e3%83%bc%e3%83%97'>シャイトープ</a>
+<a class='btn' href='search_all.html?q=%e3%82%b7%e3%83%a3%e3%82%a4%e3%83%8a%e3%83%bb%e3%83%80%e3%83%ab%e3%82%af%ef%bd%9e%e9%bb%92%e3%81%8d%e6%9c%88%e3%81%ae%e7%8e%8b%e3%81%a8%e8%92%bc%e7%a2%a7%e3%81%ae%e6%9c%88%e3%81%ae%e5%a7%ab%e5%90%9b%ef%bd%9e'>シャイナ・ダルク～黒き月の王と蒼碧の月の姫君～</a>
+<a class='btn' href='search_all.html?q=%e3%82%b7%e3%83%a3%e3%82%a4%e3%83%8b%e3%83%bc%e3%82%ab%e3%83%a9%e3%83%bc%e3%82%ba'>シャイニーカラーズ</a>
+<a class='btn' href='search_all.html?q=%e3%82%b7%e3%83%a3%e3%82%a4%e3%83%8b%e3%83%b3%e3%82%b0+%e3%83%96%e3%83%ac%e3%82%a4%e3%83%89'>シャイニング ブレイド</a>
+<a class='btn' href='search_all.html?q=%e3%82%b7%e3%83%a3%e3%82%a4%e3%83%8b%e3%83%b3%e3%82%b0%e3%83%bb%e3%83%86%e3%82%a3%e3%82%a2%e3%83%bc%e3%82%ba'>シャイニング・ティアーズ</a>
+<a class='btn' href='search_all.html?q=%e3%82%b7%e3%83%a3%e3%82%a4%e3%83%8b%e3%83%b3%e3%82%b0%e3%83%bb%e3%83%8f%e3%83%bc%e3%83%84+%ef%bd%9e%e5%b9%b8%e3%81%9b%e3%81%ae%e3%83%91%e3%83%b3%ef%bd%9e'>シャイニング・ハーツ ～幸せのパン～</a>
+<a class='btn' href='search_all.html?q=%e3%82%b7%e3%83%a3%e3%82%a4%e3%83%8b%e3%83%b3%e3%82%b0%e3%83%bb%e3%83%95%e3%82%a9%e3%83%bc%e3%82%b9+%e3%83%8d%e3%82%aa'>シャイニング・フォース ネオ</a>
+<a class='btn' href='search_all.html?q=%e3%82%b7%e3%83%a3%e3%82%a4%e3%83%8b%e3%83%b3%e3%82%b0%e3%83%bb%e3%83%96%e3%83%ac%e3%82%a4%e3%83%89'>シャイニング・ブレイド</a>
+<a class='btn' href='search_all.html?q=%e3%82%b7%e3%83%a3%e3%82%a4%e3%83%8b%e3%83%b3%e3%82%b0%e3%83%bb%e3%83%96%e3%83%ac%e3%82%a4%e3%83%89+%e4%b8%bb%e9%a1%8c%e6%ad%8c'>シャイニング・ブレイド 主題歌</a>
+<a class='btn' href='search_all.html?q=%e3%82%b7%e3%83%a3%e3%82%a4%e3%83%b3%e3%83%9d%e3%82%b9%e3%83%88'>シャインポスト</a>
+<a class='btn' href='search_all.html?q=%e3%82%b7%e3%83%a3%e3%82%ad%e3%83%bc%e3%83%b3%e3%80%81%e6%b0%b4%e6%9c%a8%e4%b8%80%e9%83%8e'>シャキーン、水木一郎</a>
+<a class='btn' href='search_all.html?q=%e3%82%b7%e3%83%a3%e3%83%89%e3%82%a6%e3%82%ac%e3%83%bc%e3%83%87%e3%83%b3%e3%83%8a%e3%83%b3%e3%83%90%e3%83%bc%e3%82%ba'>シャドウガーデンナンバーズ</a>
+<a class='btn' href='search_all.html?q=%e3%82%b7%e3%83%a3%e3%83%89%e3%82%a6%e3%83%90%e3%83%bc%e3%82%b9'>シャドウバース</a>
+<a class='btn' href='search_all.html?q=%e3%82%b7%e3%83%a3%e3%83%89%e3%83%bc%e3%83%8f%e3%82%a6%e3%82%b9'>シャドーハウス</a>
+<a class='btn' href='search_all.html?q=%e3%82%b7%e3%83%a3%e3%83%89%e3%83%bc%e3%83%8f%e3%82%a6%e3%82%b9+2nd+Season+OP'>シャドーハウス 2nd Season OP</a>
+<a class='btn' href='search_all.html?q=%e3%82%b8%e3%83%a3%e3%83%92%e3%83%bc%e6%a7%98%e3%81%af%e3%81%8f%e3%81%98%e3%81%91%e3%81%aa%e3%81%84!'>ジャヒー様はくじけない!</a>
+<a class='btn' href='search_all.html?q=%e3%82%b8%e3%83%a3%e3%83%92%e3%83%bc%e6%a7%98%e3%81%af%e3%81%8f%e3%81%98%e3%81%91%e3%81%aa%e3%81%84%ef%bc%81'>ジャヒー様はくじけない！</a>
+<a class='btn' href='search_all.html?q=%e3%82%b8%e3%83%a3%e3%83%92%e3%83%bc%e6%a7%98%e3%81%af%e3%81%8f%e3%81%98%e3%81%91%e3%81%aa%e3%81%84%ef%bc%81+OP'>ジャヒー様はくじけない！ OP</a>
+<a class='btn' href='search_all.html?q=%e3%82%b8%e3%83%a3%e3%83%92%e3%83%bc%e6%a7%98%e3%81%af%e3%81%8f%e3%81%98%e3%81%91%e3%81%aa%e3%81%84%ef%bc%81+OP2'>ジャヒー様はくじけない！ OP2</a>
+<a class='btn' href='search_all.html?q=%e3%81%97%e3%82%83%e3%81%b9%e3%82%8b%e5%b8%bd%e5%ad%90'>しゃべる帽子</a>
+<a class='btn' href='search_all.html?q=%e3%82%b7%e3%83%a3%e3%83%ab%e3%83%bb%e3%82%a6%e3%82%a3%e3%83%bb%e3%83%80%e3%83%b3%e3%82%b9+%ef%bc%8f%e6%b2%99%e8%8a%b1%e5%8f%89%e3%82%af%e3%83%ad%e3%83%b1+%e3%83%ad%e3%83%9c%e5%ad%90+%e5%a4%a7%e7%a5%9e%e3%83%9f%e3%82%aa+%e7%8d%85%e7%99%bd%e3%81%bc%e3%81%9f%e3%82%93'>シャル・ウィ・ダンス ／沙花叉クロヱ ロボ子 大神ミオ 獅白ぼたん</a>
+<a class='btn' href='search_all.html?q=%e3%82%b7%e3%83%a3%e3%83%b3%e3%82%b0%e3%83%aa%e3%83%bb%e3%83%a9'>シャングリ・ラ</a>
+<a class='btn' href='search_all.html?q=%e3%82%b7%e3%83%a3%e3%83%b3%e3%82%b0%e3%83%aa%e3%83%a9%e3%83%bb%e3%83%95%e3%83%ad%e3%83%b3%e3%83%86%e3%82%a3%e3%82%a2+2nd+season'>シャングリラ・フロンティア 2nd season</a>
+<a class='btn' href='search_all.html?q=%e3%82%b7%e3%83%a3%e3%83%b3%e3%82%b0%e3%83%aa%e3%83%a9%e3%83%bb%e3%83%95%e3%83%ad%e3%83%b3%e3%83%86%e3%82%a3%e3%82%a2+ED'>シャングリラ・フロンティア ED</a>
+<a class='btn' href='search_all.html?q=%e3%82%b7%e3%83%a3%e3%83%b3%e3%82%b0%e3%83%aa%e3%83%a9%e3%83%bb%e3%83%95%e3%83%ad%e3%83%b3%e3%83%86%e3%82%a3%e3%82%a2+ED2'>シャングリラ・フロンティア ED2</a>
+<a class='btn' href='search_all.html?q=%e3%82%b7%e3%83%a3%e3%83%b3%e3%82%b0%e3%83%aa%e3%83%a9%e3%83%bb%e3%83%95%e3%83%ad%e3%83%b3%e3%83%86%e3%82%a3%e3%82%a2+OP'>シャングリラ・フロンティア OP</a>
+<a class='btn' href='search_all.html?q=%e3%82%b7%e3%83%a3%e3%83%b3%e3%82%b0%e3%83%aa%e3%83%a9%e3%83%bb%e3%83%95%e3%83%ad%e3%83%b3%e3%83%86%e3%82%a3%e3%82%a2+OP2'>シャングリラ・フロンティア OP2</a>
+<a class='btn' href='search_all.html?q=%e3%82%b7%e3%83%a3%e3%83%b3%e3%82%b0%e3%83%aa%e3%83%a9%e3%83%bb%e3%83%95%e3%83%ad%e3%83%b3%e3%83%86%e3%82%a3%e3%82%a2+%e7%ac%ac11%e8%a9%b1%e6%8c%bf%e5%85%a5%e6%ad%8c'>シャングリラ・フロンティア 第11話挿入歌</a>
+<a class='btn' href='search_all.html?q=%e3%82%b7%e3%83%a3%e3%83%b3%e3%82%b0%e3%83%aa%e3%83%a9%e3%83%bb%e3%83%95%e3%83%ad%e3%83%b3%e3%83%86%e3%82%a3%e3%82%a2%ef%bc%88%e7%ac%ac2%e3%82%af%e3%83%bc%e3%83%ab%ef%bc%89'>シャングリラ・フロンティア（第2クール）</a>
+<a class='btn' href='search_all.html?q=%e3%82%b7%e3%83%a3%e3%83%b3%e3%82%b0%e3%83%aa%e3%83%a9%e3%83%bb%e3%83%95%e3%83%ad%e3%83%b3%e3%83%86%e3%82%a3%e3%82%a2%ef%bd%9e%e3%82%af%e3%82%bd%e3%82%b2%e3%83%bc%e3%83%8f%e3%83%b3%e3%82%bf%e3%83%bc%e3%80%81%e7%a5%9e%e3%82%b2%e3%83%bc%e3%81%ab%e6%8c%91%e3%81%be%e3%82%93%e3%81%a8%e3%81%99%ef%bd%9e+2nd+Season+OP'>シャングリラ・フロンティア～クソゲーハンター、神ゲーに挑まんとす～ 2nd Season OP</a>
+<a class='btn' href='search_all.html?q=%e3%82%b7%e3%83%a3%e3%83%b3%e3%83%81%e3%83%bc'>シャンチー</a>
+<a class='btn' href='search_all.html?q=%e3%82%b7%e3%83%a3%e3%83%b3%e3%83%88%e3%83%a9+-%e7%b5%b6%e5%af%be%e4%be%9d%e5%ad%98%e3%81%ae%e6%ad%8c%e5%a7%ab-'>シャントラ -絶対依存の歌姫-</a>
+<a class='btn' href='search_all.html?q=%e3%82%b7%e3%83%a3%e3%83%b3%e3%83%88%e3%83%a9+-%e7%b5%b6%e5%af%be%e4%be%9d%e5%ad%98%e3%81%ae%e6%ad%8c%e5%a7%ab-+IM'>シャントラ -絶対依存の歌姫- IM</a>
+<a class='btn' href='search_all.html?q=%e3%82%b7%e3%83%a3%e4%b9%b1Q'>シャ乱Q</a>
+<a class='btn' href='search_all.html?q=%e3%82%b7%e3%83%a6%e3%82%a4'>シユイ</a>
+<a class='btn' href='search_all.html?q=%e3%82%b7%e3%83%a5%e3%83%bc%e3%83%88!+Goal+to+the+Future'>シュート! Goal to the Future</a>
+<a class='btn' href='search_all.html?q=%e3%82%b8%e3%83%a5%e3%82%a8%e3%83%aa%e3%83%bc%e3%83%bb%e3%83%8a%e3%82%a4%e3%83%84%e3%83%bb%e3%82%a2%e3%83%ab%e3%82%ab%e3%83%87%e3%82%a3%e3%82%a2_1stOP'>ジュエリー・ナイツ・アルカディア_1stOP</a>
+<a class='btn' href='search_all.html?q=%e3%82%b8%e3%83%a5%e3%82%a8%e3%83%aa%e3%83%bc%e3%83%bb%e3%83%8a%e3%82%a4%e3%83%84%e3%83%bb%e3%82%a2%e3%83%ab%e3%82%ab%e3%83%87%e3%82%a3%e3%82%a2_2ndOP'>ジュエリー・ナイツ・アルカディア_2ndOP</a>
+<a class='btn' href='search_all.html?q=%e3%82%b8%e3%83%a5%e3%82%a8%e3%83%aa%e3%83%bc%e3%83%bb%e3%83%8a%e3%82%a4%e3%83%84%e3%83%bb%e3%82%a2%e3%83%ab%e3%82%ab%e3%83%87%e3%82%a3%e3%82%a2_ED'>ジュエリー・ナイツ・アルカディア_ED</a>
+<a class='btn' href='search_all.html?q=%e3%82%b8%e3%83%a5%e3%82%a8%e3%83%aa%e3%83%bc%e3%83%bb%e3%83%8a%e3%82%a4%e3%83%84%e3%83%bb%e3%82%a2%e3%83%ab%e3%82%ab%e3%83%87%e3%82%a3%e3%82%a2_IN'>ジュエリー・ナイツ・アルカディア_IN</a>
+<a class='btn' href='search_all.html?q=%e3%82%b8%e3%83%a5%e3%82%a8%e3%83%aa%e3%83%bc%e3%83%bb%e3%83%8f%e3%83%bc%e3%83%84%e3%83%bb%e3%82%a2%e3%82%ab%e3%83%87%e3%83%9f%e3%82%a2_OP'>ジュエリー・ハーツ・アカデミア_OP</a>
+<a class='btn' href='search_all.html?q=%e3%82%b8%e3%83%a5%e3%82%a8%e3%83%ab%e3%82%b9%e3%82%aa%e3%83%bc%e3%82%b7%e3%83%a3%e3%83%b3'>ジュエルスオーシャン</a>
+<a class='btn' href='search_all.html?q=%e3%82%b8%e3%83%a5%e3%82%a8%e3%83%ab%e3%83%9a%e3%83%83%e3%83%88+%e3%83%8f%e3%83%83%e3%83%94%e3%83%8d%e3%82%b9'>ジュエルペット ハッピネス</a>
+<a class='btn' href='search_all.html?q=%e3%82%b8%e3%83%a5%e3%82%a8%e3%83%ab%e3%83%9a%e3%83%83%e3%83%88+%e3%83%9e%e3%82%b8%e3%82%ab%e3%83%ab%e3%83%81%e3%82%a7%e3%83%b3%e3%82%b8'>ジュエルペット マジカルチェンジ</a>
+<a class='btn' href='search_all.html?q=%e3%82%b8%e3%83%a5%e3%82%a8%e3%83%ab%e3%83%9a%e3%83%83%e3%83%88%e3%81%a6%e3%81%83%e3%82%93%e3%81%8f%e3%82%8b%e2%98%86'>ジュエルペットてぃんくる☆</a>
+<a class='btn' href='search_all.html?q=%e3%82%b7%e3%83%a5%e3%82%ac%e3%83%bc%e3%82%a2%e3%83%83%e3%83%97%e3%83%ab%e3%83%bb%e3%83%95%e3%82%a7%e3%82%a2%e3%83%aa%e3%83%bc%e3%83%86%e3%82%a4%e3%83%ab'>シュガーアップル・フェアリーテイル</a>
+<a class='btn' href='search_all.html?q=%e3%82%b7%e3%83%a5%e3%82%ac%e3%83%bc%e3%82%b3%e3%83%bc%e3%83%88%e3%83%95%e3%83%aa%e3%83%bc%e3%82%af%e3%82%b9'>シュガーコートフリークス</a>
+<a class='btn' href='search_all.html?q=%e3%82%b7%e3%83%a5%e3%82%ac%e3%83%bc%e3%82%bd%e3%83%b3%e3%82%b0%e3%81%a8%e3%83%93%e3%82%bf%e3%83%bc%e3%82%b9%e3%83%86%e3%83%83%e3%83%97%ef%bc%8f%e6%b2%99%e8%8a%b1%e5%8f%88%e3%82%af%e3%83%ad%e3%82%a8%ef%bc%86%e5%ae%9d%e9%90%98%e3%83%9e%e3%83%aa%e3%83%b3%ef%bc%86%e7%99%bd%e9%8a%80%e3%83%8e%e3%82%a8%e3%83%ab'>シュガーソングとビターステップ／沙花又クロエ＆宝鐘マリン＆白銀ノエル</a>
+<a class='btn' href='search_all.html?q=%e3%82%b7%e3%83%a5%e3%82%ac%e3%83%bc%e3%83%a9%e3%83%83%e3%82%b7%e3%83%a5%ef%bc%8fmiComet'>シュガーラッシュ／miComet</a>
+<a class='btn' href='search_all.html?q=%e3%81%97%e3%82%85%e3%81%8c%e3%81%a6%e3%82%93%ef%bc%81-sugarfull+tempering-_ED'>しゅがてん！-sugarfull tempering-_ED</a>
+<a class='btn' href='search_all.html?q=%e3%81%97%e3%82%85%e3%81%8c%e3%81%a6%e3%82%93%ef%bc%81-sugarfull+tempering-_OP'>しゅがてん！-sugarfull tempering-_OP</a>
+<a class='btn' href='search_all.html?q=%e3%81%97%e3%82%85%e3%81%94%e3%82%ad%e3%83%a3%e3%83%a9%ef%bc%81'>しゅごキャラ！</a>
+<a class='btn' href='search_all.html?q=%e3%81%97%e3%82%85%e3%81%aa'>しゅな</a>
+<a class='btn' href='search_all.html?q=%e3%81%97%e3%82%85%e3%81%b7%e3%82%8c%7e%e3%82%80%e3%82%ad%e3%83%a3%e3%83%b3%e3%83%87%e3%82%a3+%e7%8e%8b%e9%81%93%e3%81%ab%e3%81%af%e7%8e%8b%e9%81%93%e3%81%9f%e3%82%8b%e7%90%86%e7%94%b1%e3%81%8c%e3%81%82%e3%82%8b%e3%82%93%e3%81%a7%e3%81%99!'>しゅぷれ~むキャンディ 王道には王道たる理由があるんです!</a>
+<a class='btn' href='search_all.html?q=%e3%82%b7%e3%83%a5%e3%83%af%e3%82%b7%e3%83%a5%e3%83%af%ef%bc%8fThree%e2%88%9eLoop'>シュワシュワ／Three∞Loop</a>
+<a class='btn' href='search_all.html?q=%e3%82%b8%e3%83%a7%e3%83%bc%e3%82%ab%e3%83%bc%e3%82%b2%e3%83%bc%e3%83%a0'>ジョーカーゲーム</a>
+<a class='btn' href='search_all.html?q=%e3%82%b8%e3%83%a7%e3%83%bc%e3%82%ab%e3%83%bc%e3%82%b2%e3%83%bc%e3%83%a0+'>ジョーカーゲーム </a>
+<a class='btn' href='search_all.html?q=%e3%82%b8%e3%83%a7%e3%83%bc%e3%82%ab%e3%83%bc%e3%81%ae%e5%9b%bd%e3%81%ae%e3%82%a2%e3%83%aa%e3%82%b9'>ジョーカーの国のアリス</a>
+<a class='btn' href='search_all.html?q=%e3%82%b8%e3%83%a7%e3%82%b8%e3%83%a7%e3%81%ae%e5%a5%87%e5%a6%99%e3%81%aa%e5%86%92%e9%99%ba'>ジョジョの奇妙な冒険</a>
+<a class='btn' href='search_all.html?q=%e3%82%b8%e3%83%a7%e3%82%b8%e3%83%a7%e3%81%ae%e5%a5%87%e5%a6%99%e3%81%aa%e5%86%92%e9%99%ba+%e3%82%b9%e3%82%bf%e3%83%bc%e3%83%80%e3%82%b9%e3%83%88%e3%82%af%e3%83%ab%e3%82%bb%e3%82%a4%e3%83%80%e3%83%bc%e3%82%b9'>ジョジョの奇妙な冒険 スターダストクルセイダース</a>
+<a class='btn' href='search_all.html?q=%e3%82%b8%e3%83%a7%e3%82%b8%e3%83%a7%e3%81%ae%e5%a5%87%e5%a6%99%e3%81%aa%e5%86%92%e9%99%ba+%e3%82%b9%e3%82%bf%e3%83%bc%e3%83%80%e3%82%b9%e3%83%88%e3%82%af%e3%83%ab%e3%82%bb%e3%82%a4%e3%83%80%e3%83%bc%e3%82%b9%e3%83%bb%e5%af%8c%e6%b0%b8TOMMY%e5%bc%98%e6%98%8e'>ジョジョの奇妙な冒険 スターダストクルセイダース・富永TOMMY弘明</a>
+<a class='btn' href='search_all.html?q=%e3%82%b8%e3%83%a7%e3%82%b8%e3%83%a7%e3%81%ae%e5%a5%87%e5%a6%99%e3%81%aa%e5%86%92%e9%99%ba+%e3%82%b9%e3%83%88%e3%83%bc%e3%83%b3%e3%82%aa%e3%83%bc%e3%82%b7%e3%83%a3%e3%83%b3'>ジョジョの奇妙な冒険 ストーンオーシャン</a>
+<a class='btn' href='search_all.html?q=%e3%82%b8%e3%83%a7%e3%82%b8%e3%83%a7%e3%81%ae%e5%a5%87%e5%a6%99%e3%81%aa%e5%86%92%e9%99%ba+%e3%83%80%e3%82%a4%e3%83%a4%e3%83%a2%e3%83%b3%e3%83%89%e3%81%af%e7%a0%95%e3%81%91%e3%81%aa%e3%81%84'>ジョジョの奇妙な冒険 ダイヤモンドは砕けない</a>
+<a class='btn' href='search_all.html?q=%e3%82%b8%e3%83%a7%e3%82%b8%e3%83%a7%e3%81%ae%e5%a5%87%e5%a6%99%e3%81%aa%e5%86%92%e9%99%ba+%e3%83%95%e3%82%a1%e3%83%b3%e3%83%88%e3%83%a0+%e3%83%96%e3%83%a9%e3%83%83%e3%83%89'>ジョジョの奇妙な冒険 ファントム ブラッド</a>
+<a class='btn' href='search_all.html?q=%e3%82%b8%e3%83%a7%e3%82%b8%e3%83%a7%e3%81%ae%e5%a5%87%e5%a6%99%e3%81%aa%e5%86%92%e9%99%ba+%e9%bb%84%e9%87%91%e3%81%ae%e9%a2%a8'>ジョジョの奇妙な冒険 黄金の風</a>
+<a class='btn' href='search_all.html?q=%e3%81%98%e3%82%87%e3%81%97%e3%82%89%e3%81%8f'>じょしらく</a>
+<a class='btn' href='search_all.html?q=%e3%82%b8%e3%83%a7%e3%82%bc%e3%81%a8%e8%99%8e%e3%81%a8%e9%ad%9a%e3%81%9f%e3%81%a1'>ジョゼと虎と魚たち</a>
+<a class='btn' href='search_all.html?q=%e3%82%b7%e3%83%ab%e3%83%b4%e3%82%a1%e3%83%aa%e3%82%aa+%e3%83%88%e3%83%aa%e3%83%8b%e3%83%86%e3%82%a3'>シルヴァリオ トリニティ</a>
+<a class='btn' href='search_all.html?q=%e3%82%b7%e3%83%ab%e3%82%a8%e3%83%83%e3%83%88%ef%bc%8fKANA-BOON'>シルエット／KANA-BOON</a>
+<a class='btn' href='search_all.html?q=%e3%81%97%e3%82%8d%e3%81%8f%e3%81%be%e3%83%99%e3%83%ab%e3%82%b9%e3%82%bf%e3%83%bc%e3%82%ba'>しろくまベルスターズ</a>
+<a class='btn' href='search_all.html?q=%e3%81%97%e3%82%8d%e3%81%8f%e3%81%be%e3%83%99%e3%83%ab%e3%82%b9%e3%82%bf%e3%83%bc%e3%82%ba%e2%99%aa'>しろくまベルスターズ♪</a>
+<a class='btn' href='search_all.html?q=%e3%82%b7%e3%83%ad%e9%a3%af'>シロ飯</a>
+<a class='btn' href='search_all.html?q=%e3%81%98%e3%82%93'>じん</a>
+<a class='btn' href='search_all.html?q=%e3%82%b7%e3%83%b3%e3%83%bb%e3%82%a8%e3%83%b4%e3%82%a1%e3%83%b3%e3%82%b2%e3%83%aa%e3%82%aa%e3%83%b3%e5%8a%87%e5%a0%b4%e7%89%88'>シン・エヴァンゲリオン劇場版</a>
+<a class='btn' href='search_all.html?q=%e3%82%b7%e3%83%b3%e3%83%bb%e3%83%a6%e3%83%8b%e3%83%90%e3%83%bc%e3%82%b9%e3%83%ad%e3%83%9c%e3%83%bb%e9%ab%98%e6%a9%8b%e6%b4%8b%e5%ad%90'>シン・ユニバースロボ・高橋洋子</a>
+<a class='btn' href='search_all.html?q=%e3%82%b7%e3%83%b3%e3%83%bb%e4%bb%ae%e9%9d%a2%e3%83%a9%e3%82%a4%e3%83%80%e3%83%bc%e3%83%bb%e5%ad%90%e9%96%80%e7%9c%9f%e4%ba%ba(YOUTUBE%e5%8b%95%e7%94%bb)'>シン・仮面ライダー・子門真人(YOUTUBE動画)</a>
+<a class='btn' href='search_all.html?q=%e3%82%b7%e3%83%b3%e3%83%bb%e4%bb%ae%e9%9d%a2%e3%83%a9%e3%82%a4%e3%83%80%e3%83%bc%e3%83%bb%e8%97%a4%e6%b5%a9%e4%b8%80(YOUTUBE%e5%8b%95%e7%94%bb)'>シン・仮面ライダー・藤浩一(YOUTUBE動画)</a>
+<a class='btn' href='search_all.html?q=%e3%82%b7%e3%83%b3%e3%82%ab%e3%83%aa%e3%82%aa%e3%83%b3+%e3%83%81%e3%82%a7%e3%83%b3%e3%82%b8+%e3%82%b6+%e3%83%af%e3%83%bc%e3%83%ab%e3%83%89'>シンカリオン チェンジ ザ ワールド</a>
+<a class='btn' href='search_all.html?q=%e3%82%b8%e3%83%b3%e3%82%ad%e3%83%bb%e3%83%aa%e3%82%b6%e3%83%ac%e3%82%af%e3%82%b7%e3%83%a7%e3%83%b3+JINKI+RESURRECTION'>ジンキ・リザレクション JINKI RESURRECTION</a>
+<a class='btn' href='search_all.html?q=%e3%82%b7%e3%83%b3%e3%82%b9%e3%83%a1%e3%83%a2%e3%83%aa%e3%83%bc%e3%82%ba+%e6%98%9f%e5%a4%a9%e3%81%ae%e4%b8%8b%e3%81%a7+OP'>シンスメモリーズ 星天の下で OP</a>
+<a class='btn' href='search_all.html?q=%e3%82%b7%e3%83%b3%e3%82%bbver'>シンセver</a>
+<a class='btn' href='search_all.html?q=%e3%82%b7%e3%83%b3%e3%82%bd%e3%82%a6%e3%83%8e%e3%82%a4%e3%82%ba%7e%e5%8f%97%e4%bf%a1%e6%8e%a2%e5%81%b5%e3%81%ae%e4%ba%8b%e4%bb%b6%e7%b0%bf%7e'>シンソウノイズ~受信探偵の事件簿~</a>
+<a class='btn' href='search_all.html?q=%e3%82%b7%e3%83%b3%e3%83%87%e3%83%ac%e3%83%a9%e3%83%bb%e3%83%9e%e3%82%b8%e3%83%83%e3%82%af%ef%bc%8f%e7%b4%ab%e5%92%b2%e3%82%b7%e3%82%aa%e3%83%b3'>シンデレラ・マジック／紫咲シオン</a></div>
+  </div>
+
+  <script>
+    (function(){
+      const list=document.querySelectorAll('.list-し a');
+      const el=document.getElementById('count-list-し');
+      if(el){ el.textContent='表示件数: '+list.length; }
+    })();
+  </script>
+</div>
+</div>
+</body></html>

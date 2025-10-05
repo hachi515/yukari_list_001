@@ -1,0 +1,219 @@
+﻿<!DOCTYPE html>
+<html lang='ja'>
+<head>
+<meta charset='UTF-8'>
+<title>作品名（ね 行）</title>
+<meta name='viewport' content='width=device-width, initial-scale=1.0'>
+<meta property='og:title' content='つぼはち・オフライン検索'>
+<meta property='og:description' content='ゆかりのオフライン時に検索可能のサイトです'>
+<meta property='og:image' content='https://raw.githubusercontent.com/hachi515/yukari_list_001/main/Hasunosora_3.png'>
+<meta property='og:url' content=''>
+<meta name='twitter:card' content='summary_large_image'>
+<meta name='twitter:title' content='つぼはち・オフライン検索'>
+<meta name='twitter:description' content='ゆかりのオフライン時に検索可能のサイトです'>
+<meta name='twitter:image' content='https://raw.githubusercontent.com/hachi515/yukari_list_001/main/Hasunosora_3.png'>
+<style>:root{
+  --accent:#1B64C2;
+  --accent-50: rgba(27,100,194,.50);
+  --accent-70: rgba(27,100,194,.70);
+  --accent-90: rgba(27,100,194,.90);
+  --border:#1B64C2;
+  --panel:rgba(255,255,255,.55);
+  --panel-strong:rgba(255,255,255,.60);
+  --ui-gray:#a1a1a1;
+}
+*{box-sizing:border-box}
+html,body{width:100%}
+body{
+  font-family:'ヒラギノ角ゴ ProN W3','Hiragino Kaku Gothic ProN','Hiragino Sans','ヒラギノ角ゴシック','Yu Gothic','メイリオ',Meiryo,Arial,sans-serif;
+  font-size:14px; color:#222; background:#eef2f5; font-weight:400;
+  background-image:url('https://raw.githubusercontent.com/hachi515/yukari_list_001/main/Hasunosora_1.png'); background-size:cover; background-attachment:fixed; background-position:center; margin:0;
+}
+.wrap{ max-width:1100px; margin:24px auto; padding:12px; background:var(--panel); border:0; border-radius:0; box-shadow:none; overflow-x:auto; }
+
+h1{ display:inline-block; margin:0 0 14px 0; padding:4px 0; background:transparent; color:#0b1b2e; font-size:18px; font-weight:500 }
+h2{ margin:10px 0 8px; padding:0; color:#0b1b2e; font-size:18px; font-weight:500; background:transparent } /* ← h1と同サイズ */
+
+.back{ text-align:right; margin:-6px 0 6px 0 }
+.back a{ color:var(--accent); text-decoration:none; border-bottom:1px dotted var(--accent) }
+
+.section{margin:10px 0 18px}
+.search{display:flex; gap:8px; margin:8px 0 4px; align-items:center; justify-content:flex-start}
+.search select{ padding:8px 10px; font-size:14px; background:var(--panel); border:1px solid var(--ui-gray); border-radius:0; font-weight:400 }
+.search input[type=text]{ flex:0 0 260px; width:260px; padding:8px; font-size:14px; background:var(--panel); border:1px solid var(--ui-gray); border-radius:0; font-weight:400 }
+.search button{ padding:8px 12px; font-size:14px; color:#fff; background:var(--accent-90); border:1px solid var(--ui-gray); border-radius:0; cursor:pointer }
+.count{font-size:11px; color:#222; margin:4px 0 8px}
+a{ color:var(--accent); }
+
+.btn{display:inline-block; padding:8px 10px; background:var(--accent-70); color:#fff; text-decoration:none; border:1px solid var(--border); border-radius:0; font-weight:400 }
+.btn-outline{background:var(--panel); color:#1b1b1b; border:1px solid var(--border)}
+.year-buttons,.new-buttons{display:flex; flex-wrap:wrap; gap:8px}
+
+.kana-row{display:flex; gap:24px; margin-bottom:8px}
+.kana-group{display:flex; gap:6px}
+.kana-btn{display:inline-block; padding:6px 10px; background:var(--accent-70); color:#fff; text-decoration:none; border:1px solid var(--border); border-radius:0; font-size:14px; font-weight:400}
+.kana-btn.disabled{opacity:.35; pointer-events:none}
+
+/* 作品名グリッド：1行2個 */
+.prog-grid{display:grid; grid-template-columns:repeat(2, minmax(0,1fr)); gap:8px}
+.prog-grid a{display:block}
+
+/* カード */
+.card{margin:12px 0; border:0; background:transparent}
+.card-title{padding:0; background:transparent}
+.card-title a{display:block; padding:8px 10px; background:var(--accent-70); color:#fff; text-decoration:none; white-space:normal; font-weight:500}
+.card-body{padding:10px; background:var(--panel-strong)}
+.meta{margin:3px 0; font-weight:400}
+.meta .label{display:inline-block; min-width:84px; color:#0b1b2e; font-weight:400}
+
+/* ページャ */
+.pager{display:flex; gap:6px; flex-wrap:wrap; margin:14px 0}
+.pager a,.pager span{padding:6px 10px; border:1px solid var(--border); text-decoration:none; color:#fff; background:var(--accent-70); font-weight:400}
+.pager .current{background:var(--accent-90); color:#fff}
+
+/* スクロール枠（search_all / 年別 / 新着 / 五十音） */
+.list-container{max-height:900px; overflow-y:auto; border:1px solid var(--ui-gray); background:rgba(255,255,255,.35); padding:8px; box-shadow:0 4px 8px rgba(0,0,0,.06)}
+.stickybar{position:sticky; top:0; z-index:20; background:rgba(255,255,255,.6); border-bottom:1px solid var(--ui-gray); padding:8px; margin:-8px -8px 8px -8px}
+.stickybar.no-bg{background:transparent; border:none; padding:0; margin:0 0 8px 0}
+
+@media (max-width:768px){
+  body{ background-image:url('https://raw.githubusercontent.com/hachi515/yukari_list_001/main/Hasunosora_2.png'); font-size:13px }
+  .search select, .search input[type=text], .search button{ font-size:13px; padding:7px 10px }
+  /* 入力幅をスマホではやや広めに */
+  .search input[type=text]{ flex:0 0 56vw; width:56vw }
+  .list-container{ max-height:450px }
+}
+  .search select, .search input[type=text], .search button{ font-size:13px; padding:7px 10px }
+  .list-container{ max-height:450px }
+}</style>
+<script>const SEARCH_BASE = 'http://ykr.moe:11059/';
+
+function tokensHalf(v){return v.toLowerCase().trim().split(/ +/).filter(Boolean)}
+function qparam(name){ const m = location.search.match(new RegExp('[?&]'+name+'=([^&]+)')); return m ? decodeURIComponent(m[1]) : ''; }
+
+// 軽量リンク化：data-q を href に展開
+document.addEventListener('DOMContentLoaded', ()=>{
+  document.querySelectorAll('a[data-q]').forEach(a=>{
+    try{
+      const q = a.getAttribute('data-q')||'';
+      a.href = SEARCH_BASE + 'search.php?searchword=' + q;
+      a.target = '_blank';
+    }catch(e){}
+  });
+});
+
+function filterCards(listId, boxId){
+  const q = tokensHalf(document.getElementById(boxId).value);
+  const list = document.getElementById(listId);
+  if(!list){return}
+  const cards = list.querySelectorAll('.card');
+  let vis = 0;
+  cards.forEach(c=>{
+    const hit = q.every(tok => c.innerText.toLowerCase().includes(tok));
+    c.style.display = hit ? '' : 'none';
+    if(hit) vis++;
+  });
+  const cEl = document.getElementById('count-'+listId);
+  if(cEl){ cEl.textContent = '表示件数: ' + vis; }
+  const pager = document.getElementById('pager-'+listId);
+  const per = parseInt(list.dataset.per || '100',10);
+  if(pager){ if(q.length===0){ pager.style.display = ''; } else { pager.style.display = (vis<=per) ? 'none' : ''; } }
+}
+
+/* ===== 検索結果専用：表示中カードを「制作者優先度→日付」で並べ替え ===== */
+const DEFAULT_PRIO = 999;
+function reorderByPriority(listId){
+  const list = document.getElementById(listId);
+  if(!list){return}
+  const visible = Array.from(list.querySelectorAll('.card')).filter(c => c.style.display !== 'none');
+  visible.sort((a,b)=>{
+    const pa = parseInt(a.dataset.priority||DEFAULT_PRIO);
+    const pb = parseInt(b.dataset.priority||DEFAULT_PRIO);
+    if(pa !== pb) return pa - pb;
+    const da = parseInt(a.dataset.updated||0); // yyyymmdd
+    const db = parseInt(b.dataset.updated||0);
+    return db - da;
+  });
+  visible.forEach(c => list.appendChild(c));
+}
+
+function filterCardsAdv(listId, boxId, yearId){
+  const q = tokensHalf(document.getElementById(boxId).value);
+  const yEl = document.getElementById(yearId);
+  const y = yEl ? (yEl.value||'').trim() : '';
+  const list = document.getElementById(listId);
+  if(!list){return}
+  const cards = list.querySelectorAll('.card');
+  let vis = 0;
+  cards.forEach(c=>{
+    const okText = q.every(tok => c.innerText.toLowerCase().includes(tok));
+    const band = (c.dataset.yearband||'');
+    const yr = (c.dataset.year||'');
+    const okYear = (y==='' || yr===y || band===y);
+    const show = okText && okYear;
+    c.style.display = show ? '' : 'none';
+    if(show) vis++;
+  });
+  const cEl = document.getElementById('count-'+listId);
+  if(cEl){ cEl.textContent = '表示件数: ' + vis; }
+
+  // ★検索（キーワード or 年帯）を使ったときだけ優先度並び替えを実施
+  if(q.length>0 || y!==''){ reorderByPriority(listId); }
+}
+
+function filterGrid(gridSel, boxId, countId){
+  const q = tokensHalf(document.getElementById(boxId).value);
+  const nodes = document.querySelectorAll(gridSel+' a');
+  let vis=0; nodes.forEach(a=>{ const hit=q.every(t=>a.innerText.toLowerCase().includes(t)); a.style.display=hit?'':'none'; if(hit) vis++; });
+  if(countId){ const el=document.getElementById(countId); if(el){ el.textContent='表示件数: '+vis; } }
+}</script>
+</head>
+<body>
+<div class='wrap'>
+<h1>作品名（ね 行）</h1>
+<div class='back'><a href='index.html'>一覧に戻る</a></div>
+
+<div class='section'>
+  <div class='search'>
+    <input type='text' id='q-ね' placeholder='この行の作品名を絞り込み（半角スペースAND）'>
+    <button onclick="filterGrid('.list-ね a','q-ね','count-list-ね')">検索</button>
+  </div>
+  <div class='count' id='count-list-ね'></div>
+
+  <div class='list-container'>
+    <div class='prog-grid list-ね'><a class='btn' href='search_all.html?q=%e3%83%8d%e3%82%aa+%e3%82%a2%e3%83%b3%e3%82%b8%e3%82%a7%e3%83%aa%e3%83%bc%e3%82%af'>ネオ アンジェリーク</a>
+<a class='btn' href='search_all.html?q=%e3%83%8d%e3%82%aa+%e3%82%a2%e3%83%b3%e3%82%b8%e3%82%a7%e3%83%aa%e3%83%bc%e3%82%af+Abyss'>ネオ アンジェリーク Abyss</a>
+<a class='btn' href='search_all.html?q=%e3%83%8d%e3%82%aa+%e3%82%a2%e3%83%b3%e3%82%b8%e3%82%a7%e3%83%aa%e3%83%bc%e3%82%af+Abyss+%ef%bd%9e%e9%99%bd%e3%81%a0%e3%81%be%e3%82%8a%e9%82%b8%e3%81%b8%e3%82%88%e3%81%86%e3%81%93%e3%81%9d%ef%bd%9e'>ネオ アンジェリーク Abyss ～陽だまり邸へようこそ～</a>
+<a class='btn' href='search_all.html?q=%e3%83%8d%e3%82%aa+%e3%82%a2%e3%83%b3%e3%82%b8%e3%82%a7%e3%83%aa%e3%83%bc%e3%82%af+Abyss+-Second+Age-'>ネオ アンジェリーク Abyss -Second Age-</a>
+<a class='btn' href='search_all.html?q=%e3%83%8d%e3%82%aa+%e3%82%a2%e3%83%b3%e3%82%b8%e3%82%a7%e3%83%aa%e3%83%bc%e3%82%af+Special'>ネオ アンジェリーク Special</a>
+<a class='btn' href='search_all.html?q=%e3%83%8d%e3%82%aa%e3%83%ad%e3%83%9e%e3%83%b3%e3%82%b9'>ネオロマンス</a>
+<a class='btn' href='search_all.html?q=%e3%83%8d%e3%82%ae%e3%81%be%ef%bc%81'>ネギま！</a>
+<a class='btn' href='search_all.html?q=%e3%83%8d%e3%82%ae%e3%81%be!%ef%bc%9f'>ネギま!？</a>
+<a class='btn' href='search_all.html?q=%e3%83%8d%e3%82%ae%e3%81%be!%ef%bc%9f+%e5%a4%8f%e3%82%b9%e3%83%9a%e3%82%b7%e3%83%a3%e3%83%ab!%ef%bc%9f'>ネギま!？ 夏スペシャル!？</a>
+<a class='btn' href='search_all.html?q=%e3%83%8d%e3%82%ae%e3%81%be!%ef%bc%9f+%e6%98%a5%e3%82%b9%e3%83%9a%e3%82%b7%e3%83%a3%e3%83%ab!%ef%bc%9f'>ネギま!？ 春スペシャル!？</a>
+<a class='btn' href='search_all.html?q=%e3%83%8d%e3%82%af%e3%83%ad%e3%83%8e%e3%83%9f%e5%ad%90%e3%81%ae%e3%82%b3%e3%82%ba%e3%83%9f%e3%83%83%e3%82%af%e3%83%9b%e3%83%a9%e3%83%bc%e3%82%b7%e3%83%a7%e3%82%a6'>ネクロノミ子のコズミックホラーショウ</a>
+<a class='btn' href='search_all.html?q=%e3%83%8d%e3%82%b3%e3%82%b8%e3%83%a3%e3%83%a9%e5%b8%82%e3%81%ae11%e4%ba%ba+%e4%b8%bb%e9%a1%8c%e6%ad%8c'>ネコジャラ市の11人 主題歌</a>
+<a class='btn' href='search_all.html?q=%e3%83%8d%e3%82%b3%e3%81%a8%e5%a5%b3%e5%ad%90%e5%af%ae%ef%bc%88%e3%83%af%e3%82%ab%e3%82%a4%ef%bc%89%e3%81%9b%e3%82%88%ef%bc%81_OP'>ネコと女子寮（ワカイ）せよ！_OP</a>
+<a class='btn' href='search_all.html?q=%e3%83%8d%e3%82%b3%e3%81%b1%e3%82%89'>ネコぱら</a>
+<a class='btn' href='search_all.html?q=%e3%83%8d%e3%82%b3%e3%81%b1%e3%82%89OVA'>ネコぱらOVA</a>
+<a class='btn' href='search_all.html?q=%e3%81%ad%e3%81%98%e5%bc%8f%ef%bc%bf%e7%b5%90%e6%9c%88%e3%82%86%e3%81%8b%e3%82%8a'>ねじ式＿結月ゆかり</a>
+<a class='btn' href='search_all.html?q=%e3%81%ad%e3%81%98%e5%bc%8f%c3%97buzzG'>ねじ式&#215;buzzG</a>
+<a class='btn' href='search_all.html?q=%e3%83%8d%e3%82%bf%e3%83%90%e3%83%ac'>ネタバレ</a>
+<a class='btn' href='search_all.html?q=%e3%83%8d%e3%82%bf%e5%8b%95%e7%94%bb'>ネタ動画</a>
+<a class='btn' href='search_all.html?q=%e3%83%8d%e3%83%88%e3%82%b2%e3%81%ae%e5%ab%81%e3%81%af%e5%a5%b3%e3%81%ae%e5%ad%90%e3%81%98%e3%82%83%e3%81%aa%e3%81%84%e3%81%a8%e6%80%9d%e3%81%a3%e3%81%9f%ef%bc%9f'>ネトゲの嫁は女の子じゃないと思った？</a>
+<a class='btn' href='search_all.html?q=%e3%83%8d%e3%83%88%e5%85%85%e3%81%ae%e3%82%b9%e3%82%b9%e3%83%a1'>ネト充のススメ</a>
+<a class='btn' href='search_all.html?q=%e3%81%ad%e3%82%89%e3%82%8f%e3%82%8c%e3%81%9f%e5%ad%a6%e5%9c%92'>ねらわれた学園</a>
+<a class='btn' href='search_all.html?q=%e3%81%ad%e3%82%93%e3%81%a9%e3%82%8d%e3%81%84%e3%81%a9+%e3%81%98%e3%81%87%e3%81%ad%e3%82%8c%ef%bd%9e%e3%81%97%e3%82%87%e3%82%93'>ねんどろいど じぇねれ～しょん</a>
+<a class='btn' href='search_all.html?q=%e3%81%ad%e3%82%93%e3%81%ad'>ねんね</a></div>
+  </div>
+
+  <script>
+    (function(){
+      const list=document.querySelectorAll('.list-ね a');
+      const el=document.getElementById('count-list-ね');
+      if(el){ el.textContent='表示件数: '+list.length; }
+    })();
+  </script>
+</div>
+</div>
+</body></html>

@@ -1,0 +1,364 @@
+﻿<!DOCTYPE html>
+<html lang='ja'>
+<head>
+<meta charset='UTF-8'>
+<title>作品名（か 行）</title>
+<meta name='viewport' content='width=device-width, initial-scale=1.0'>
+<meta property='og:title' content='つぼはち・オフライン検索'>
+<meta property='og:description' content='ゆかりのオフライン時に検索可能のサイトです'>
+<meta property='og:image' content='https://raw.githubusercontent.com/hachi515/yukari_list_001/main/Hasunosora_3.png'>
+<meta property='og:url' content=''>
+<meta name='twitter:card' content='summary_large_image'>
+<meta name='twitter:title' content='つぼはち・オフライン検索'>
+<meta name='twitter:description' content='ゆかりのオフライン時に検索可能のサイトです'>
+<meta name='twitter:image' content='https://raw.githubusercontent.com/hachi515/yukari_list_001/main/Hasunosora_3.png'>
+<style>:root{
+  --accent:#1B64C2;
+  --accent-50: rgba(27,100,194,.50);
+  --accent-70: rgba(27,100,194,.70);
+  --accent-90: rgba(27,100,194,.90);
+  --border:#1B64C2;
+  --panel:rgba(255,255,255,.55);
+  --panel-strong:rgba(255,255,255,.60);
+  --ui-gray:#a1a1a1;
+}
+*{box-sizing:border-box}
+html,body{width:100%}
+body{
+  font-family:'ヒラギノ角ゴ ProN W3','Hiragino Kaku Gothic ProN','Hiragino Sans','ヒラギノ角ゴシック','Yu Gothic','メイリオ',Meiryo,Arial,sans-serif;
+  font-size:14px; color:#222; background:#eef2f5; font-weight:400;
+  background-image:url('https://raw.githubusercontent.com/hachi515/yukari_list_001/main/Hasunosora_1.png'); background-size:cover; background-attachment:fixed; background-position:center; margin:0;
+}
+.wrap{ max-width:1100px; margin:24px auto; padding:12px; background:var(--panel); border:0; border-radius:0; box-shadow:none; overflow-x:auto; }
+
+h1{ display:inline-block; margin:0 0 14px 0; padding:4px 0; background:transparent; color:#0b1b2e; font-size:18px; font-weight:500 }
+h2{ margin:10px 0 8px; padding:0; color:#0b1b2e; font-size:18px; font-weight:500; background:transparent } /* ← h1と同サイズ */
+
+.back{ text-align:right; margin:-6px 0 6px 0 }
+.back a{ color:var(--accent); text-decoration:none; border-bottom:1px dotted var(--accent) }
+
+.section{margin:10px 0 18px}
+.search{display:flex; gap:8px; margin:8px 0 4px; align-items:center; justify-content:flex-start}
+.search select{ padding:8px 10px; font-size:14px; background:var(--panel); border:1px solid var(--ui-gray); border-radius:0; font-weight:400 }
+.search input[type=text]{ flex:0 0 260px; width:260px; padding:8px; font-size:14px; background:var(--panel); border:1px solid var(--ui-gray); border-radius:0; font-weight:400 }
+.search button{ padding:8px 12px; font-size:14px; color:#fff; background:var(--accent-90); border:1px solid var(--ui-gray); border-radius:0; cursor:pointer }
+.count{font-size:11px; color:#222; margin:4px 0 8px}
+a{ color:var(--accent); }
+
+.btn{display:inline-block; padding:8px 10px; background:var(--accent-70); color:#fff; text-decoration:none; border:1px solid var(--border); border-radius:0; font-weight:400 }
+.btn-outline{background:var(--panel); color:#1b1b1b; border:1px solid var(--border)}
+.year-buttons,.new-buttons{display:flex; flex-wrap:wrap; gap:8px}
+
+.kana-row{display:flex; gap:24px; margin-bottom:8px}
+.kana-group{display:flex; gap:6px}
+.kana-btn{display:inline-block; padding:6px 10px; background:var(--accent-70); color:#fff; text-decoration:none; border:1px solid var(--border); border-radius:0; font-size:14px; font-weight:400}
+.kana-btn.disabled{opacity:.35; pointer-events:none}
+
+/* 作品名グリッド：1行2個 */
+.prog-grid{display:grid; grid-template-columns:repeat(2, minmax(0,1fr)); gap:8px}
+.prog-grid a{display:block}
+
+/* カード */
+.card{margin:12px 0; border:0; background:transparent}
+.card-title{padding:0; background:transparent}
+.card-title a{display:block; padding:8px 10px; background:var(--accent-70); color:#fff; text-decoration:none; white-space:normal; font-weight:500}
+.card-body{padding:10px; background:var(--panel-strong)}
+.meta{margin:3px 0; font-weight:400}
+.meta .label{display:inline-block; min-width:84px; color:#0b1b2e; font-weight:400}
+
+/* ページャ */
+.pager{display:flex; gap:6px; flex-wrap:wrap; margin:14px 0}
+.pager a,.pager span{padding:6px 10px; border:1px solid var(--border); text-decoration:none; color:#fff; background:var(--accent-70); font-weight:400}
+.pager .current{background:var(--accent-90); color:#fff}
+
+/* スクロール枠（search_all / 年別 / 新着 / 五十音） */
+.list-container{max-height:900px; overflow-y:auto; border:1px solid var(--ui-gray); background:rgba(255,255,255,.35); padding:8px; box-shadow:0 4px 8px rgba(0,0,0,.06)}
+.stickybar{position:sticky; top:0; z-index:20; background:rgba(255,255,255,.6); border-bottom:1px solid var(--ui-gray); padding:8px; margin:-8px -8px 8px -8px}
+.stickybar.no-bg{background:transparent; border:none; padding:0; margin:0 0 8px 0}
+
+@media (max-width:768px){
+  body{ background-image:url('https://raw.githubusercontent.com/hachi515/yukari_list_001/main/Hasunosora_2.png'); font-size:13px }
+  .search select, .search input[type=text], .search button{ font-size:13px; padding:7px 10px }
+  /* 入力幅をスマホではやや広めに */
+  .search input[type=text]{ flex:0 0 56vw; width:56vw }
+  .list-container{ max-height:450px }
+}
+  .search select, .search input[type=text], .search button{ font-size:13px; padding:7px 10px }
+  .list-container{ max-height:450px }
+}</style>
+<script>const SEARCH_BASE = 'http://ykr.moe:11059/';
+
+function tokensHalf(v){return v.toLowerCase().trim().split(/ +/).filter(Boolean)}
+function qparam(name){ const m = location.search.match(new RegExp('[?&]'+name+'=([^&]+)')); return m ? decodeURIComponent(m[1]) : ''; }
+
+// 軽量リンク化：data-q を href に展開
+document.addEventListener('DOMContentLoaded', ()=>{
+  document.querySelectorAll('a[data-q]').forEach(a=>{
+    try{
+      const q = a.getAttribute('data-q')||'';
+      a.href = SEARCH_BASE + 'search.php?searchword=' + q;
+      a.target = '_blank';
+    }catch(e){}
+  });
+});
+
+function filterCards(listId, boxId){
+  const q = tokensHalf(document.getElementById(boxId).value);
+  const list = document.getElementById(listId);
+  if(!list){return}
+  const cards = list.querySelectorAll('.card');
+  let vis = 0;
+  cards.forEach(c=>{
+    const hit = q.every(tok => c.innerText.toLowerCase().includes(tok));
+    c.style.display = hit ? '' : 'none';
+    if(hit) vis++;
+  });
+  const cEl = document.getElementById('count-'+listId);
+  if(cEl){ cEl.textContent = '表示件数: ' + vis; }
+  const pager = document.getElementById('pager-'+listId);
+  const per = parseInt(list.dataset.per || '100',10);
+  if(pager){ if(q.length===0){ pager.style.display = ''; } else { pager.style.display = (vis<=per) ? 'none' : ''; } }
+}
+
+/* ===== 検索結果専用：表示中カードを「制作者優先度→日付」で並べ替え ===== */
+const DEFAULT_PRIO = 999;
+function reorderByPriority(listId){
+  const list = document.getElementById(listId);
+  if(!list){return}
+  const visible = Array.from(list.querySelectorAll('.card')).filter(c => c.style.display !== 'none');
+  visible.sort((a,b)=>{
+    const pa = parseInt(a.dataset.priority||DEFAULT_PRIO);
+    const pb = parseInt(b.dataset.priority||DEFAULT_PRIO);
+    if(pa !== pb) return pa - pb;
+    const da = parseInt(a.dataset.updated||0); // yyyymmdd
+    const db = parseInt(b.dataset.updated||0);
+    return db - da;
+  });
+  visible.forEach(c => list.appendChild(c));
+}
+
+function filterCardsAdv(listId, boxId, yearId){
+  const q = tokensHalf(document.getElementById(boxId).value);
+  const yEl = document.getElementById(yearId);
+  const y = yEl ? (yEl.value||'').trim() : '';
+  const list = document.getElementById(listId);
+  if(!list){return}
+  const cards = list.querySelectorAll('.card');
+  let vis = 0;
+  cards.forEach(c=>{
+    const okText = q.every(tok => c.innerText.toLowerCase().includes(tok));
+    const band = (c.dataset.yearband||'');
+    const yr = (c.dataset.year||'');
+    const okYear = (y==='' || yr===y || band===y);
+    const show = okText && okYear;
+    c.style.display = show ? '' : 'none';
+    if(show) vis++;
+  });
+  const cEl = document.getElementById('count-'+listId);
+  if(cEl){ cEl.textContent = '表示件数: ' + vis; }
+
+  // ★検索（キーワード or 年帯）を使ったときだけ優先度並び替えを実施
+  if(q.length>0 || y!==''){ reorderByPriority(listId); }
+}
+
+function filterGrid(gridSel, boxId, countId){
+  const q = tokensHalf(document.getElementById(boxId).value);
+  const nodes = document.querySelectorAll(gridSel+' a');
+  let vis=0; nodes.forEach(a=>{ const hit=q.every(t=>a.innerText.toLowerCase().includes(t)); a.style.display=hit?'':'none'; if(hit) vis++; });
+  if(countId){ const el=document.getElementById(countId); if(el){ el.textContent='表示件数: '+vis; } }
+}</script>
+</head>
+<body>
+<div class='wrap'>
+<h1>作品名（か 行）</h1>
+<div class='back'><a href='index.html'>一覧に戻る</a></div>
+
+<div class='section'>
+  <div class='search'>
+    <input type='text' id='q-か' placeholder='この行の作品名を絞り込み（半角スペースAND）'>
+    <button onclick="filterGrid('.list-か a','q-か','count-list-か')">検索</button>
+  </div>
+  <div class='count' id='count-list-か'></div>
+
+  <div class='list-container'>
+    <div class='prog-grid list-か'><a class='btn' href='search_all.html?q=+%e3%82%ac%e3%83%ab%e3%83%95%e3%82%a9%e3%83%bc%e3%82%b9+%e6%96%b0%e4%b8%96%e7%b4%80%e7%b7%a8+%e4%b8%8b'> ガルフォース 新世紀編 下</a>
+<a class='btn' href='search_all.html?q=%e3%81%8c%ef%bc%89%e3%82%ac%e3%83%bc%e3%83%ab%e3%82%ba%e3%83%96%e3%83%a9%e3%83%9c%e3%83%bc'>が）ガールズブラボー</a>
+<a class='btn' href='search_all.html?q=%e3%81%8b%ef%bc%89%e3%81%8b%e3%82%8a%e3%82%93'>か）かりん</a>
+<a class='btn' href='search_all.html?q=%e3%81%8c%ef%bc%89%e3%82%ac%e3%83%b3%e3%83%91%e3%83%ac%e3%83%bc%e3%83%89%e3%83%9e%e3%83%bc%e3%83%81'>が）ガンパレードマーチ</a>
+<a class='btn' href='search_all.html?q=%e3%81%8b%ef%bc%89%e5%8a%a0%e5%a5%88%ef%bd%9e%e3%81%84%e3%82%82%e3%81%86%e3%81%a8%ef%bd%9e'>か）加奈～いもうと～</a>
+<a class='btn' href='search_all.html?q=%e3%81%8b%ef%bc%89%e5%ae%b6%e6%97%8f%e8%a8%88%e7%94%bb'>か）家族計画</a>
+<a class='btn' href='search_all.html?q=%e3%81%8b%ef%bc%89%e9%8f%a1%e9%9f%b3%e3%83%ac%e3%83%b3'>か）鏡音レン</a>
+<a class='btn' href='search_all.html?q=%e3%81%8b%ef%bc%89%e9%a2%a8%e3%81%ae%e3%82%b9%e3%83%86%e3%82%a3%e3%82%b0%e3%83%9e'>か）風のスティグマ</a>
+<a class='btn' href='search_all.html?q=%e3%82%ab%e3%83%bc%e3%83%89%e3%82%ad%e3%83%a3%e3%83%97%e3%82%bf%e3%83%bc%e3%81%95%e3%81%8f%e3%82%89'>カードキャプターさくら</a>
+<a class='btn' href='search_all.html?q=%e3%82%ab%e3%83%bc%e3%83%89%e3%82%ad%e3%83%a3%e3%83%97%e3%82%bf%e3%83%bc%e3%81%95%e3%81%8f%e3%82%89+%e3%82%af%e3%83%aa%e3%82%a2%e3%82%ab%e3%83%bc%e3%83%89%e7%b7%a8+OP'>カードキャプターさくら クリアカード編 OP</a>
+<a class='btn' href='search_all.html?q=%e3%82%ab%e3%83%bc%e3%83%89%e3%82%ad%e3%83%a3%e3%83%97%e3%82%bf%e3%83%bc%e3%81%95%e3%81%8f%e3%82%89+%e5%8a%87%e5%a0%b4%e7%89%88'>カードキャプターさくら 劇場版</a>
+<a class='btn' href='search_all.html?q=%e3%82%ab%e3%83%bc%e3%83%89%e3%82%ad%e3%83%a3%e3%83%97%e3%82%bf%e3%83%bc%e3%81%95%e3%81%8f%e3%82%89+%e5%b0%81%e5%8d%b0%e3%81%95%e3%82%8c%e3%81%9f%e3%82%ab%e3%83%bc%e3%83%89'>カードキャプターさくら 封印されたカード</a>
+<a class='btn' href='search_all.html?q=%e3%82%ab%e3%83%bc%e3%83%89%e3%83%95%e3%82%a1%e3%82%a4%e3%83%88!!+%e3%83%b4%e3%82%a1%e3%83%b3%e3%82%ac%e3%83%bc%e3%83%89+Divinez'>カードファイト!! ヴァンガード Divinez</a>
+<a class='btn' href='search_all.html?q=%e3%82%ab%e3%83%bc%e3%83%89%e3%83%95%e3%82%a1%e3%82%a4%e3%83%88!!+%e3%83%b4%e3%82%a1%e3%83%b3%e3%82%ac%e3%83%bc%e3%83%89+Divinez+%e3%83%87%e3%83%a9%e3%83%83%e3%82%af%e3%82%b9%e6%b1%ba%e5%8b%9d%e7%b7%a8'>カードファイト!! ヴァンガード Divinez デラックス決勝編</a>
+<a class='btn' href='search_all.html?q=%e3%82%ab%e3%83%bc%e3%83%89%e3%83%95%e3%82%a1%e3%82%a4%e3%83%88!!+%e3%83%b4%e3%82%a1%e3%83%b3%e3%82%ac%e3%83%bc%e3%83%89+overDress'>カードファイト!! ヴァンガード overDress</a>
+<a class='btn' href='search_all.html?q=%e3%82%ab%e3%83%bc%e3%83%89%e3%83%95%e3%82%a1%e3%82%a4%e3%83%88!!+%e3%83%b4%e3%82%a1%e3%83%b3%e3%82%ac%e3%83%bc%e3%83%89+will%2bDress'>カードファイト!! ヴァンガード will+Dress</a>
+<a class='btn' href='search_all.html?q=%e3%82%ab%e3%83%bc%e3%83%89%e3%83%95%e3%82%a1%e3%82%a4%e3%83%88!!+%e3%83%b4%e3%82%a1%e3%83%b3%e3%82%ac%e3%83%bc%e3%83%89+%e3%83%aa%e3%83%b3%e3%82%af%e3%82%b8%e3%83%a7%e3%83%bc%e3%82%ab%e3%83%bc%e7%b7%a8'>カードファイト!! ヴァンガード リンクジョーカー編</a>
+<a class='btn' href='search_all.html?q=%e3%82%ab%e3%83%bc%e3%83%89%e3%83%95%e3%82%a1%e3%82%a4%e3%83%88!!+%e3%83%b4%e3%82%a1%e3%83%b3%e3%82%ac%e3%83%bc%e3%83%89+%e3%83%ac%e3%82%ae%e3%82%aa%e3%83%b3%e3%83%a1%e3%82%a4%e3%83%88%e7%b7%a8'>カードファイト!! ヴァンガード レギオンメイト編</a>
+<a class='btn' href='search_all.html?q=%e3%82%ab%e3%83%bc%e3%83%89%e3%83%95%e3%82%a1%e3%82%a4%e3%83%88!!+%e3%83%b4%e3%82%a1%e3%83%b3%e3%82%ac%e3%83%bc%e3%83%89+%e5%a4%96%e4%bc%9d+%e3%82%a4%e3%83%95-if-'>カードファイト!! ヴァンガード 外伝 イフ-if-</a>
+<a class='btn' href='search_all.html?q=%e3%82%ab%e3%83%bc%e3%83%89%e3%83%95%e3%82%a1%e3%82%a4%e3%83%88!!+%e3%83%b4%e3%82%a1%e3%83%b3%e3%82%ac%e3%83%bc%e3%83%89+%e6%96%b0%e5%8f%b3%e8%a1%9b%e9%96%80%e7%b7%a8'>カードファイト!! ヴァンガード 新右衛門編</a>
+<a class='btn' href='search_all.html?q=%e3%82%ab%e3%83%bc%e3%83%89%e3%83%95%e3%82%a1%e3%82%a4%e3%83%88!!+%e3%83%b4%e3%82%a1%e3%83%b3%e3%82%ac%e3%83%bc%e3%83%89(%e7%b6%9a%e3%83%bb%e9%ab%98%e6%a0%a1%e7%94%9f%e7%b7%a8)'>カードファイト!! ヴァンガード(続・高校生編)</a>
+<a class='btn' href='search_all.html?q=%e3%82%ab%e3%83%bc%e3%83%89%e3%83%95%e3%82%a1%e3%82%a4%e3%83%88!!+%e3%83%b4%e3%82%a1%e3%83%b3%e3%82%ac%e3%83%bc%e3%83%89G'>カードファイト!! ヴァンガードG</a>
+<a class='btn' href='search_all.html?q=%e3%82%ab%e3%83%bc%e3%83%89%e3%83%95%e3%82%a1%e3%82%a4%e3%83%88!!+%e3%83%b4%e3%82%a1%e3%83%b3%e3%82%ac%e3%83%bc%e3%83%89G+NEXT'>カードファイト!! ヴァンガードG NEXT</a>
+<a class='btn' href='search_all.html?q=%e3%82%ab%e3%83%bc%e3%83%89%e3%83%95%e3%82%a1%e3%82%a4%e3%83%88!!+%e3%83%b4%e3%82%a1%e3%83%b3%e3%82%ac%e3%83%bc%e3%83%89G+Z'>カードファイト!! ヴァンガードG Z</a>
+<a class='btn' href='search_all.html?q=%e3%82%ab%e3%83%bc%e3%83%89%e3%83%95%e3%82%a1%e3%82%a4%e3%83%88!!+%e3%83%b4%e3%82%a1%e3%83%b3%e3%82%ac%e3%83%bc%e3%83%89G+%e3%82%ae%e3%82%a2%e3%83%bc%e3%82%b9%e3%82%af%e3%83%a9%e3%82%a4%e3%82%b7%e3%82%b9%e7%b7%a8'>カードファイト!! ヴァンガードG ギアースクライシス編</a>
+<a class='btn' href='search_all.html?q=%e3%82%ab%e3%83%bc%e3%83%89%e3%83%95%e3%82%a1%e3%82%a4%e3%83%88!!+%e3%83%b4%e3%82%a1%e3%83%b3%e3%82%ac%e3%83%bc%e3%83%89G+%e3%82%b9%e3%83%88%e3%83%a9%e3%82%a4%e3%83%89%e3%82%b2%e3%83%bc%e3%83%88%e7%b7%a8'>カードファイト!! ヴァンガードG ストライドゲート編</a>
+<a class='btn' href='search_all.html?q=%e3%82%ab%e3%83%bc%e3%83%89%e3%83%95%e3%82%a1%e3%82%a4%e3%83%88%ef%bc%81%ef%bc%81%e3%83%b4%e3%82%a1%e3%83%b3%e3%82%ac%e3%83%bc%e3%83%89'>カードファイト！！ヴァンガード</a>
+<a class='btn' href='search_all.html?q=%e3%82%ab%e3%83%bc%e3%83%89%e3%83%95%e3%82%a1%e3%82%a4%e3%83%88!!%e3%83%b4%e3%82%a1%e3%83%b3%e3%82%ac%e3%83%bc%e3%83%89+%e6%96%b0%e5%8f%b3%e8%a1%9b%e9%96%80%e7%b7%a8'>カードファイト!!ヴァンガード 新右衛門編</a>
+<a class='btn' href='search_all.html?q=%e3%82%ab%e3%83%bc%e3%83%89%e3%83%95%e3%82%a1%e3%82%a4%e3%83%88%e3%83%b4%e3%82%a1%e3%83%b3%e3%82%ac%e3%83%bc%e3%83%89(2018)'>カードファイトヴァンガード(2018)</a>
+<a class='btn' href='search_all.html?q=%e3%82%ab%e3%83%bc%e3%83%8b%e3%83%b4%e3%82%a1%e3%83%ab'>カーニヴァル</a>
+<a class='btn' href='search_all.html?q=%e3%82%ab%e3%83%bc%e3%83%8b%e3%83%90%e3%83%ab%e3%83%bb%e3%83%95%e3%82%a1%e3%83%b3%e3%82%bf%e3%82%ba%e3%83%a0'>カーニバル・ファンタズム</a>
+<a class='btn' href='search_all.html?q=%e3%82%ab%e3%83%bc%e3%83%8b%e3%83%90%e3%83%ab%e3%83%95%e3%82%a1%e3%83%b3%e3%82%bf%e3%82%b9%e3%83%a0'>カーニバルファンタスム</a>
+<a class='btn' href='search_all.html?q=%e3%82%ac%e3%83%bc%e3%83%8d%e3%83%83%e3%83%88%e3%83%bb%e3%82%af%e3%83%ac%e3%82%a4%e3%83%89%e3%83%ab'>ガーネット・クレイドル</a>
+<a class='btn' href='search_all.html?q=%e3%82%ab%e3%83%bc%e3%83%93%e3%82%a3%e3%81%ae%e3%82%a8%e3%82%a2%e3%83%a9%e3%82%a4%e3%83%80%e3%83%bc'>カービィのエアライダー</a>
+<a class='btn' href='search_all.html?q=%e3%82%ac%e3%83%bc%e3%83%aa%e3%83%bc%e3%83%bb%e3%82%a8%e3%82%a2%e3%83%95%e3%82%a9%e3%83%bc%e3%82%b9'>ガーリー・エアフォース</a>
+<a class='btn' href='search_all.html?q=%e3%82%ac%e3%83%bc%e3%83%aa%e3%83%83%e3%82%b7%e3%83%a5+%e3%83%8a%e3%83%b3%e3%83%90%e3%83%bc'>ガーリッシュ ナンバー</a>
+<a class='btn' href='search_all.html?q=%e3%82%ac%e3%83%bc%e3%83%aa%e3%83%83%e3%82%b7%e3%83%a5%e3%83%8a%e3%83%b3%e3%83%90%e3%83%bc'>ガーリッシュナンバー</a>
+<a class='btn' href='search_all.html?q=%e3%82%ac%e3%83%bc%e3%83%ab%e3%82%ba%ef%bc%86%e3%83%91%e3%83%b3%e3%83%84%e3%82%a1%e3%83%bc'>ガールズ＆パンツァー</a>
+<a class='btn' href='search_all.html?q=%e3%82%ac%e3%83%bc%e3%83%ab%e3%82%ba%26%e3%83%91%e3%83%b3%e3%83%84%e3%82%a1%e3%83%bc+%e6%9c%80%e7%b5%82%e7%ab%a0'>ガールズ&amp;パンツァー 最終章</a>
+<a class='btn' href='search_all.html?q=%e3%82%ac%e3%83%bc%e3%83%ab%e3%82%ba%ef%bc%86%e3%83%91%e3%83%b3%e3%83%84%e3%82%a1%e3%83%bc+%e6%9c%80%e7%b5%82%e7%ab%a0'>ガールズ＆パンツァー 最終章</a>
+<a class='btn' href='search_all.html?q=%e3%82%ac%e3%83%bc%e3%83%ab%e3%82%ba%26%e3%83%91%e3%83%b3%e3%83%84%e3%82%a1%e3%83%bc+%e6%9c%80%e7%b5%82%e7%ab%a0+1-3%e8%a9%b1OP'>ガールズ&amp;パンツァー 最終章 1-3話OP</a>
+<a class='btn' href='search_all.html?q=%e3%82%ac%e3%83%bc%e3%83%ab%e3%82%ba%ef%bc%86%e3%83%91%e3%83%b3%e3%83%84%e3%82%a1%e3%83%bc%e6%9c%80%e7%b5%82%e7%ab%a0%ef%bc%88%ef%bc%91%e7%ab%a0%e3%83%bb%ef%bc%92%e7%ab%a0%e6%8c%af%e3%82%8a%e8%bf%94%e3%82%8a%e7%89%88%ef%bc%89OP'>ガールズ＆パンツァー最終章（１章・２章振り返り版）OP</a>
+<a class='btn' href='search_all.html?q=%e3%82%ac%e3%83%bc%e3%83%ab%e3%82%ba%ef%bc%86%e3%83%91%e3%83%b3%e3%83%84%e3%82%a1%e3%83%bc%e6%9c%80%e7%b5%82%e7%ab%a0%ef%bc%88%ef%bc%91%e8%a9%b1%ef%bd%9e3%e8%a9%b1%ef%bc%89%ef%bc%af%ef%bc%b0'>ガールズ＆パンツァー最終章（１話～3話）ＯＰ</a>
+<a class='btn' href='search_all.html?q=%e3%82%ac%e3%83%bc%e3%83%ab%e3%82%ba%26%e3%83%91%e3%83%b3%e3%83%84%e3%82%a1%e3%83%bc%e6%9c%80%e7%b5%82%e7%ab%a0%e4%b8%bb%e9%a1%8c%e6%ad%8c'>ガールズ&amp;パンツァー最終章主題歌</a>
+<a class='btn' href='search_all.html?q=%e3%82%ac%e3%83%bc%e3%83%ab%e3%82%ba%e3%83%bb%e3%83%96%e3%83%83%e3%82%af%e3%83%bb%e3%83%a1%e3%82%a4%e3%82%ab%e3%83%bc+-%e5%b9%b8%e3%81%9b%e3%81%ae%e3%83%aa%e3%83%96%e3%83%ac%e3%83%83%e3%83%88-'>ガールズ・ブック・メイカー -幸せのリブレット-</a>
+<a class='btn' href='search_all.html?q=%e3%82%ac%e3%83%bc%e3%83%ab%e3%82%ba%e3%83%90%e3%83%b3%e3%83%89%e3%82%af%e3%83%a9%e3%82%a4'>ガールズバンドクライ</a>
+<a class='btn' href='search_all.html?q=%e3%82%ac%e3%83%bc%e3%83%ab%e3%82%ba%e3%83%90%e3%83%b3%e3%83%89%e3%82%af%e3%83%a9%e3%82%a4+CD+1'>ガールズバンドクライ CD 1</a>
+<a class='btn' href='search_all.html?q=%e3%82%ac%e3%83%bc%e3%83%ab%e3%82%ba%e3%83%90%e3%83%b3%e3%83%89%e3%82%af%e3%83%a9%e3%82%a4+CD2'>ガールズバンドクライ CD2</a>
+<a class='btn' href='search_all.html?q=%e3%82%ac%e3%83%bc%e3%83%ab%e3%82%ba%e3%83%90%e3%83%b3%e3%83%89%e3%82%af%e3%83%a9%e3%82%a4+CD3'>ガールズバンドクライ CD3</a>
+<a class='btn' href='search_all.html?q=%e3%82%ac%e3%83%bc%e3%83%ab%e3%82%ba%e3%83%90%e3%83%b3%e3%83%89%e3%82%af%e3%83%a9%e3%82%a4+CD4'>ガールズバンドクライ CD4</a>
+<a class='btn' href='search_all.html?q=%e3%82%ac%e3%83%bc%e3%83%ab%e3%82%ba%e3%83%90%e3%83%b3%e3%83%89%e3%82%af%e3%83%a9%e3%82%a4+ED'>ガールズバンドクライ ED</a>
+<a class='btn' href='search_all.html?q=%e3%82%ac%e3%83%bc%e3%83%ab%e3%82%ba%e3%83%90%e3%83%b3%e3%83%89%e3%82%af%e3%83%a9%e3%82%a4+OP'>ガールズバンドクライ OP</a>
+<a class='btn' href='search_all.html?q=%e3%82%ac%e3%83%bc%e3%83%ab%e3%82%ba%e3%83%90%e3%83%b3%e3%83%89%e3%82%af%e3%83%a9%e3%82%a4+%e7%ac%ac11%e8%a9%b1%e6%8c%bf%e5%85%a5%e6%ad%8c'>ガールズバンドクライ 第11話挿入歌</a>
+<a class='btn' href='search_all.html?q=%e3%82%ac%e3%83%bc%e3%83%ab%e3%82%ba%e3%83%90%e3%83%b3%e3%83%89%e3%82%af%e3%83%a9%e3%82%a4+%e7%ac%ac13%e8%a9%b1%e6%8c%bf%e5%85%a5%e6%ad%8c'>ガールズバンドクライ 第13話挿入歌</a>
+<a class='btn' href='search_all.html?q=%e3%82%ac%e3%83%bc%e3%83%ab%e3%82%ba%e3%83%90%e3%83%b3%e3%83%89%e3%82%af%e3%83%a9%e3%82%a4+%e7%ac%ac1%e8%a9%b1%e6%8c%bf%e5%85%a5%e6%ad%8c'>ガールズバンドクライ 第1話挿入歌</a>
+<a class='btn' href='search_all.html?q=%e3%82%ac%e3%83%bc%e3%83%ab%e3%82%ba%e3%83%90%e3%83%b3%e3%83%89%e3%82%af%e3%83%a9%e3%82%a4+%e7%ac%ac3%e8%a9%b1%e6%8c%bf%e5%85%a5%e6%ad%8c'>ガールズバンドクライ 第3話挿入歌</a>
+<a class='btn' href='search_all.html?q=%e3%82%ac%e3%83%bc%e3%83%ab%e3%82%ba%e3%83%90%e3%83%b3%e3%83%89%e3%82%af%e3%83%a9%e3%82%a4+%e7%ac%ac5%e8%a9%b1%e6%8c%bf%e5%85%a5%e6%ad%8c'>ガールズバンドクライ 第5話挿入歌</a>
+<a class='btn' href='search_all.html?q=%e3%82%ac%e3%83%bc%e3%83%ab%e3%82%ba%e3%83%90%e3%83%b3%e3%83%89%e3%82%af%e3%83%a9%e3%82%a4+%e7%ac%ac7%e8%a9%b1%e6%8c%bf%e5%85%a5%e6%ad%8c'>ガールズバンドクライ 第7話挿入歌</a>
+<a class='btn' href='search_all.html?q=%e3%82%ac%e3%83%bc%e3%83%ab%e3%82%ba%e3%83%90%e3%83%b3%e3%83%89%e3%82%af%e3%83%a9%e3%82%a4_MV%e7%89%88'>ガールズバンドクライ_MV版</a>
+<a class='btn' href='search_all.html?q=%e3%82%ac%e3%83%bc%e3%83%ab%e3%82%ba%e3%83%90%e3%83%b3%e3%83%89%e3%82%af%e3%83%a9%e3%82%a4%e3%83%bb%e3%83%88%e3%82%b2%e3%83%8a%e3%82%b7%e3%83%88%e3%82%b2%e3%82%a2%e3%83%aa'>ガールズバンドクライ・トゲナシトゲアリ</a>
+<a class='btn' href='search_all.html?q=%e3%82%ac%e3%83%bc%e3%83%ab%e3%83%95%e3%83%ac%e3%83%b3%e3%83%89(%e4%bb%ae)'>ガールフレンド(仮)</a>
+<a class='btn' href='search_all.html?q=%e3%82%ac%e3%83%bc%e3%83%ab%e3%83%95%e3%83%ac%e3%83%b3%e3%83%89%ef%bc%88%e4%bb%ae%ef%bc%89'>ガールフレンド（仮）</a>
+<a class='btn' href='search_all.html?q=%e3%82%ac%e3%82%a4%e3%82%b3%e3%83%84%e6%9b%b8%e5%ba%97%e5%93%a1+%e6%9c%ac%e7%94%b0%e3%81%95%e3%82%93'>ガイコツ書店員 本田さん</a>
+<a class='btn' href='search_all.html?q=%e3%81%8c%e3%81%84%e3%81%b0%e3%83%bc%e3%81%95%e3%82%93'>がいばーさん</a>
+<a class='btn' href='search_all.html?q=%e3%82%ab%e3%82%a6%e3%83%9c%e3%83%bc%e3%82%a4%e3%83%93%e3%83%90%e3%83%83%e3%83%97%e3%83%bb%e5%bd%b1%e5%b1%b1%e3%83%92%e3%83%ad%e3%83%8e%e3%83%96(%e3%82%ab%e3%83%90%e3%83%bc)'>カウボーイビバップ・影山ヒロノブ(カバー)</a>
+<a class='btn' href='search_all.html?q=%e3%82%ab%e3%82%a6%e3%83%9c%e3%83%bc%e3%82%a4%e3%83%93%e3%83%90%e3%83%83%e3%83%97%e3%83%bb%e5%b1%b1%e6%a0%b9%e9%ba%bb%e8%a1%a3'>カウボーイビバップ・山根麻衣</a>
+<a class='btn' href='search_all.html?q=%e3%82%ac%e3%82%a6%e3%83%aa%e3%83%bc%e3%83%ab%e3%83%89%e3%83%ad%e3%83%83%e3%83%97%e3%82%a2%e3%82%a6%e3%83%88'>ガウリールドロップアウト</a>
+<a class='btn' href='search_all.html?q=%e3%82%ac%e3%83%b4%e3%83%aa%e3%83%bc%e3%83%ab%e3%83%89%e3%83%ad%e3%83%83%e3%83%97%e3%82%a2%e3%82%a6%e3%83%88'>ガヴリールドロップアウト</a>
+<a class='btn' href='search_all.html?q=%e3%81%8b%e3%81%88%e3%81%97%e3%81%a6%ef%bc%81%e3%83%8b%e3%83%bc%e3%82%bd%e3%83%83%e3%82%af%e3%82%b9%ef%bc%8f%e6%b3%89%e3%81%93%e3%81%aa%e3%81%9f%e3%83%bb%e6%9f%8a%e3%81%8b%e3%81%8c%e3%81%bf%e3%83%bb%e6%9f%8a%e3%81%a4%e3%81%8b%e3%81%95%e9%ab%98%e8%89%af%e3%81%bf%e3%82%86%e3%81%8d'>かえして！ニーソックス／泉こなた・柊かがみ・柊つかさ高良みゆき</a>
+<a class='btn' href='search_all.html?q=%e3%82%ab%e3%82%a8%e3%83%ab%e7%8e%8b%e5%ad%90%e3%81%a8%e3%81%84%e3%82%82%e3%82%80%e3%81%97%e3%83%98%e3%83%b3%e3%83%aa%e3%83%bc'>カエル王子といもむしヘンリー</a>
+<a class='btn' href='search_all.html?q=%e3%82%ab%e3%82%a8%e3%83%ab%e7%95%91%ef%bc%a4%ef%bc%a5%e3%81%a4%e3%81%8b%e3%81%be%e3%81%88%e3%81%a6'>カエル畑ＤＥつかまえて</a>
+<a class='btn' href='search_all.html?q=%e3%82%ab%e3%82%aa%e3%82%b9%e3%82%a6%e3%82%a9%e3%83%bc%e3%82%ba'>カオスウォーズ</a>
+<a class='btn' href='search_all.html?q=%e3%82%ab%e3%82%aa%e3%82%b9%e3%82%b7%e3%83%b3%e3%83%89%e3%83%ad%e3%83%bc%e3%83%a0%ef%bc%8f%e9%88%b4%e6%9c%a8%e3%81%93%e3%81%ae%e3%81%bf'>カオスシンドローム／鈴木このみ</a>
+<a class='btn' href='search_all.html?q=%e3%81%8b%e3%81%8f%e3%81%97%e3%81%a6!%e3%83%9e%e3%82%ad%e3%83%8a%e3%81%95%e3%82%93!!+OP'>かくして!マキナさん!! OP</a>
+<a class='btn' href='search_all.html?q=%e3%81%8b%e3%81%8f%e3%81%97%e3%81%a6%e3%81%aa%e3%81%84%e7%89%88'>かくしてない版</a>
+<a class='btn' href='search_all.html?q=%e3%81%8c%e3%81%8f%e3%81%a8!'>がくと!</a>
+<a class='btn' href='search_all.html?q=%e3%81%8b%e3%81%90%e3%82%84%e6%a7%98%e3%81%af%e5%91%8a%e3%82%89%e3%81%9b%e3%81%9f%e3%81%84%ef%bd%9e%e5%a4%a9%e6%89%8d%e3%81%9f%e3%81%a1%e3%81%ae%e6%81%8b%e6%84%9b%e9%a0%ad%e8%84%b3%e6%88%a6%ef%bd%9e'>かぐや様は告らせたい～天才たちの恋愛頭脳戦～</a>
+<a class='btn' href='search_all.html?q=%e3%81%8b%e3%81%90%e3%82%84%e6%a7%98%e3%81%af%e5%91%8a%e3%82%89%e3%81%9b%e3%81%9f%e3%81%84-%e3%82%a6%e3%83%ab%e3%83%88%e3%83%a9%e3%83%ad%e3%83%9e%e3%83%b3%e3%83%86%e3%82%a3%e3%83%83%e3%82%af-+%e6%8c%bf%e5%85%a5%e6%ad%8c'>かぐや様は告らせたい-ウルトラロマンティック- 挿入歌</a>
+<a class='btn' href='search_all.html?q=%e3%81%8b%e3%81%8f%e3%82%8a%e3%82%88%e3%81%ae%e5%ae%bf%e9%a3%af+%e5%bc%90+OP'>かくりよの宿飯 弐 OP</a>
+<a class='btn' href='search_all.html?q=%e3%81%8b%e3%81%92%e3%81%8d%e3%81%97%e3%82%87%e3%81%86%e3%81%98%e3%82%87!!'>かげきしょうじょ!!</a>
+<a class='btn' href='search_all.html?q=%e3%81%8b%e3%81%92%e3%81%8d%e3%81%97%e3%82%87%e3%81%86%e3%81%98%e3%82%87!!+4%e8%a9%b1ED'>かげきしょうじょ!! 4話ED</a>
+<a class='btn' href='search_all.html?q=%e3%81%8b%e3%81%92%e3%81%8d%e3%81%97%e3%82%87%e3%81%86%e3%81%98%e3%82%87!!+8%2c9%e8%a9%b1ED'>かげきしょうじょ!! 8,9話ED</a>
+<a class='btn' href='search_all.html?q=%e3%81%8b%e3%81%92%e3%81%8d%e3%81%97%e3%82%87%e3%81%86%e3%81%98%e3%82%87!!+ED'>かげきしょうじょ!! ED</a>
+<a class='btn' href='search_all.html?q=%e3%81%8b%e3%81%92%e3%81%8d%e3%81%97%e3%82%87%e3%81%86%e3%81%98%e3%82%87!!+OP_%e6%9c%80%e7%b5%8213%e8%a9%b1%e7%89%88'>かげきしょうじょ!! OP_最終13話版</a>
+<a class='btn' href='search_all.html?q=%e3%82%ab%e3%82%b6%e3%83%8f%e3%83%8d%ef%bc%8f%e9%9c%9c%e6%9c%88%e3%81%af%e3%82%8b%e3%81%8b'>カザハネ／霜月はるか</a>
+<a class='btn' href='search_all.html?q=%e3%81%8b%e3%81%97%e3%81%be%e3%81%97%ef%bd%9e%e3%82%ac%e3%83%bc%e3%83%ab%ef%bd%a5%e3%83%9f%e3%83%83%e3%83%84%ef%bd%a5%e3%82%ac%e3%83%bc%e3%83%ab%ef%bd%9e'>かしまし～ガール･ミッツ･ガール～</a>
+<a class='btn' href='search_all.html?q=%e3%82%ab%e3%82%b9%e3%82%bf%e3%83%a0%e3%82%aa%e3%83%bc%e3%83%80%e3%83%bc%e3%83%a1%e3%82%a4%e3%83%893D2'>カスタムオーダーメイド3D2</a>
+<a class='btn' href='search_all.html?q=%e3%82%ac%e3%82%b9%e3%83%88'>ガスト</a>
+<a class='btn' href='search_all.html?q=%e3%82%ab%e3%82%b9%e3%83%9f%e3%83%b3'>カスミン</a>
+<a class='btn' href='search_all.html?q=%e3%81%8b%e3%81%9f%e3%81%a1%ef%bc%8f%e5%ae%89%e6%9c%88%e5%90%8d%e8%8e%89%e5%ad%90'>かたち／安月名莉子</a>
+<a class='btn' href='search_all.html?q=%e3%81%8b%e3%81%9f%e3%82%8a%e3%81%a4%e3%81%90%e6%84%9b_%e8%96%ac%e5%b8%ab%e4%b8%b8%e3%81%b2%e3%82%8d%e5%ad%90'>かたりつぐ愛_薬師丸ひろ子</a>
+<a class='btn' href='search_all.html?q=%e3%82%ac%e3%83%81%e3%82%a2%e3%82%af%e3%82%bf+ED'>ガチアクタ ED</a>
+<a class='btn' href='search_all.html?q=%e3%81%8c%e3%81%a3%e3%81%93%e3%81%86%e3%81%90%e3%82%89%e3%81%97!'>がっこうぐらし!</a>
+<a class='btn' href='search_all.html?q=%e3%81%8c%e3%81%a3%e3%81%93%e3%81%86%e3%81%90%e3%82%89%e3%81%97%ef%bc%81'>がっこうぐらし！</a>
+<a class='btn' href='search_all.html?q=%e3%82%ab%e3%83%83%e3%82%b3%e3%82%a6%e3%81%ae%e8%a8%b1%e5%ab%81'>カッコウの許嫁</a>
+<a class='btn' href='search_all.html?q=%e3%82%ab%e3%83%83%e3%82%b3%e3%82%a6%e3%81%ae%e8%a8%b1%e5%ab%81+ED'>カッコウの許嫁 ED</a>
+<a class='btn' href='search_all.html?q=%e3%82%ab%e3%83%83%e3%82%b3%e3%82%a6%e3%81%ae%e8%a8%b1%e5%ab%81+Season2+ED'>カッコウの許嫁 Season2 ED</a>
+<a class='btn' href='search_all.html?q=%e3%82%ab%e3%83%83%e3%82%b3%e3%82%a6%e3%81%ae%e8%a8%b1%e5%a9%9a'>カッコウの許婚</a>
+<a class='btn' href='search_all.html?q=%e3%82%ac%e3%83%83%e3%83%81%e3%83%a3%e3%83%9e%e3%83%b3%e3%82%af%e3%83%a9%e3%82%a6%e3%82%ba'>ガッチャマンクラウズ</a>
+<a class='btn' href='search_all.html?q=%e3%82%ac%e3%83%83%e3%83%81%e3%83%a3%e3%83%9e%e3%83%b3%e3%82%af%e3%83%a9%e3%82%a6%e3%82%ba%e3%82%a4%e3%83%b3%e3%82%b5%e3%82%a4%e3%83%88'>ガッチャマンクラウズインサイト</a>
+<a class='btn' href='search_all.html?q=%e3%81%8b%e3%81%a3%e3%81%a6%e3%81%ab%e6%a1%83%e5%a4%a9%e4%bd%bf'>かってに桃天使</a>
+<a class='btn' href='search_all.html?q=%e3%81%8b%e3%81%a4%e3%81%a6%e7%a5%9e%e3%81%a0%e3%81%a3%e3%81%9f%e7%8d%a3%e3%81%9f%e3%81%a1%e3%81%b8'>かつて神だった獣たちへ</a>
+<a class='btn' href='search_all.html?q=%e3%81%8b%e3%81%a4%e3%81%a6%e9%ad%94%e6%b3%95%e5%b0%91%e5%a5%b3%e3%81%a8%e6%82%aa%e3%81%af%e6%95%b5%e5%af%be%e3%81%97%e3%81%a6%e3%81%84%e3%81%9f%e3%80%82'>かつて魔法少女と悪は敵対していた。</a>
+<a class='btn' href='search_all.html?q=%e3%82%ab%e3%83%8a%e3%82%bf%e3%83%8f%e3%83%ab%e3%82%ab%ef%bc%8fRADWIMPS'>カナタハルカ／RADWIMPS</a>
+<a class='btn' href='search_all.html?q=%e3%81%8b%e3%81%aa%e3%82%81%e3%82%82'>かなめも</a>
+<a class='btn' href='search_all.html?q=%e3%82%ab%e3%83%8c%e3%83%81'>カヌチ</a>
+<a class='btn' href='search_all.html?q=%e3%82%ab%e3%83%8e%e3%82%a8%e3%83%a9%e3%83%8a'>カノエラナ</a>
+<a class='btn' href='search_all.html?q=%e3%81%8b%e3%81%ae%e3%81%93%e3%82%93'>かのこん</a>
+<a class='btn' href='search_all.html?q=%e3%81%8b%e3%81%ae%e3%81%93%e3%82%93+%ef%bd%9e%e7%9c%9f%e5%a4%8f%e3%81%ae%e5%a4%a7%e8%ac%9d%e8%82%89%e7%a5%ad%ef%bd%9e'>かのこん ～真夏の大謝肉祭～</a>
+<a class='btn' href='search_all.html?q=%e3%82%ab%e3%83%8e%e3%82%b8%e3%83%a7%e3%82%82%e5%bd%bc%e5%a5%b3'>カノジョも彼女</a>
+<a class='btn' href='search_all.html?q=%e3%82%ab%e3%83%90%e3%83%bc%e3%82%ab%e3%83%a9%e3%82%aa%e3%82%b1'>カバーカラオケ</a>
+<a class='btn' href='search_all.html?q=%e3%82%ab%e3%83%90%e3%83%bc%e3%82%bd%e3%83%b3%e3%82%b0'>カバーソング</a>
+<a class='btn' href='search_all.html?q=%e3%82%ab%e3%83%96%e3%82%ad%e3%83%96!'>カブキブ!</a>
+<a class='btn' href='search_all.html?q=%e3%82%ab%e3%83%9f%e3%82%ab%e3%82%bc%e2%98%86%e3%82%a8%e3%82%af%e3%82%b9%e3%83%97%e3%83%ad%e3%83%bc%e3%83%a9%e3%83%bc%ef%bc%81'>カミカゼ☆エクスプローラー！</a>
+<a class='btn' href='search_all.html?q=%e3%81%8b%e3%81%bf%e3%81%95%e3%81%be%e3%81%bf%e3%81%aa%e3%82%89%e3%81%84+%e3%83%92%e3%83%9f%e3%83%84%e3%81%ae%e3%81%93%e3%81%93%e3%81%9f%e3%81%be'>かみさまみならい ヒミツのここたま</a>
+<a class='btn' href='search_all.html?q=%e3%81%8b%e3%81%bf%e3%81%a1%e3%82%83%e3%81%be%ef%bc%81%e3%81%8b%e3%82%8a%e3%82%93'>かみちゃま！かりん</a>
+<a class='btn' href='search_all.html?q=%e3%81%8b%e3%81%bf%e3%81%a1%e3%82%85'>かみちゅ</a>
+<a class='btn' href='search_all.html?q=%e3%82%ab%e3%83%a9%e3%82%aa%e3%82%b1'>カラオケ</a>
+<a class='btn' href='search_all.html?q=%e3%82%ab%e3%83%a9%e3%82%aa%e3%82%b1%e8%a1%8c%e3%81%93%ef%bc%81'>カラオケ行こ！</a>
+<a class='btn' href='search_all.html?q=%e3%82%ab%e3%83%a9%e3%82%aa%e3%82%b1%e5%ad%97%e5%b9%95%e4%bb%98%e3%81%8d%e3%81%ae%e6%a5%bd%e6%9b%b2%e5%8b%95%e7%94%bb%e3%81%ae%e4%bd%9c%e3%82%8a%e6%96%b9_%e7%b4%a0%e6%9d%90%e3%81%9f%e3%81%a1'>カラオケ字幕付きの楽曲動画の作り方_素材たち</a>
+<a class='btn' href='search_all.html?q=%e3%82%ab%e3%83%a9%e3%82%aa%e3%82%b1%e5%8b%95%e7%94%bb+-+%e5%ae%ae%e5%86%85%e3%82%bf%e3%82%ab%e3%83%a6%e3%82%ad'>カラオケ動画 - 宮内タカユキ</a>
+<a class='btn' href='search_all.html?q=%e3%82%ab%e3%83%a9%e3%82%aa%e3%82%b1%e5%8b%95%e7%94%bb+-+%e7%9f%b3%e5%8e%9f%e6%85%8e%e4%b8%80'>カラオケ動画 - 石原慎一</a>
+<a class='btn' href='search_all.html?q=%e3%81%8b%e3%82%89%e3%81%8b%e3%81%84%e4%b8%8a%e6%89%8b%e3%81%ae%e9%ab%98%e6%9c%a8%e3%81%95%e3%82%93'>からかい上手の高木さん</a>
+<a class='btn' href='search_all.html?q=%e3%81%8b%e3%82%89%e3%81%8b%e3%81%84%e4%b8%8a%e6%89%8b%e3%81%ae%e9%ab%98%e6%9c%a8%e3%81%95%e3%82%932'>からかい上手の高木さん2</a>
+<a class='btn' href='search_all.html?q=%e3%81%8b%e3%82%89%e3%81%8b%e3%81%84%e4%b8%8a%e6%89%8b%e3%81%ae%e9%ab%98%e6%9c%a8%e3%81%95%e3%82%933+ED'>からかい上手の高木さん3 ED</a>
+<a class='btn' href='search_all.html?q=%e3%81%8b%e3%82%89%e3%81%8b%e3%81%84%e4%b8%8a%e6%89%8b%e3%81%ae%e9%ab%98%e6%9c%a8%e3%81%95%e3%82%933+OP'>からかい上手の高木さん3 OP</a>
+<a class='btn' href='search_all.html?q=%e3%81%8b%e3%82%89%e3%81%8f%e3%82%8a%e5%89%a3%e8%b1%aa%e4%bc%9d%e3%83%a0%e3%82%b5%e3%82%b7%e3%83%ad%e3%83%bc%e3%83%89'>からくり剣豪伝ムサシロード</a>
+<a class='btn' href='search_all.html?q=%e3%82%ac%e3%83%a9%e3%82%b9%e3%81%ae%e8%89%a6%e9%9a%8a'>ガラスの艦隊</a>
+<a class='btn' href='search_all.html?q=%e3%82%ab%e3%83%a9%e3%82%b9%e3%83%a4%e3%82%b5%e3%83%9c%e3%82%a6'>カラスヤサボウ</a>
+<a class='btn' href='search_all.html?q=%e3%82%ab%e3%83%a9%e3%82%b9%e5%a4%a9%e7%8b%97%e3%82%ab%e3%83%96%e3%83%88'>カラス天狗カブト</a>
+<a class='btn' href='search_all.html?q=%e3%82%ab%e3%83%a9%e3%83%95%e3%83%ab+%ef%bc%8f+ClariS'>カラフル ／ ClariS</a>
+<a class='btn' href='search_all.html?q=%e3%82%ab%e3%83%a9%e3%83%95%e3%83%ab%ef%bc%8fClariS'>カラフル／ClariS</a>
+<a class='btn' href='search_all.html?q=%e3%82%ab%e3%83%a9%e3%83%95%e3%83%ab%ef%bc%8f%e6%b9%8a%e3%81%82%e3%81%8f%e3%81%82%ef%bc%86%e5%85%8e%e7%94%b0%e3%81%ba%e3%81%93%e3%82%89'>カラフル／湊あくあ＆兎田ぺこら</a>
+<a class='btn' href='search_all.html?q=%e3%81%8b%e3%82%8a%e3%81%90%e3%82%89%e3%81%97%e6%81%8b%e6%84%9b_OP'>かりぐらし恋愛_OP</a>
+<a class='btn' href='search_all.html?q=%e3%82%ac%e3%83%aa%e3%83%ac%e3%82%a4%e3%83%89%e3%83%b3%e3%83%8a'>ガリレイドンナ</a>
+<a class='btn' href='search_all.html?q=%e3%81%8b%e3%82%8a%e3%82%93'>かりん</a>
+<a class='btn' href='search_all.html?q=%e3%82%ac%e3%83%ab%e3%83%95%e3%82%a9%e3%83%bc%e3%82%b9+%e3%82%a8%e3%82%bf%e3%83%bc%e3%83%8a%e3%83%ab%e3%83%bb%e3%82%b9%e3%83%88%e3%83%bc%e3%83%aa%e3%83%bc'>ガルフォース エターナル・ストーリー</a>
+<a class='btn' href='search_all.html?q=%e3%82%ac%e3%83%ab%e3%83%95%e3%82%a9%e3%83%bc%e3%82%b9+%e5%9c%b0%e7%90%83%e7%ab%a01'>ガルフォース 地球章1</a>
+<a class='btn' href='search_all.html?q=%e3%82%ac%e3%83%ab%e3%83%95%e3%82%a9%e3%83%bc%e3%82%b9+%e5%9c%b0%e7%90%83%e7%ab%a02'>ガルフォース 地球章2</a>
+<a class='btn' href='search_all.html?q=%e3%82%ac%e3%83%ab%e3%83%95%e3%82%a9%e3%83%bc%e3%82%b9+%e5%9c%b0%e7%90%83%e7%ab%a03'>ガルフォース 地球章3</a>
+<a class='btn' href='search_all.html?q=%e3%82%ac%e3%83%ab%e3%83%95%e3%82%a9%e3%83%bc%e3%82%b92+%e3%83%87%e3%82%a3%e3%82%b9%e3%83%88%e3%83%a9%e3%82%af%e3%82%b7%e3%83%a7%e3%83%b3'>ガルフォース2 ディストラクション</a>
+<a class='btn' href='search_all.html?q=%e3%82%ac%e3%83%ab%e3%83%95%e3%82%a9%e3%83%bc%e3%82%b93+%5b%e5%ae%87%e5%ae%99%e7%ab%a0%e5%ae%8c%e7%b5%90%e7%af%87%5d+%e3%82%b9%e3%82%bf%e3%83%bc%e3%83%80%e3%82%b9%e3%83%88%e3%83%bb%e3%82%a6%e3%82%a9%e3%83%bc'>ガルフォース3 [宇宙章完結篇] スターダスト・ウォー</a>
+<a class='btn' href='search_all.html?q=%e3%82%ab%e3%83%ac%e3%82%a4%e3%83%89%e3%82%b9%e3%82%bf%e3%83%bc'>カレイドスター</a>
+<a class='btn' href='search_all.html?q=%e3%82%ab%e3%83%ad%e3%83%aa%e3%83%bc%e3%83%a1%e3%82%a4%e3%83%88CM%e3%83%bbOrangestar(%e3%83%8b%e3%82%b3%e3%82%ab%e3%83%a9)'>カロリーメイトCM・Orangestar(ニコカラ)</a>
+<a class='btn' href='search_all.html?q=%e3%82%ab%e3%83%af%e3%82%a4%e3%82%b9%e3%82%ae%e3%82%af%e3%83%a9%e3%82%a4%e3%82%b7%e3%82%b9'>カワイスギクライシス</a>
+<a class='btn' href='search_all.html?q=%e3%82%ac%e3%83%b3%c3%97%e3%82%bd%e3%83%bc%e3%83%89'>ガン&#215;ソード</a>
+<a class='btn' href='search_all.html?q=%e3%82%ac%e3%83%b3%e3%82%b2%e3%82%a4%e3%83%ab%e3%83%bb%e3%82%aa%e3%83%b3%e3%83%a9%e3%82%a4%e3%83%b3'>ガンゲイル・オンライン</a>
+<a class='btn' href='search_all.html?q=%e3%82%ab%e3%83%b3%e3%82%b6%e3%82%ad%e3%82%a4%e3%82%aa%e3%83%aa'>カンザキイオリ</a>
+<a class='btn' href='search_all.html?q=%e3%82%ab%e3%83%b3%e3%82%b6%e3%82%ad%e3%82%a4%e3%82%aa%e3%83%aa%ef%bc%bf%e5%8f%af%e4%b8%8d%ef%bc%8f%e8%8a%b1%e8%ad%9c'>カンザキイオリ＿可不／花譜</a>
+<a class='btn' href='search_all.html?q=%e3%82%ab%e3%83%b3%e3%82%b6%e3%82%ad%e3%82%a4%e3%82%aa%e3%83%aa%ef%bc%bf%e8%8a%b1%e8%ad%9c'>カンザキイオリ＿花譜</a>
+<a class='btn' href='search_all.html?q=%e3%82%ac%e3%83%b3%e3%82%b9%e3%83%aa%e3%83%b3%e3%82%ac%e3%83%bc+%e3%82%b9%e3%83%88%e3%83%a9%e3%83%88%e3%82%b9+%e3%83%aa%e3%83%ad%e3%83%bc%e3%83%87%e3%83%83%e3%83%89'>ガンスリンガー ストラトス リローデッド</a>
+<a class='btn' href='search_all.html?q=%e3%82%ac%e3%83%b3%e3%83%80%e3%83%a0+G%e3%81%ae%e3%83%ac%e3%82%b3%e3%83%b3%e3%82%ae%e3%82%b9%e3%82%bf'>ガンダム Gのレコンギスタ</a>
+<a class='btn' href='search_all.html?q=%e3%82%ac%e3%83%b3%e3%83%80%e3%83%a0UCMAD'>ガンダムUCMAD</a>
+<a class='btn' href='search_all.html?q=%e3%82%ac%e3%83%b3%e3%83%80%e3%83%a0%e3%81%95%e3%82%93%e9%9f%b3%e9%a0%ad%ef%bc%8f%e5%b0%8f%e8%a5%bf%e5%85%8b%e5%b9%b8%e3%80%81%e4%bb%a3%e6%b0%b8+%e7%bf%bc%e3%80%81%e7%bd%ae%e9%ae%8e%e9%be%8d%e5%a4%aa%e9%83%8e%e3%80%81%e8%88%88%e6%b4%a5%e5%92%8c%e5%b9%b8'>ガンダムさん音頭／小西克幸、代永 翼、置鮎龍太郎、興津和幸</a>
+<a class='btn' href='search_all.html?q=%e3%82%ac%e3%83%b3%e3%83%80%e3%83%a0%e3%83%93%e3%83%ab%e3%83%89%e3%83%80%e3%82%a4%e3%83%90%e3%83%bc%e3%82%ba'>ガンダムビルドダイバーズ</a>
+<a class='btn' href='search_all.html?q=%e3%82%ac%e3%83%b3%e3%83%80%e3%83%a0%e3%83%93%e3%83%ab%e3%83%89%e3%83%80%e3%82%a4%e3%83%90%e3%83%bc%e3%82%baRe%ef%bc%9aRISE'>ガンダムビルドダイバーズRe：RISE</a>
+<a class='btn' href='search_all.html?q=%e3%82%ac%e3%83%b3%e3%83%80%e3%83%a0%e3%83%93%e3%83%ab%e3%83%89%e3%83%95%e3%82%a1%e3%82%a4%e3%82%bf%e3%83%bc%e3%82%ba'>ガンダムビルドファイターズ</a>
+<a class='btn' href='search_all.html?q=%e3%82%ac%e3%83%b3%e3%83%80%e3%83%a0%e3%83%93%e3%83%ab%e3%83%89%e3%83%95%e3%82%a1%e3%82%a4%e3%82%bf%e3%83%bc%e3%82%ba+%e3%83%88%e3%83%a9%e3%82%a4'>ガンダムビルドファイターズ トライ</a>
+<a class='btn' href='search_all.html?q=%e3%82%ac%e3%83%b3%e3%83%80%e3%83%a0%e3%83%93%e3%83%ab%e3%83%89%e3%83%95%e3%82%a1%e3%82%a4%e3%82%bf%e3%83%bc%e3%82%baRe%ef%bc%9aRISE'>ガンダムビルドファイターズRe：RISE</a>
+<a class='btn' href='search_all.html?q=%e3%82%ac%e3%83%b3%e3%83%80%e3%83%a0%e3%83%93%e3%83%ab%e3%83%89%e3%83%a1%e3%82%bf%e3%83%90%e3%83%bc%e3%82%b9'>ガンダムビルドメタバース</a>
+<a class='btn' href='search_all.html?q=%e3%82%ac%e3%83%b3%e3%83%80%e3%83%a0%e3%83%96%e3%83%ac%e3%82%a4%e3%82%ab%e3%83%bc+%e3%83%90%e3%83%88%e3%83%ad%e3%83%bc%e3%82%b0'>ガンダムブレイカー バトローグ</a>
+<a class='btn' href='search_all.html?q=%e3%81%8b%e3%82%93%e3%81%aa%e3%81%8e'>かんなぎ</a>
+<a class='btn' href='search_all.html?q=%e3%81%8c%e3%82%93%e3%81%b0%e3%81%a3%e3%81%a6%e3%81%84%e3%81%8d%e3%81%be%e3%81%a3%e3%81%97%e3%82%87%e3%81%84'>がんばっていきまっしょい</a>
+<a class='btn' href='search_all.html?q=%e3%82%ac%e3%83%b3%e3%83%90%e3%83%aa%e3%82%b9%e3%83%88%ef%bc%81%e9%a7%bf'>ガンバリスト！駿</a>
+<a class='btn' href='search_all.html?q=%e3%82%ac%e3%83%b3%e3%83%91%e3%83%ac%e3%83%bc%e3%83%89%e3%83%bb%e3%82%aa%e3%83%bc%e3%82%b1%e3%82%b9%e3%83%88%e3%83%a9'>ガンパレード・オーケストラ</a>
+<a class='btn' href='search_all.html?q=%e3%82%ac%e3%83%b3%e3%83%91%e3%83%ac%e3%83%bc%e3%83%89%e3%83%bb%e3%83%9e%e3%83%bc%e3%83%81%ef%bd%9e%e6%96%b0%e3%81%9f%e3%81%aa%e3%82%8b%e8%a1%8c%e8%bb%8d%e6%ad%8c%ef%bd%9e'>ガンパレード・マーチ～新たなる行軍歌～</a>
+<a class='btn' href='search_all.html?q=%e3%82%ab%e3%83%b3%e3%83%94%e3%82%aa%e3%83%bc%e3%83%8d%ef%bc%81'>カンピオーネ！</a>
+<a class='btn' href='search_all.html?q=%e3%82%ab%e3%83%b3%e3%83%94%e3%82%aa%e3%83%bc%e3%83%8d!+%ef%bd%9e%e3%81%be%e3%81%a4%e3%82%8d%e3%82%8f%e3%81%ac%e7%a5%9e%e3%80%85%e3%81%a8%e7%a5%9e%e6%ae%ba%e3%81%97%e3%81%ae%e9%ad%94%e7%8e%8b%ef%bd%9e'>カンピオーネ! ～まつろわぬ神々と神殺しの魔王～</a>
+<a class='btn' href='search_all.html?q=%e3%81%8b%e8%a1%8c'>か行</a></div>
+  </div>
+
+  <script>
+    (function(){
+      const list=document.querySelectorAll('.list-か a');
+      const el=document.getElementById('count-list-か');
+      if(el){ el.textContent='表示件数: '+list.length; }
+    })();
+  </script>
+</div>
+</div>
+</body></html>

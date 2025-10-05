@@ -1,0 +1,1441 @@
+﻿<!DOCTYPE html>
+<html lang='ja'>
+<head>
+<meta charset='UTF-8'>
+<title>年別：2023</title>
+<meta name='viewport' content='width=device-width, initial-scale=1.0'>
+<meta property='og:title' content='つぼはち・オフライン検索'>
+<meta property='og:description' content='ゆかりのオフライン時に検索可能のサイトです'>
+<meta property='og:image' content='https://raw.githubusercontent.com/hachi515/yukari_list_001/main/Hasunosora_3.png'>
+<meta property='og:url' content=''>
+<meta name='twitter:card' content='summary_large_image'>
+<meta name='twitter:title' content='つぼはち・オフライン検索'>
+<meta name='twitter:description' content='ゆかりのオフライン時に検索可能のサイトです'>
+<meta name='twitter:image' content='https://raw.githubusercontent.com/hachi515/yukari_list_001/main/Hasunosora_3.png'>
+<style>:root{
+  --accent:#1B64C2;
+  --accent-50: rgba(27,100,194,.50);
+  --accent-70: rgba(27,100,194,.70);
+  --accent-90: rgba(27,100,194,.90);
+  --border:#1B64C2;
+  --panel:rgba(255,255,255,.55);
+  --panel-strong:rgba(255,255,255,.60);
+  --ui-gray:#a1a1a1;
+}
+*{box-sizing:border-box}
+html,body{width:100%}
+body{
+  font-family:'ヒラギノ角ゴ ProN W3','Hiragino Kaku Gothic ProN','Hiragino Sans','ヒラギノ角ゴシック','Yu Gothic','メイリオ',Meiryo,Arial,sans-serif;
+  font-size:14px; color:#222; background:#eef2f5; font-weight:400;
+  background-image:url('https://raw.githubusercontent.com/hachi515/yukari_list_001/main/Hasunosora_1.png'); background-size:cover; background-attachment:fixed; background-position:center; margin:0;
+}
+.wrap{ max-width:1100px; margin:24px auto; padding:12px; background:var(--panel); border:0; border-radius:0; box-shadow:none; overflow-x:auto; }
+
+h1{ display:inline-block; margin:0 0 14px 0; padding:4px 0; background:transparent; color:#0b1b2e; font-size:18px; font-weight:500 }
+h2{ margin:10px 0 8px; padding:0; color:#0b1b2e; font-size:18px; font-weight:500; background:transparent } /* ← h1と同サイズ */
+
+.back{ text-align:right; margin:-6px 0 6px 0 }
+.back a{ color:var(--accent); text-decoration:none; border-bottom:1px dotted var(--accent) }
+
+.section{margin:10px 0 18px}
+.search{display:flex; gap:8px; margin:8px 0 4px; align-items:center; justify-content:flex-start}
+.search select{ padding:8px 10px; font-size:14px; background:var(--panel); border:1px solid var(--ui-gray); border-radius:0; font-weight:400 }
+.search input[type=text]{ flex:0 0 260px; width:260px; padding:8px; font-size:14px; background:var(--panel); border:1px solid var(--ui-gray); border-radius:0; font-weight:400 }
+.search button{ padding:8px 12px; font-size:14px; color:#fff; background:var(--accent-90); border:1px solid var(--ui-gray); border-radius:0; cursor:pointer }
+.count{font-size:11px; color:#222; margin:4px 0 8px}
+a{ color:var(--accent); }
+
+.btn{display:inline-block; padding:8px 10px; background:var(--accent-70); color:#fff; text-decoration:none; border:1px solid var(--border); border-radius:0; font-weight:400 }
+.btn-outline{background:var(--panel); color:#1b1b1b; border:1px solid var(--border)}
+.year-buttons,.new-buttons{display:flex; flex-wrap:wrap; gap:8px}
+
+.kana-row{display:flex; gap:24px; margin-bottom:8px}
+.kana-group{display:flex; gap:6px}
+.kana-btn{display:inline-block; padding:6px 10px; background:var(--accent-70); color:#fff; text-decoration:none; border:1px solid var(--border); border-radius:0; font-size:14px; font-weight:400}
+.kana-btn.disabled{opacity:.35; pointer-events:none}
+
+/* 作品名グリッド：1行2個 */
+.prog-grid{display:grid; grid-template-columns:repeat(2, minmax(0,1fr)); gap:8px}
+.prog-grid a{display:block}
+
+/* カード */
+.card{margin:12px 0; border:0; background:transparent}
+.card-title{padding:0; background:transparent}
+.card-title a{display:block; padding:8px 10px; background:var(--accent-70); color:#fff; text-decoration:none; white-space:normal; font-weight:500}
+.card-body{padding:10px; background:var(--panel-strong)}
+.meta{margin:3px 0; font-weight:400}
+.meta .label{display:inline-block; min-width:84px; color:#0b1b2e; font-weight:400}
+
+/* ページャ */
+.pager{display:flex; gap:6px; flex-wrap:wrap; margin:14px 0}
+.pager a,.pager span{padding:6px 10px; border:1px solid var(--border); text-decoration:none; color:#fff; background:var(--accent-70); font-weight:400}
+.pager .current{background:var(--accent-90); color:#fff}
+
+/* スクロール枠（search_all / 年別 / 新着 / 五十音） */
+.list-container{max-height:900px; overflow-y:auto; border:1px solid var(--ui-gray); background:rgba(255,255,255,.35); padding:8px; box-shadow:0 4px 8px rgba(0,0,0,.06)}
+.stickybar{position:sticky; top:0; z-index:20; background:rgba(255,255,255,.6); border-bottom:1px solid var(--ui-gray); padding:8px; margin:-8px -8px 8px -8px}
+.stickybar.no-bg{background:transparent; border:none; padding:0; margin:0 0 8px 0}
+
+@media (max-width:768px){
+  body{ background-image:url('https://raw.githubusercontent.com/hachi515/yukari_list_001/main/Hasunosora_2.png'); font-size:13px }
+  .search select, .search input[type=text], .search button{ font-size:13px; padding:7px 10px }
+  /* 入力幅をスマホではやや広めに */
+  .search input[type=text]{ flex:0 0 56vw; width:56vw }
+  .list-container{ max-height:450px }
+}
+  .search select, .search input[type=text], .search button{ font-size:13px; padding:7px 10px }
+  .list-container{ max-height:450px }
+}</style>
+<script>const SEARCH_BASE = 'http://ykr.moe:11059/';
+
+function tokensHalf(v){return v.toLowerCase().trim().split(/ +/).filter(Boolean)}
+function qparam(name){ const m = location.search.match(new RegExp('[?&]'+name+'=([^&]+)')); return m ? decodeURIComponent(m[1]) : ''; }
+
+// 軽量リンク化：data-q を href に展開
+document.addEventListener('DOMContentLoaded', ()=>{
+  document.querySelectorAll('a[data-q]').forEach(a=>{
+    try{
+      const q = a.getAttribute('data-q')||'';
+      a.href = SEARCH_BASE + 'search.php?searchword=' + q;
+      a.target = '_blank';
+    }catch(e){}
+  });
+});
+
+function filterCards(listId, boxId){
+  const q = tokensHalf(document.getElementById(boxId).value);
+  const list = document.getElementById(listId);
+  if(!list){return}
+  const cards = list.querySelectorAll('.card');
+  let vis = 0;
+  cards.forEach(c=>{
+    const hit = q.every(tok => c.innerText.toLowerCase().includes(tok));
+    c.style.display = hit ? '' : 'none';
+    if(hit) vis++;
+  });
+  const cEl = document.getElementById('count-'+listId);
+  if(cEl){ cEl.textContent = '表示件数: ' + vis; }
+  const pager = document.getElementById('pager-'+listId);
+  const per = parseInt(list.dataset.per || '100',10);
+  if(pager){ if(q.length===0){ pager.style.display = ''; } else { pager.style.display = (vis<=per) ? 'none' : ''; } }
+}
+
+/* ===== 検索結果専用：表示中カードを「制作者優先度→日付」で並べ替え ===== */
+const DEFAULT_PRIO = 999;
+function reorderByPriority(listId){
+  const list = document.getElementById(listId);
+  if(!list){return}
+  const visible = Array.from(list.querySelectorAll('.card')).filter(c => c.style.display !== 'none');
+  visible.sort((a,b)=>{
+    const pa = parseInt(a.dataset.priority||DEFAULT_PRIO);
+    const pb = parseInt(b.dataset.priority||DEFAULT_PRIO);
+    if(pa !== pb) return pa - pb;
+    const da = parseInt(a.dataset.updated||0); // yyyymmdd
+    const db = parseInt(b.dataset.updated||0);
+    return db - da;
+  });
+  visible.forEach(c => list.appendChild(c));
+}
+
+function filterCardsAdv(listId, boxId, yearId){
+  const q = tokensHalf(document.getElementById(boxId).value);
+  const yEl = document.getElementById(yearId);
+  const y = yEl ? (yEl.value||'').trim() : '';
+  const list = document.getElementById(listId);
+  if(!list){return}
+  const cards = list.querySelectorAll('.card');
+  let vis = 0;
+  cards.forEach(c=>{
+    const okText = q.every(tok => c.innerText.toLowerCase().includes(tok));
+    const band = (c.dataset.yearband||'');
+    const yr = (c.dataset.year||'');
+    const okYear = (y==='' || yr===y || band===y);
+    const show = okText && okYear;
+    c.style.display = show ? '' : 'none';
+    if(show) vis++;
+  });
+  const cEl = document.getElementById('count-'+listId);
+  if(cEl){ cEl.textContent = '表示件数: ' + vis; }
+
+  // ★検索（キーワード or 年帯）を使ったときだけ優先度並び替えを実施
+  if(q.length>0 || y!==''){ reorderByPriority(listId); }
+}
+
+function filterGrid(gridSel, boxId, countId){
+  const q = tokensHalf(document.getElementById(boxId).value);
+  const nodes = document.querySelectorAll(gridSel+' a');
+  let vis=0; nodes.forEach(a=>{ const hit=q.every(t=>a.innerText.toLowerCase().includes(t)); a.style.display=hit?'':'none'; if(hit) vis++; });
+  if(countId){ const el=document.getElementById(countId); if(el){ el.textContent='表示件数: '+vis; } }
+}</script>
+</head>
+<body>
+<div class='wrap'>
+<h1>年別：2023</h1>
+<div class='back'><a href='index.html'>一覧に戻る</a></div>
+
+<div class='section'>
+  <div class='search'>
+    <input type='text' id='q-list-year-14' placeholder='キーワード（半角スペースAND）'>
+    <button onclick="filterCards('list-year-14','q-list-year-14')">検索</button>
+  </div>
+  <div class='count' id='count-list-year-14'></div>
+
+  <div class='list-container'>
+    <div id='list-year-14' data-per='100'>
+<div class='card' data-year='2023' data-yearband='2023' data-updated='20230922' data-priority='999'>
+  <div class='card-title'>
+    <a data-q='%e3%80%90%e3%82%b7%e3%83%a3%e3%83%89%e3%82%a6%e3%83%90%e3%83%bc%e3%82%b9%e3%80%91%5bOP%5d%e3%82%ad%e3%83%aa%e3%83%95%e3%83%80%5bPENGUIN+RESEARCH%5d(on-cut)krk.mp4'>キリフダ[PENGUIN RESEARCH](on-cut)krk</a>
+  </div>
+  <div class='card-body'>
+    <div class='meta'><span class='label'>作品名</span> <a href='search_all.html?q=%e3%82%b7%e3%83%a3%e3%83%89%e3%82%a6%e3%83%90%e3%83%bc%e3%82%b9'>シャドウバース</a></div>
+    <div class='meta'><span class='label'>歌い手</span> </div>
+    <div class='meta'><span class='label'>制作者</span> 黒河</div>
+    <div class='meta'><span class='label'>最終更新日</span> 2023/09/22</div>
+    <div class='meta'><span class='label'>ファイル名</span> <a data-q='%e3%80%90%e3%82%b7%e3%83%a3%e3%83%89%e3%82%a6%e3%83%90%e3%83%bc%e3%82%b9%e3%80%91%5bOP%5d%e3%82%ad%e3%83%aa%e3%83%95%e3%83%80%5bPENGUIN+RESEARCH%5d(on-cut)krk.mp4'>【シャドウバース】[OP]キリフダ[PENGUIN RESEARCH](on-cut)krk.mp4</a></div>
+  </div>
+</div>
+<div class='card' data-year='2023' data-yearband='2023' data-updated='20230922' data-priority='999'>
+  <div class='card-title'>
+    <a data-q='%e3%80%90PSYCHO-PASS%e3%80%91%5b%e5%8a%87%e5%a0%b4%e7%89%88OP%5dWho+What+Who+What%5b%e5%87%9b%e3%81%a8%e3%81%97%e3%81%a6%e6%99%82%e9%9b%a8%5d(on-cut)krk.mp4'>Who What Who What[凛として時雨](on-cut)krk</a>
+  </div>
+  <div class='card-body'>
+    <div class='meta'><span class='label'>作品名</span> <a href='search_all.html?q=PSYCHO-PASS'>PSYCHO-PASS</a></div>
+    <div class='meta'><span class='label'>歌い手</span> </div>
+    <div class='meta'><span class='label'>制作者</span> 黒河</div>
+    <div class='meta'><span class='label'>最終更新日</span> 2023/09/22</div>
+    <div class='meta'><span class='label'>ファイル名</span> <a data-q='%e3%80%90PSYCHO-PASS%e3%80%91%5b%e5%8a%87%e5%a0%b4%e7%89%88OP%5dWho+What+Who+What%5b%e5%87%9b%e3%81%a8%e3%81%97%e3%81%a6%e6%99%82%e9%9b%a8%5d(on-cut)krk.mp4'>【PSYCHO-PASS】[劇場版OP]Who What Who What[凛として時雨](on-cut)krk.mp4</a></div>
+  </div>
+</div>
+<div class='card' data-year='2023' data-yearband='2023' data-updated='20230922' data-priority='999'>
+  <div class='card-title'>
+    <a data-q='%e3%80%90%e6%b6%88%e6%bb%85%e9%83%bd%e5%b8%82+Where+I+End+and+You+Begin%e3%80%91%5bOP%5d%e7%ad%94%5b%e9%98%bf%e9%83%a8%e7%9c%9f%e5%a4%ae%5d(on-cut)krk.mp4'>答[阿部真央](on-cut)krk</a>
+  </div>
+  <div class='card-body'>
+    <div class='meta'><span class='label'>作品名</span> <a href='search_all.html?q=%e6%b6%88%e6%bb%85%e9%83%bd%e5%b8%82+Where+I+End+and+You+Begin'>消滅都市 Where I End and You Begin</a></div>
+    <div class='meta'><span class='label'>歌い手</span> </div>
+    <div class='meta'><span class='label'>制作者</span> 黒河</div>
+    <div class='meta'><span class='label'>最終更新日</span> 2023/09/22</div>
+    <div class='meta'><span class='label'>ファイル名</span> <a data-q='%e3%80%90%e6%b6%88%e6%bb%85%e9%83%bd%e5%b8%82+Where+I+End+and+You+Begin%e3%80%91%5bOP%5d%e7%ad%94%5b%e9%98%bf%e9%83%a8%e7%9c%9f%e5%a4%ae%5d(on-cut)krk.mp4'>【消滅都市 Where I End and You Begin】[OP]答[阿部真央](on-cut)krk.mp4</a></div>
+  </div>
+</div>
+<div class='card' data-year='2023' data-yearband='2023' data-updated='20230922' data-priority='999'>
+  <div class='card-title'>
+    <a data-q='%e3%80%90%e3%82%bd%e3%82%a6%e3%83%8a%e3%83%b3%e3%81%a7%e3%81%99%e3%81%8b%ef%bc%9f%e3%80%91%5bED%5d%e7%94%9f%e3%81%8d%e3%82%8b%5b%e5%ae%89%e9%87%8e%e5%b8%8c%e4%b8%96%e4%b9%83%5d(on-cut)krk.mp4'>生きる[安野希世乃](on-cut)krk</a>
+  </div>
+  <div class='card-body'>
+    <div class='meta'><span class='label'>作品名</span> <a href='search_all.html?q=%e3%82%bd%e3%82%a6%e3%83%8a%e3%83%b3%e3%81%a7%e3%81%99%e3%81%8b%ef%bc%9f'>ソウナンですか？</a></div>
+    <div class='meta'><span class='label'>歌い手</span> </div>
+    <div class='meta'><span class='label'>制作者</span> 黒河</div>
+    <div class='meta'><span class='label'>最終更新日</span> 2023/09/22</div>
+    <div class='meta'><span class='label'>ファイル名</span> <a data-q='%e3%80%90%e3%82%bd%e3%82%a6%e3%83%8a%e3%83%b3%e3%81%a7%e3%81%99%e3%81%8b%ef%bc%9f%e3%80%91%5bED%5d%e7%94%9f%e3%81%8d%e3%82%8b%5b%e5%ae%89%e9%87%8e%e5%b8%8c%e4%b8%96%e4%b9%83%5d(on-cut)krk.mp4'>【ソウナンですか？】[ED]生きる[安野希世乃](on-cut)krk.mp4</a></div>
+  </div>
+</div>
+<div class='card' data-year='2023' data-yearband='2023' data-updated='20230922' data-priority='999'>
+  <div class='card-title'>
+    <a data-q='%e3%80%90%e3%82%b9%e3%82%bf%e3%83%bc%e3%82%aa%e3%83%bc%e3%82%b7%e3%83%a3%e3%83%b3EX%e3%80%91%5bOP%5dTo+the+light%5b%e5%85%ab%e5%8f%8d%e5%ae%89%e6%9c%aa%e6%9e%9c%5d(on-cut)krk.mp4'>To the light[八反安未果](on-cut)krk</a>
+  </div>
+  <div class='card-body'>
+    <div class='meta'><span class='label'>作品名</span> <a href='search_all.html?q=%e3%82%b9%e3%82%bf%e3%83%bc%e3%82%aa%e3%83%bc%e3%82%b7%e3%83%a3%e3%83%b3EX'>スターオーシャンEX</a></div>
+    <div class='meta'><span class='label'>歌い手</span> </div>
+    <div class='meta'><span class='label'>制作者</span> 黒河</div>
+    <div class='meta'><span class='label'>最終更新日</span> 2023/09/22</div>
+    <div class='meta'><span class='label'>ファイル名</span> <a data-q='%e3%80%90%e3%82%b9%e3%82%bf%e3%83%bc%e3%82%aa%e3%83%bc%e3%82%b7%e3%83%a3%e3%83%b3EX%e3%80%91%5bOP%5dTo+the+light%5b%e5%85%ab%e5%8f%8d%e5%ae%89%e6%9c%aa%e6%9e%9c%5d(on-cut)krk.mp4'>【スターオーシャンEX】[OP]To the light[八反安未果](on-cut)krk.mp4</a></div>
+  </div>
+</div>
+<div class='card' data-year='2023' data-yearband='2023' data-updated='20230922' data-priority='999'>
+  <div class='card-title'>
+    <a data-q='%e3%80%90%e3%83%ad%e3%83%bc%e3%83%89+%e3%82%aa%e3%83%96+%e3%83%b4%e3%82%a1%e3%83%bc%e3%83%9f%e3%83%aa%e3%82%aa%e3%83%b3+%e7%b4%85%e8%93%ae%e3%81%ae%e7%8e%8b%e3%80%91%5bED%5d%e7%b4%85%e3%81%8f%e3%80%81%e7%b5%b6%e6%9c%9b%e3%81%ae%e8%8a%b1%e3%80%82%5bJUNNA%5d(on-cut)krk.mp4'>紅く、絶望の花。[JUNNA](on-cut)krk</a>
+  </div>
+  <div class='card-body'>
+    <div class='meta'><span class='label'>作品名</span> <a href='search_all.html?q=%e3%83%ad%e3%83%bc%e3%83%89+%e3%82%aa%e3%83%96+%e3%83%b4%e3%82%a1%e3%83%bc%e3%83%9f%e3%83%aa%e3%82%aa%e3%83%b3+%e7%b4%85%e8%93%ae%e3%81%ae%e7%8e%8b'>ロード オブ ヴァーミリオン 紅蓮の王</a></div>
+    <div class='meta'><span class='label'>歌い手</span> </div>
+    <div class='meta'><span class='label'>制作者</span> 黒河</div>
+    <div class='meta'><span class='label'>最終更新日</span> 2023/09/22</div>
+    <div class='meta'><span class='label'>ファイル名</span> <a data-q='%e3%80%90%e3%83%ad%e3%83%bc%e3%83%89+%e3%82%aa%e3%83%96+%e3%83%b4%e3%82%a1%e3%83%bc%e3%83%9f%e3%83%aa%e3%82%aa%e3%83%b3+%e7%b4%85%e8%93%ae%e3%81%ae%e7%8e%8b%e3%80%91%5bED%5d%e7%b4%85%e3%81%8f%e3%80%81%e7%b5%b6%e6%9c%9b%e3%81%ae%e8%8a%b1%e3%80%82%5bJUNNA%5d(on-cut)krk.mp4'>【ロード オブ ヴァーミリオン 紅蓮の王】[ED]紅く、絶望の花。[JUNNA](on-cut)krk.mp4</a></div>
+  </div>
+</div>
+<div class='card' data-year='2023' data-yearband='2023' data-updated='20230922' data-priority='999'>
+  <div class='card-title'>
+    <a data-q='%e3%80%90LORD+of+VERMILION+ARENA%e3%80%91%5b%e3%83%a9%e3%82%a4%e3%82%ba%e3%83%9e%e3%83%83%e3%83%97BGM%5dRise%5b%e5%b1%b1%e4%b8%8b%e7%b5%b5%e7%90%86%5d(on-cut)krk.mp4'>Rise[山下絵理](on-cut)krk</a>
+  </div>
+  <div class='card-body'>
+    <div class='meta'><span class='label'>作品名</span> <a href='search_all.html?q=LORD+of+VERMILION+ARENA'>LORD of VERMILION ARENA</a></div>
+    <div class='meta'><span class='label'>歌い手</span> </div>
+    <div class='meta'><span class='label'>制作者</span> 黒河</div>
+    <div class='meta'><span class='label'>最終更新日</span> 2023/09/22</div>
+    <div class='meta'><span class='label'>ファイル名</span> <a data-q='%e3%80%90LORD+of+VERMILION+ARENA%e3%80%91%5b%e3%83%a9%e3%82%a4%e3%82%ba%e3%83%9e%e3%83%83%e3%83%97BGM%5dRise%5b%e5%b1%b1%e4%b8%8b%e7%b5%b5%e7%90%86%5d(on-cut)krk.mp4'>【LORD of VERMILION ARENA】[ライズマップBGM]Rise[山下絵理](on-cut)krk.mp4</a></div>
+  </div>
+</div>
+<div class='card' data-year='2023' data-yearband='2023' data-updated='20230922' data-priority='999'>
+  <div class='card-title'>
+    <a data-q='%e3%80%90%e9%ad%94%e9%81%93%e7%a5%96%e5%b8%ab%e3%80%91%5bOP2%5d%e5%b0%8e%5bCIVILIAN%5d(on-cut)krk%5bMV%5d.mp4'>導[CIVILIAN](on-cut)krk[MV]</a>
+  </div>
+  <div class='card-body'>
+    <div class='meta'><span class='label'>作品名</span> <a href='search_all.html?q=%e9%ad%94%e9%81%93%e7%a5%96%e5%b8%ab'>魔道祖師</a></div>
+    <div class='meta'><span class='label'>歌い手</span> </div>
+    <div class='meta'><span class='label'>制作者</span> 黒河</div>
+    <div class='meta'><span class='label'>最終更新日</span> 2023/09/22</div>
+    <div class='meta'><span class='label'>ファイル名</span> <a data-q='%e3%80%90%e9%ad%94%e9%81%93%e7%a5%96%e5%b8%ab%e3%80%91%5bOP2%5d%e5%b0%8e%5bCIVILIAN%5d(on-cut)krk%5bMV%5d.mp4'>【魔道祖師】[OP2]導[CIVILIAN](on-cut)krk[MV].mp4</a></div>
+  </div>
+</div>
+<div class='card' data-year='2023' data-yearband='2023' data-updated='20230922' data-priority='999'>
+  <div class='card-title'>
+    <a data-q='%e3%80%90%e9%ad%94%e9%81%93%e7%a5%96%e5%b8%ab%e3%80%91%5bOP%5d%e5%8d%83%e5%a4%9c%e6%83%b3%e6%ad%8c%5bCIVILIAN%5d(on-cut)krk.mp4'>千夜想歌[CIVILIAN](on-cut)krk</a>
+  </div>
+  <div class='card-body'>
+    <div class='meta'><span class='label'>作品名</span> <a href='search_all.html?q=%e9%ad%94%e9%81%93%e7%a5%96%e5%b8%ab'>魔道祖師</a></div>
+    <div class='meta'><span class='label'>歌い手</span> </div>
+    <div class='meta'><span class='label'>制作者</span> 黒河</div>
+    <div class='meta'><span class='label'>最終更新日</span> 2023/09/22</div>
+    <div class='meta'><span class='label'>ファイル名</span> <a data-q='%e3%80%90%e9%ad%94%e9%81%93%e7%a5%96%e5%b8%ab%e3%80%91%5bOP%5d%e5%8d%83%e5%a4%9c%e6%83%b3%e6%ad%8c%5bCIVILIAN%5d(on-cut)krk.mp4'>【魔道祖師】[OP]千夜想歌[CIVILIAN](on-cut)krk.mp4</a></div>
+  </div>
+</div>
+<div class='card' data-year='2023' data-yearband='2023' data-updated='20230922' data-priority='999'>
+  <div class='card-title'>
+    <a data-q='%e3%80%90%e3%81%bf%e3%82%8b%e3%82%bf%e3%82%a4%e3%83%84%e3%80%91%5bED%5dTrue+days%5b%e8%97%8d%e5%b7%9d%e3%83%ac%e3%83%b3(CV%e6%88%b8%e6%9d%be%e9%81%a5)%5d(on-cut)krk%5b%e8%80%b3%e3%82%b3%e3%83%94%5d.mp4'>True days[藍川レン(CV戸松遥)](on-cut)krk[耳コピ]</a>
+  </div>
+  <div class='card-body'>
+    <div class='meta'><span class='label'>作品名</span> <a href='search_all.html?q=%e3%81%bf%e3%82%8b%e3%82%bf%e3%82%a4%e3%83%84'>みるタイツ</a></div>
+    <div class='meta'><span class='label'>歌い手</span> </div>
+    <div class='meta'><span class='label'>制作者</span> 黒河</div>
+    <div class='meta'><span class='label'>最終更新日</span> 2023/09/22</div>
+    <div class='meta'><span class='label'>ファイル名</span> <a data-q='%e3%80%90%e3%81%bf%e3%82%8b%e3%82%bf%e3%82%a4%e3%83%84%e3%80%91%5bED%5dTrue+days%5b%e8%97%8d%e5%b7%9d%e3%83%ac%e3%83%b3(CV%e6%88%b8%e6%9d%be%e9%81%a5)%5d(on-cut)krk%5b%e8%80%b3%e3%82%b3%e3%83%94%5d.mp4'>【みるタイツ】[ED]True days[藍川レン(CV戸松遥)](on-cut)krk[耳コピ].mp4</a></div>
+  </div>
+</div>
+<div class='card' data-year='2023' data-yearband='2023' data-updated='20230922' data-priority='999'>
+  <div class='card-title'>
+    <a data-q='%e3%80%90%e3%83%9e%e3%83%93%e3%83%8e%e3%82%ae%e3%80%91%5b%e4%b8%bb%e9%a1%8c%e6%ad%8c%5dEternal%5b%e7%94%b0%e4%b8%ad%e7%90%86%e6%81%b5%5d(on-cut)krk.mp4'>Eternal[田中理恵](on-cut)krk</a>
+  </div>
+  <div class='card-body'>
+    <div class='meta'><span class='label'>作品名</span> <a href='search_all.html?q=%e3%83%9e%e3%83%93%e3%83%8e%e3%82%ae'>マビノギ</a></div>
+    <div class='meta'><span class='label'>歌い手</span> </div>
+    <div class='meta'><span class='label'>制作者</span> 黒河</div>
+    <div class='meta'><span class='label'>最終更新日</span> 2023/09/22</div>
+    <div class='meta'><span class='label'>ファイル名</span> <a data-q='%e3%80%90%e3%83%9e%e3%83%93%e3%83%8e%e3%82%ae%e3%80%91%5b%e4%b8%bb%e9%a1%8c%e6%ad%8c%5dEternal%5b%e7%94%b0%e4%b8%ad%e7%90%86%e6%81%b5%5d(on-cut)krk.mp4'>【マビノギ】[主題歌]Eternal[田中理恵](on-cut)krk.mp4</a></div>
+  </div>
+</div>
+<div class='card' data-year='2023' data-yearband='2023' data-updated='20230922' data-priority='999'>
+  <div class='card-title'>
+    <a data-q='%e3%80%90%e3%81%be%e3%81%97%e3%82%8d%e3%82%a6%e3%82%a3%e3%83%83%e3%83%81%e3%80%91%5bTM%5d%e5%ae%bf%e5%91%bd%5b%e6%ad%8c%e6%89%8b%e4%b8%8d%e6%98%8e%5d(on-cut)krk%5b%e8%80%b3%e3%82%b3%e3%83%94%5d.mp4'>宿命[歌手不明](on-cut)krk[耳コピ]</a>
+  </div>
+  <div class='card-body'>
+    <div class='meta'><span class='label'>作品名</span> <a href='search_all.html?q=%e3%81%be%e3%81%97%e3%82%8d%e3%82%a6%e3%82%a3%e3%83%83%e3%83%81'>ましろウィッチ</a></div>
+    <div class='meta'><span class='label'>歌い手</span> </div>
+    <div class='meta'><span class='label'>制作者</span> 黒河</div>
+    <div class='meta'><span class='label'>最終更新日</span> 2023/09/22</div>
+    <div class='meta'><span class='label'>ファイル名</span> <a data-q='%e3%80%90%e3%81%be%e3%81%97%e3%82%8d%e3%82%a6%e3%82%a3%e3%83%83%e3%83%81%e3%80%91%5bTM%5d%e5%ae%bf%e5%91%bd%5b%e6%ad%8c%e6%89%8b%e4%b8%8d%e6%98%8e%5d(on-cut)krk%5b%e8%80%b3%e3%82%b3%e3%83%94%5d.mp4'>【ましろウィッチ】[TM]宿命[歌手不明](on-cut)krk[耳コピ].mp4</a></div>
+  </div>
+</div>
+<div class='card' data-year='2023' data-yearband='2023' data-updated='20230922' data-priority='999'>
+  <div class='card-title'>
+    <a data-q='%e3%80%90MAJOR+2nd%e3%80%91%5bOP3%5dAnswer%5b%e5%ae%b6%e5%85%a5%e3%83%ac%e3%82%aa%5d(on-cut)krk.mp4'>Answer[家入レオ](on-cut)krk</a>
+  </div>
+  <div class='card-body'>
+    <div class='meta'><span class='label'>作品名</span> <a href='search_all.html?q=MAJOR+2nd'>MAJOR 2nd</a></div>
+    <div class='meta'><span class='label'>歌い手</span> </div>
+    <div class='meta'><span class='label'>制作者</span> 黒河</div>
+    <div class='meta'><span class='label'>最終更新日</span> 2023/09/22</div>
+    <div class='meta'><span class='label'>ファイル名</span> <a data-q='%e3%80%90MAJOR+2nd%e3%80%91%5bOP3%5dAnswer%5b%e5%ae%b6%e5%85%a5%e3%83%ac%e3%82%aa%5d(on-cut)krk.mp4'>【MAJOR 2nd】[OP3]Answer[家入レオ](on-cut)krk.mp4</a></div>
+  </div>
+</div>
+<div class='card' data-year='2023' data-yearband='2023' data-updated='20230922' data-priority='999'>
+  <div class='card-title'>
+    <a data-q='%e3%80%90%e7%81%ab%e3%83%8e%e4%b8%b8%e7%9b%b8%e6%92%b2%e3%80%91%5bED%5d%e6%97%a5%e5%87%ba%e3%82%ba%e3%83%ab%e5%a0%b4%e6%89%80%5b%e3%82%aa%e3%83%a1%e3%81%a7%e3%81%9f%e3%81%84%e9%a0%ad%e3%81%a7%e3%81%aa%e3%81%ab%e3%82%88%e3%82%8a%5d(on-cut)krk.mp4'>日出ズル場所[オメでたい頭でなにより](on-cut)krk</a>
+  </div>
+  <div class='card-body'>
+    <div class='meta'><span class='label'>作品名</span> <a href='search_all.html?q=%e7%81%ab%e3%83%8e%e4%b8%b8%e7%9b%b8%e6%92%b2'>火ノ丸相撲</a></div>
+    <div class='meta'><span class='label'>歌い手</span> </div>
+    <div class='meta'><span class='label'>制作者</span> 黒河</div>
+    <div class='meta'><span class='label'>最終更新日</span> 2023/09/22</div>
+    <div class='meta'><span class='label'>ファイル名</span> <a data-q='%e3%80%90%e7%81%ab%e3%83%8e%e4%b8%b8%e7%9b%b8%e6%92%b2%e3%80%91%5bED%5d%e6%97%a5%e5%87%ba%e3%82%ba%e3%83%ab%e5%a0%b4%e6%89%80%5b%e3%82%aa%e3%83%a1%e3%81%a7%e3%81%9f%e3%81%84%e9%a0%ad%e3%81%a7%e3%81%aa%e3%81%ab%e3%82%88%e3%82%8a%5d(on-cut)krk.mp4'>【火ノ丸相撲】[ED]日出ズル場所[オメでたい頭でなにより](on-cut)krk.mp4</a></div>
+  </div>
+</div>
+<div class='card' data-year='2023' data-yearband='2023' data-updated='20230922' data-priority='999'>
+  <div class='card-title'>
+    <a data-q='%e3%80%90%e6%9d%b1%e6%96%b9%e3%82%ad%e3%83%a3%e3%83%8e%e3%83%b3%e3%83%9c%e3%83%bc%e3%83%ab%e3%80%91%5bOP%5d%e8%8f%af%e3%82%84%e3%81%90%e5%a4%a2%e5%b9%bb%e3%81%ae%e5%b0%91%e5%a5%b3%e3%81%9f%e3%81%a1%5b%e5%8d%9a%e9%ba%97%e9%9c%8a%e5%a4%a2(CV%ef%bc%9a%e9%ac%bc%e9%a0%ad%e6%98%8e%e9%87%8c)%e9%9c%a7%e9%9b%a8%e9%ad%94%e7%90%86%e6%b2%99(CV%ef%bc%9a%e9%a3%af%e6%b2%bc%e5%8d%97%e5%ae%9f)%5d(on-cut)krk%5bDUO%5d.mp4'>華やぐ夢幻の少女たち[博麗霊夢(CV：鬼頭明里)霧雨魔理沙(CV：飯沼南実)](on-cut)krk[DUO]</a>
+  </div>
+  <div class='card-body'>
+    <div class='meta'><span class='label'>作品名</span> <a href='search_all.html?q=%e6%9d%b1%e6%96%b9%e3%82%ad%e3%83%a3%e3%83%8e%e3%83%b3%e3%83%9c%e3%83%bc%e3%83%ab'>東方キャノンボール</a></div>
+    <div class='meta'><span class='label'>歌い手</span> </div>
+    <div class='meta'><span class='label'>制作者</span> 黒河</div>
+    <div class='meta'><span class='label'>最終更新日</span> 2023/09/22</div>
+    <div class='meta'><span class='label'>ファイル名</span> <a data-q='%e3%80%90%e6%9d%b1%e6%96%b9%e3%82%ad%e3%83%a3%e3%83%8e%e3%83%b3%e3%83%9c%e3%83%bc%e3%83%ab%e3%80%91%5bOP%5d%e8%8f%af%e3%82%84%e3%81%90%e5%a4%a2%e5%b9%bb%e3%81%ae%e5%b0%91%e5%a5%b3%e3%81%9f%e3%81%a1%5b%e5%8d%9a%e9%ba%97%e9%9c%8a%e5%a4%a2(CV%ef%bc%9a%e9%ac%bc%e9%a0%ad%e6%98%8e%e9%87%8c)%e9%9c%a7%e9%9b%a8%e9%ad%94%e7%90%86%e6%b2%99(CV%ef%bc%9a%e9%a3%af%e6%b2%bc%e5%8d%97%e5%ae%9f)%5d(on-cut)krk%5bDUO%5d.mp4'>【東方キャノンボール】[OP]華やぐ夢幻の少女たち[博麗霊夢(CV：鬼頭明里)霧雨魔理沙(CV：飯沼南実)](on-cut)krk[DUO].mp4</a></div>
+  </div>
+</div>
+<div class='card' data-year='2023' data-yearband='2023' data-updated='20230922' data-priority='999'>
+  <div class='card-title'>
+    <a data-q='%e3%80%90%e6%9d%b1%e6%96%b9LostWord%e3%80%91%5bTM%5d%e3%83%ad%e3%82%b9%e3%83%88%e3%83%af%e3%83%bc%e3%83%89%e3%82%af%e3%83%ad%e3%83%8b%e3%82%ab%e3%83%ab%5b%e3%81%84%e3%81%a8%e3%81%86%e3%81%8b%e3%81%aa%e3%81%93%5d(on-cut)krk%5bPV%5d.mp4'>ロストワードクロニカル[いとうかなこ](on-cut)krk[PV]</a>
+  </div>
+  <div class='card-body'>
+    <div class='meta'><span class='label'>作品名</span> <a href='search_all.html?q=%e6%9d%b1%e6%96%b9LostWord'>東方LostWord</a></div>
+    <div class='meta'><span class='label'>歌い手</span> </div>
+    <div class='meta'><span class='label'>制作者</span> 黒河</div>
+    <div class='meta'><span class='label'>最終更新日</span> 2023/09/22</div>
+    <div class='meta'><span class='label'>ファイル名</span> <a data-q='%e3%80%90%e6%9d%b1%e6%96%b9LostWord%e3%80%91%5bTM%5d%e3%83%ad%e3%82%b9%e3%83%88%e3%83%af%e3%83%bc%e3%83%89%e3%82%af%e3%83%ad%e3%83%8b%e3%82%ab%e3%83%ab%5b%e3%81%84%e3%81%a8%e3%81%86%e3%81%8b%e3%81%aa%e3%81%93%5d(on-cut)krk%5bPV%5d.mp4'>【東方LostWord】[TM]ロストワードクロニカル[いとうかなこ](on-cut)krk[PV].mp4</a></div>
+  </div>
+</div>
+<div class='card' data-year='2023' data-yearband='2023' data-updated='20230922' data-priority='999'>
+  <div class='card-title'>
+    <a data-q='%e3%80%90%e6%9d%b1%e4%ba%ac%e3%82%a2%e3%83%b3%e3%83%80%e3%83%bc%e3%82%b0%e3%83%a9%e3%82%a6%e3%83%b3%e3%83%89%e3%80%91%5bOP2%5dHEY+YOU!!%e5%a4%b1%e3%81%a3%e3%81%a6%e3%81%af%e3%81%aa%e3%82%89%e3%81%aa%e3%81%84%e3%82%82%e3%81%ae%5biksi%ef%bc%9ad%5d(on-cut)krk.mp4'>HEY YOU!!失ってはならないもの[iksi：d](on-cut)krk</a>
+  </div>
+  <div class='card-body'>
+    <div class='meta'><span class='label'>作品名</span> <a href='search_all.html?q=%e6%9d%b1%e4%ba%ac%e3%82%a2%e3%83%b3%e3%83%80%e3%83%bc%e3%82%b0%e3%83%a9%e3%82%a6%e3%83%b3%e3%83%89'>東京アンダーグラウンド</a></div>
+    <div class='meta'><span class='label'>歌い手</span> </div>
+    <div class='meta'><span class='label'>制作者</span> 黒河</div>
+    <div class='meta'><span class='label'>最終更新日</span> 2023/09/22</div>
+    <div class='meta'><span class='label'>ファイル名</span> <a data-q='%e3%80%90%e6%9d%b1%e4%ba%ac%e3%82%a2%e3%83%b3%e3%83%80%e3%83%bc%e3%82%b0%e3%83%a9%e3%82%a6%e3%83%b3%e3%83%89%e3%80%91%5bOP2%5dHEY+YOU!!%e5%a4%b1%e3%81%a3%e3%81%a6%e3%81%af%e3%81%aa%e3%82%89%e3%81%aa%e3%81%84%e3%82%82%e3%81%ae%5biksi%ef%bc%9ad%5d(on-cut)krk.mp4'>【東京アンダーグラウンド】[OP2]HEY YOU!!失ってはならないもの[iksi：d](on-cut)krk.mp4</a></div>
+  </div>
+</div>
+<div class='card' data-year='2023' data-yearband='2023' data-updated='20230922' data-priority='999'>
+  <div class='card-title'>
+    <a data-q='%e3%80%90%e5%a4%a7%e4%b9%b1%e9%97%98%e3%82%b9%e3%83%9e%e3%83%83%e3%82%b7%e3%83%a5%e3%83%96%e3%83%a9%e3%82%b6%e3%83%bc%e3%82%ba+SPECIAL%e3%80%91%5bTM%5d%e5%91%bd%e3%81%ae%e7%81%af%e7%81%ab%5b%e5%8f%a4%e8%b3%80%e8%8b%b1%e9%87%8c%e5%a5%88%5d(on-cut)krk.mp4'>命の灯火[古賀英里奈](on-cut)krk</a>
+  </div>
+  <div class='card-body'>
+    <div class='meta'><span class='label'>作品名</span> <a href='search_all.html?q=%e5%a4%a7%e4%b9%b1%e9%97%98%e3%82%b9%e3%83%9e%e3%83%83%e3%82%b7%e3%83%a5%e3%83%96%e3%83%a9%e3%82%b6%e3%83%bc%e3%82%ba+SPECIAL'>大乱闘スマッシュブラザーズ SPECIAL</a></div>
+    <div class='meta'><span class='label'>歌い手</span> </div>
+    <div class='meta'><span class='label'>制作者</span> 黒河</div>
+    <div class='meta'><span class='label'>最終更新日</span> 2023/09/22</div>
+    <div class='meta'><span class='label'>ファイル名</span> <a data-q='%e3%80%90%e5%a4%a7%e4%b9%b1%e9%97%98%e3%82%b9%e3%83%9e%e3%83%83%e3%82%b7%e3%83%a5%e3%83%96%e3%83%a9%e3%82%b6%e3%83%bc%e3%82%ba+SPECIAL%e3%80%91%5bTM%5d%e5%91%bd%e3%81%ae%e7%81%af%e7%81%ab%5b%e5%8f%a4%e8%b3%80%e8%8b%b1%e9%87%8c%e5%a5%88%5d(on-cut)krk.mp4'>【大乱闘スマッシュブラザーズ SPECIAL】[TM]命の灯火[古賀英里奈](on-cut)krk.mp4</a></div>
+  </div>
+</div>
+<div class='card' data-year='2023' data-yearband='2023' data-updated='20230922' data-priority='999'>
+  <div class='card-title'>
+    <a data-q='%e3%80%90%e3%82%bf%e3%82%af%e3%83%86%e3%82%a3%e3%82%ab%e3%83%ab%e3%83%ad%e3%82%a2%e3%80%91%5bED%5d%e3%83%a2%e3%83%8e%e3%82%af%e3%83%ad%e3%83%bc%e3%83%a0%5b%e4%b8%ad%e5%8e%9f%e9%ba%bb%e8%a1%a3%5d(on-cut)krk.mp4'>モノクローム[中原麻衣](on-cut)krk</a>
+  </div>
+  <div class='card-body'>
+    <div class='meta'><span class='label'>作品名</span> <a href='search_all.html?q=%e3%82%bf%e3%82%af%e3%83%86%e3%82%a3%e3%82%ab%e3%83%ab%e3%83%ad%e3%82%a2'>タクティカルロア</a></div>
+    <div class='meta'><span class='label'>歌い手</span> </div>
+    <div class='meta'><span class='label'>制作者</span> 黒河</div>
+    <div class='meta'><span class='label'>最終更新日</span> 2023/09/22</div>
+    <div class='meta'><span class='label'>ファイル名</span> <a data-q='%e3%80%90%e3%82%bf%e3%82%af%e3%83%86%e3%82%a3%e3%82%ab%e3%83%ab%e3%83%ad%e3%82%a2%e3%80%91%5bED%5d%e3%83%a2%e3%83%8e%e3%82%af%e3%83%ad%e3%83%bc%e3%83%a0%5b%e4%b8%ad%e5%8e%9f%e9%ba%bb%e8%a1%a3%5d(on-cut)krk.mp4'>【タクティカルロア】[ED]モノクローム[中原麻衣](on-cut)krk.mp4</a></div>
+  </div>
+</div>
+<div class='card' data-year='2023' data-yearband='2023' data-updated='20230922' data-priority='999'>
+  <div class='card-title'>
+    <a data-q='%e3%80%90TIME+DEFENDERS%e3%80%91%5bTM%5dNever+Too+Late%5bKOTOKO%5d(on-cut)krk.mp4'>Never Too Late[KOTOKO](on-cut)krk</a>
+  </div>
+  <div class='card-body'>
+    <div class='meta'><span class='label'>作品名</span> <a href='search_all.html?q=TIME+DEFENDERS'>TIME DEFENDERS</a></div>
+    <div class='meta'><span class='label'>歌い手</span> </div>
+    <div class='meta'><span class='label'>制作者</span> 黒河</div>
+    <div class='meta'><span class='label'>最終更新日</span> 2023/09/22</div>
+    <div class='meta'><span class='label'>ファイル名</span> <a data-q='%e3%80%90TIME+DEFENDERS%e3%80%91%5bTM%5dNever+Too+Late%5bKOTOKO%5d(on-cut)krk.mp4'>【TIME DEFENDERS】[TM]Never Too Late[KOTOKO](on-cut)krk.mp4</a></div>
+  </div>
+</div>
+<div class='card' data-year='2023' data-yearband='2023' data-updated='20230922' data-priority='999'>
+  <div class='card-title'>
+    <a data-q='%e3%80%90DUELSAVIOR%e3%80%91%5bOP%5dNo+WAY+OUT%5b%e3%82%b5%e3%82%a4%e3%82%ad%e3%83%83%e3%82%af%e3%83%a9%e3%83%90%e3%83%bc%5d(on-cut)krk.mp4'>No WAY OUT[サイキックラバー](on-cut)krk</a>
+  </div>
+  <div class='card-body'>
+    <div class='meta'><span class='label'>作品名</span> <a href='search_all.html?q=DUELSAVIOR'>DUELSAVIOR</a></div>
+    <div class='meta'><span class='label'>歌い手</span> </div>
+    <div class='meta'><span class='label'>制作者</span> 黒河</div>
+    <div class='meta'><span class='label'>最終更新日</span> 2023/09/22</div>
+    <div class='meta'><span class='label'>ファイル名</span> <a data-q='%e3%80%90DUELSAVIOR%e3%80%91%5bOP%5dNo+WAY+OUT%5b%e3%82%b5%e3%82%a4%e3%82%ad%e3%83%83%e3%82%af%e3%83%a9%e3%83%90%e3%83%bc%5d(on-cut)krk.mp4'>【DUELSAVIOR】[OP]No WAY OUT[サイキックラバー](on-cut)krk.mp4</a></div>
+  </div>
+</div>
+<div class='card' data-year='2023' data-yearband='2023' data-updated='20230921' data-priority='999'>
+  <div class='card-title'>
+    <a data-q='%e3%80%90%e3%82%82%e3%81%ae%e3%81%ae%e3%81%8c%e3%81%9f%e3%82%8a+%e7%ac%ac%e4%ba%8c%e7%ab%a0%e3%80%91%5bOP%5d%e8%aa%b0%e3%81%8c%e7%82%ba%5b%e3%83%a1%e3%82%ac%e3%83%86%e3%83%a9%e3%83%bb%e3%82%bc%e3%83%ad%5d(on-cut)krk.mp4'>誰が為[メガテラ・ゼロ](on-cut)krk</a>
+  </div>
+  <div class='card-body'>
+    <div class='meta'><span class='label'>作品名</span> <a href='search_all.html?q=%e3%82%82%e3%81%ae%e3%81%ae%e3%81%8c%e3%81%9f%e3%82%8a+%e7%ac%ac%e4%ba%8c%e7%ab%a0'>もののがたり 第二章</a></div>
+    <div class='meta'><span class='label'>歌い手</span> </div>
+    <div class='meta'><span class='label'>制作者</span> 黒河</div>
+    <div class='meta'><span class='label'>最終更新日</span> 2023/09/21</div>
+    <div class='meta'><span class='label'>ファイル名</span> <a data-q='%e3%80%90%e3%82%82%e3%81%ae%e3%81%ae%e3%81%8c%e3%81%9f%e3%82%8a+%e7%ac%ac%e4%ba%8c%e7%ab%a0%e3%80%91%5bOP%5d%e8%aa%b0%e3%81%8c%e7%82%ba%5b%e3%83%a1%e3%82%ac%e3%83%86%e3%83%a9%e3%83%bb%e3%82%bc%e3%83%ad%5d(on-cut)krk.mp4'>【もののがたり 第二章】[OP]誰が為[メガテラ・ゼロ](on-cut)krk.mp4</a></div>
+  </div>
+</div>
+<div class='card' data-year='2023' data-yearband='2023' data-updated='20230921' data-priority='3'>
+  <div class='card-title'>
+    <a data-q='%e3%82%bf%e3%83%83%e3%83%81+(spleeter-on)+%e3%82%bf%e3%83%83%e3%83%81%e2%80%bb%e3%82%bf%e3%83%83%e3%83%84+%e6%ad%8c%e8%a9%9e%e3%81%ae%e3%81%bf+%e4%b8%ad%e6%97%a5+%e7%ab%8b%e6%b5%aa%e7%9b%a3%e7%9d%a3%e3%81%ae%e6%9b%bf%e3%81%88%e6%ad%8c+MAD+%e5%8b%95%e7%94%bb%e4%bd%9c%e6%88%90%e8%80%85+%e3%81%93%e3%83%bc%e3%81%a1%e3%82%93A%e3%81%95%e3%82%93.mp4'>タッチ (spleeter-on) タッチ※タッツ 歌詞のみ 中日 立浪監督の替え歌 MAD 動画作成者 こーちんAさん</a>
+  </div>
+  <div class='card-body'>
+    <div class='meta'><span class='label'>作品名</span> <a href='search_all.html?q=%e3%82%a2%e3%83%8b%e3%83%a1%e3%83%bb%e3%82%b2%e3%83%bc%e3%83%a0%e6%98%a0%e5%83%8f+MAD%e7%b3%bb%2b%e3%81%9d%e3%81%ae%e4%bb%96'>アニメ・ゲーム映像 MAD系+その他</a></div>
+    <div class='meta'><span class='label'>歌い手</span> </div>
+    <div class='meta'><span class='label'>制作者</span> madoka</div>
+    <div class='meta'><span class='label'>最終更新日</span> 2023/09/21</div>
+    <div class='meta'><span class='label'>ファイル名</span> <a data-q='%e3%82%bf%e3%83%83%e3%83%81+(spleeter-on)+%e3%82%bf%e3%83%83%e3%83%81%e2%80%bb%e3%82%bf%e3%83%83%e3%83%84+%e6%ad%8c%e8%a9%9e%e3%81%ae%e3%81%bf+%e4%b8%ad%e6%97%a5+%e7%ab%8b%e6%b5%aa%e7%9b%a3%e7%9d%a3%e3%81%ae%e6%9b%bf%e3%81%88%e6%ad%8c+MAD+%e5%8b%95%e7%94%bb%e4%bd%9c%e6%88%90%e8%80%85+%e3%81%93%e3%83%bc%e3%81%a1%e3%82%93A%e3%81%95%e3%82%93.mp4'>タッチ (spleeter-on) タッチ※タッツ 歌詞のみ 中日 立浪監督の替え歌 MAD 動画作成者 こーちんAさん.mp4</a></div>
+  </div>
+</div>
+<div class='card' data-year='2023' data-yearband='2023' data-updated='20230921' data-priority='999'>
+  <div class='card-title'>
+    <a data-q='FREEDOM%e3%80%90JAM+Prroject+4thLIVE+VICTORY(ON%ef%bc%8fVC)%e3%80%91.mp4'>FREEDOM【JAM Prroject 4thLIVE VICTORY(ON／VC)】</a>
+  </div>
+  <div class='card-body'>
+    <div class='meta'><span class='label'>作品名</span> <a href='search_all.html?q=JAM+Prroject+4thLIVE+VICTORY(ON%ef%bc%8fVC)'>JAM Prroject 4thLIVE VICTORY(ON／VC)</a></div>
+    <div class='meta'><span class='label'>歌い手</span> VC)】</div>
+    <div class='meta'><span class='label'>制作者</span> </div>
+    <div class='meta'><span class='label'>最終更新日</span> 2023/09/21</div>
+    <div class='meta'><span class='label'>ファイル名</span> <a data-q='FREEDOM%e3%80%90JAM+Prroject+4thLIVE+VICTORY(ON%ef%bc%8fVC)%e3%80%91.mp4'>FREEDOM【JAM Prroject 4thLIVE VICTORY(ON／VC)】.mp4</a></div>
+  </div>
+</div>
+<div class='card' data-year='2023' data-yearband='2023' data-updated='20230921' data-priority='999'>
+  <div class='card-title'>
+    <a data-q='%e3%80%90%e8%8b%b1%e9%9b%84%e6%95%99%e5%ae%a4%e3%80%91%e3%80%8cBravery%ef%bc%9f+Naturally%ef%bc%9f%e3%80%8d%5bOP%5d%5b%e6%a8%8b%e5%8f%a3%e6%a5%93%5d%5b2tr+Off-On%5d.mp4'>「Bravery？ Naturally？」[OP][樋口楓][2tr Off-On]</a>
+  </div>
+  <div class='card-body'>
+    <div class='meta'><span class='label'>作品名</span> <a href='search_all.html?q=%e8%8b%b1%e9%9b%84%e6%95%99%e5%ae%a4'>英雄教室</a></div>
+    <div class='meta'><span class='label'>歌い手</span> </div>
+    <div class='meta'><span class='label'>制作者</span> </div>
+    <div class='meta'><span class='label'>最終更新日</span> 2023/09/21</div>
+    <div class='meta'><span class='label'>ファイル名</span> <a data-q='%e3%80%90%e8%8b%b1%e9%9b%84%e6%95%99%e5%ae%a4%e3%80%91%e3%80%8cBravery%ef%bc%9f+Naturally%ef%bc%9f%e3%80%8d%5bOP%5d%5b%e6%a8%8b%e5%8f%a3%e6%a5%93%5d%5b2tr+Off-On%5d.mp4'>【英雄教室】「Bravery？ Naturally？」[OP][樋口楓][2tr Off-On].mp4</a></div>
+  </div>
+</div>
+<div class='card' data-year='2023' data-yearband='2023' data-updated='20230920' data-priority='999'>
+  <div class='card-title'>
+    <a data-q='%e3%83%89%e3%83%a9%e3%83%b3%e3%82%af%e3%83%a2%e3%83%b3%e3%82%ad%e3%83%bc%e9%85%94%e6%8b%b3+%e4%b8%bb%e9%a1%8c%e6%ad%8c_%e6%8b%b3%e6%b3%95%e6%b7%b7%e4%b9%b1+(%e3%82%ab%e3%83%b3%e3%83%95%e3%83%bc%e3%82%b8%e3%83%a7%e3%83%b3)_%e5%9b%9b%e4%ba%ba%e5%9b%83%e5%ad%90_2CH.mp4'>ドランクモンキー酔拳 主題歌_拳法混乱 (カンフージョン)_四人囃子_2CH</a>
+  </div>
+  <div class='card-body'>
+    <div class='meta'><span class='label'>作品名</span> <a href='search_all.html?q=%e7%89%b9%e6%92%ae%e3%82%bd%e3%83%b3%ef%bc%86%e3%83%89%e3%83%a9%e3%83%9e%ef%bc%86%e6%ad%8c%e8%ac%a1%e6%9b%b2%e7%b3%bb%e5%8b%95%e7%94%bb'>特撮ソン＆ドラマ＆歌謡曲系動画</a></div>
+    <div class='meta'><span class='label'>歌い手</span> </div>
+    <div class='meta'><span class='label'>制作者</span> </div>
+    <div class='meta'><span class='label'>最終更新日</span> 2023/09/20</div>
+    <div class='meta'><span class='label'>ファイル名</span> <a data-q='%e3%83%89%e3%83%a9%e3%83%b3%e3%82%af%e3%83%a2%e3%83%b3%e3%82%ad%e3%83%bc%e9%85%94%e6%8b%b3+%e4%b8%bb%e9%a1%8c%e6%ad%8c_%e6%8b%b3%e6%b3%95%e6%b7%b7%e4%b9%b1+(%e3%82%ab%e3%83%b3%e3%83%95%e3%83%bc%e3%82%b8%e3%83%a7%e3%83%b3)_%e5%9b%9b%e4%ba%ba%e5%9b%83%e5%ad%90_2CH.mp4'>ドランクモンキー酔拳 主題歌_拳法混乱 (カンフージョン)_四人囃子_2CH.mp4</a></div>
+  </div>
+</div>
+<div class='card' data-year='2023' data-yearband='2023' data-updated='20230920' data-priority='999'>
+  <div class='card-title'>
+    <a data-q='%e3%80%90%e3%83%aa%e3%83%aa%e3%83%83%e3%82%af%e3%83%93%e3%83%87%e3%82%aa%e6%98%a0%e5%83%8f%e3%80%91%5b%e8%93%ae%e3%83%8e%e7%a9%ba%e5%a5%b3%e5%ad%a6%e9%99%a2%e3%82%b9%e3%82%af%e3%83%bc%e3%83%ab%e3%82%a2%e3%82%a4%e3%83%89%e3%83%ab%e3%82%af%e3%83%a9%e3%83%96%5d%e5%a4%8f%e3%82%81%e3%81%8d%e3%83%9a%e3%82%a4%e3%83%b3_%e3%83%a9%e3%83%96%e3%83%a9%e3%82%a4%e3%83%96%ef%bc%81%e8%93%ae%e3%83%8e%e7%a9%ba%e5%a5%b3%e5%ad%a6%e9%99%a2%e3%82%b9%e3%82%af%e3%83%bc%e3%83%ab%e3%82%a2%e3%82%a4%e3%83%89%e3%83%ab%e3%82%af%e3%83%a9%e3%83%96%5b103%e6%9c%9f8%e6%9c%88%e5%ba%a6Fes%c3%97LIVE%e6%a5%bd%e6%9b%b2%5d_%5b2tr%5d(On-Cut).mp4'>夏めきペイン_ラブライブ！蓮ノ空女学院スクールアイドルクラブ[103期8月度Fes&#215;LIVE楽曲]_[2tr](On-Cut)</a>
+  </div>
+  <div class='card-body'>
+    <div class='meta'><span class='label'>作品名</span> <a href='search_all.html?q=%e3%83%aa%e3%83%aa%e3%83%83%e3%82%af%e3%83%93%e3%83%87%e3%82%aa%e6%98%a0%e5%83%8f'>リリックビデオ映像</a></div>
+    <div class='meta'><span class='label'>歌い手</span> </div>
+    <div class='meta'><span class='label'>制作者</span> </div>
+    <div class='meta'><span class='label'>最終更新日</span> 2023/09/20</div>
+    <div class='meta'><span class='label'>ファイル名</span> <a data-q='%e3%80%90%e3%83%aa%e3%83%aa%e3%83%83%e3%82%af%e3%83%93%e3%83%87%e3%82%aa%e6%98%a0%e5%83%8f%e3%80%91%5b%e8%93%ae%e3%83%8e%e7%a9%ba%e5%a5%b3%e5%ad%a6%e9%99%a2%e3%82%b9%e3%82%af%e3%83%bc%e3%83%ab%e3%82%a2%e3%82%a4%e3%83%89%e3%83%ab%e3%82%af%e3%83%a9%e3%83%96%5d%e5%a4%8f%e3%82%81%e3%81%8d%e3%83%9a%e3%82%a4%e3%83%b3_%e3%83%a9%e3%83%96%e3%83%a9%e3%82%a4%e3%83%96%ef%bc%81%e8%93%ae%e3%83%8e%e7%a9%ba%e5%a5%b3%e5%ad%a6%e9%99%a2%e3%82%b9%e3%82%af%e3%83%bc%e3%83%ab%e3%82%a2%e3%82%a4%e3%83%89%e3%83%ab%e3%82%af%e3%83%a9%e3%83%96%5b103%e6%9c%9f8%e6%9c%88%e5%ba%a6Fes%c3%97LIVE%e6%a5%bd%e6%9b%b2%5d_%5b2tr%5d(On-Cut).mp4'>【リリックビデオ映像】[蓮ノ空女学院スクールアイドルクラブ]夏めきペイン_ラブライブ！蓮ノ空女学院スクールアイドルクラブ[103期8月度Fes&#215;LIVE楽曲]_[2tr](On-Cut).mp4</a></div>
+  </div>
+</div>
+<div class='card' data-year='2023' data-yearband='2023' data-updated='20230920' data-priority='999'>
+  <div class='card-title'>
+    <a data-q='%e5%b0%91%e6%9e%97%e5%af%ba%e6%9c%a8%e4%ba%ba%e6%8b%b3+%e4%b8%bb%e9%a1%8c%e6%ad%8c_%e3%83%9f%e3%83%a9%e3%82%af%e3%83%ab%e3%83%bb%e3%82%ac%e3%82%a4_%e8%ac%9d%e8%8a%b1+%e7%be%a9%e5%93%b2_2CH.mp4'>少林寺木人拳 主題歌_ミラクル・ガイ_謝花 義哲_2CH</a>
+  </div>
+  <div class='card-body'>
+    <div class='meta'><span class='label'>作品名</span> <a href='search_all.html?q=%e7%89%b9%e6%92%ae%e3%82%bd%e3%83%b3%ef%bc%86%e3%83%89%e3%83%a9%e3%83%9e%ef%bc%86%e6%ad%8c%e8%ac%a1%e6%9b%b2%e7%b3%bb%e5%8b%95%e7%94%bb'>特撮ソン＆ドラマ＆歌謡曲系動画</a></div>
+    <div class='meta'><span class='label'>歌い手</span> </div>
+    <div class='meta'><span class='label'>制作者</span> </div>
+    <div class='meta'><span class='label'>最終更新日</span> 2023/09/20</div>
+    <div class='meta'><span class='label'>ファイル名</span> <a data-q='%e5%b0%91%e6%9e%97%e5%af%ba%e6%9c%a8%e4%ba%ba%e6%8b%b3+%e4%b8%bb%e9%a1%8c%e6%ad%8c_%e3%83%9f%e3%83%a9%e3%82%af%e3%83%ab%e3%83%bb%e3%82%ac%e3%82%a4_%e8%ac%9d%e8%8a%b1+%e7%be%a9%e5%93%b2_2CH.mp4'>少林寺木人拳 主題歌_ミラクル・ガイ_謝花 義哲_2CH.mp4</a></div>
+  </div>
+</div>
+<div class='card' data-year='2023' data-yearband='2023' data-updated='20230920' data-priority='4'>
+  <div class='card-title'>
+    <a data-q='%e3%80%90Do+It+Yourself!!+-%e3%81%a9%e3%81%85%e3%83%bc%e3%83%bb%e3%81%84%e3%81%a3%e3%81%a8%e3%83%bb%e3%82%86%e3%81%82%e3%81%9b%e3%82%8b%e3%81%b5-%e3%80%91%e3%83%af%e3%82%af%e3%83%af%e3%82%af%e3%83%af%e3%83%b3%e3%83%af%e3%83%b3%ef%bc%8f%e5%b1%b1%e6%9c%ac%e3%83%a1%e3%83%bc%e3%82%b3.mp4'>ワクワクワンワン</a>
+  </div>
+  <div class='card-body'>
+    <div class='meta'><span class='label'>作品名</span> <a href='search_all.html?q=Do+It+Yourself!!+-%e3%81%a9%e3%81%85%e3%83%bc%e3%83%bb%e3%81%84%e3%81%a3%e3%81%a8%e3%83%bb%e3%82%86%e3%81%82%e3%81%9b%e3%82%8b%e3%81%b5-'>Do It Yourself!! -どぅー・いっと・ゆあせるふ-</a></div>
+    <div class='meta'><span class='label'>歌い手</span> 山本メーコ</div>
+    <div class='meta'><span class='label'>制作者</span> なぎ</div>
+    <div class='meta'><span class='label'>最終更新日</span> 2023/09/20</div>
+    <div class='meta'><span class='label'>ファイル名</span> <a data-q='%e3%80%90Do+It+Yourself!!+-%e3%81%a9%e3%81%85%e3%83%bc%e3%83%bb%e3%81%84%e3%81%a3%e3%81%a8%e3%83%bb%e3%82%86%e3%81%82%e3%81%9b%e3%82%8b%e3%81%b5-%e3%80%91%e3%83%af%e3%82%af%e3%83%af%e3%82%af%e3%83%af%e3%83%b3%e3%83%af%e3%83%b3%ef%bc%8f%e5%b1%b1%e6%9c%ac%e3%83%a1%e3%83%bc%e3%82%b3.mp4'>【Do It Yourself!! -どぅー・いっと・ゆあせるふ-】ワクワクワンワン／山本メーコ.mp4</a></div>
+  </div>
+</div>
+<div class='card' data-year='2023' data-yearband='2023' data-updated='20230920' data-priority='999'>
+  <div class='card-title'>
+    <a data-q='%e3%82%a6%e3%83%ab%e3%83%88%e3%83%a9%e3%83%9e%e3%83%b3%e3%83%96%e3%83%ac%e3%83%bc%e3%82%b6%e3%83%bc+ED1_BLACK+STAR_MindaRyn_2CH.mp4'>ウルトラマンブレーザー ED1_BLACK STAR_MindaRyn_2CH</a>
+  </div>
+  <div class='card-body'>
+    <div class='meta'><span class='label'>作品名</span> <a href='search_all.html?q=%e7%89%b9%e6%92%ae%e3%82%bd%e3%83%b3%ef%bc%86%e3%83%89%e3%83%a9%e3%83%9e%ef%bc%86%e6%ad%8c%e8%ac%a1%e6%9b%b2%e7%b3%bb%e5%8b%95%e7%94%bb'>特撮ソン＆ドラマ＆歌謡曲系動画</a></div>
+    <div class='meta'><span class='label'>歌い手</span> </div>
+    <div class='meta'><span class='label'>制作者</span> </div>
+    <div class='meta'><span class='label'>最終更新日</span> 2023/09/20</div>
+    <div class='meta'><span class='label'>ファイル名</span> <a data-q='%e3%82%a6%e3%83%ab%e3%83%88%e3%83%a9%e3%83%9e%e3%83%b3%e3%83%96%e3%83%ac%e3%83%bc%e3%82%b6%e3%83%bc+ED1_BLACK+STAR_MindaRyn_2CH.mp4'>ウルトラマンブレーザー ED1_BLACK STAR_MindaRyn_2CH.mp4</a></div>
+  </div>
+</div>
+<div class='card' data-year='2023' data-yearband='2023' data-updated='20230920' data-priority='4'>
+  <div class='card-title'>
+    <a data-q='%e3%80%90%e3%82%ac%e3%83%bc%e3%83%aa%e3%83%83%e3%82%b7%e3%83%a5%e3%83%8a%e3%83%b3%e3%83%90%e3%83%bc%e3%80%91%e6%98%8e%e6%97%a5%e3%81%b8%e3%81%ae%e9%80%94%e4%b8%ad%e3%81%a7%ef%bc%88%e3%83%91%e3%83%bc%e3%83%88%e5%88%86%e3%81%91%ef%bc%89%ef%bc%8f%e3%82%ac%e3%83%bc%e3%83%aa%e3%83%83%e3%82%b7%e3%83%a5+%e3%83%8a%e3%83%b3%e3%83%90%e3%83%bc%2b%e6%a1%9c%e3%83%b6%e4%b8%98%e4%b8%83%e6%b5%b7%ef%bc%bbon-off%ef%bc%bd.mp4'>明日への途中で（パート分け）</a>
+  </div>
+  <div class='card-body'>
+    <div class='meta'><span class='label'>作品名</span> <a href='search_all.html?q=%e3%82%ac%e3%83%bc%e3%83%aa%e3%83%83%e3%82%b7%e3%83%a5%e3%83%8a%e3%83%b3%e3%83%90%e3%83%bc'>ガーリッシュナンバー</a></div>
+    <div class='meta'><span class='label'>歌い手</span> ガーリッシュ ナンバー</div>
+    <div class='meta'><span class='label'>制作者</span> なぎ</div>
+    <div class='meta'><span class='label'>最終更新日</span> 2023/09/20</div>
+    <div class='meta'><span class='label'>ファイル名</span> <a data-q='%e3%80%90%e3%82%ac%e3%83%bc%e3%83%aa%e3%83%83%e3%82%b7%e3%83%a5%e3%83%8a%e3%83%b3%e3%83%90%e3%83%bc%e3%80%91%e6%98%8e%e6%97%a5%e3%81%b8%e3%81%ae%e9%80%94%e4%b8%ad%e3%81%a7%ef%bc%88%e3%83%91%e3%83%bc%e3%83%88%e5%88%86%e3%81%91%ef%bc%89%ef%bc%8f%e3%82%ac%e3%83%bc%e3%83%aa%e3%83%83%e3%82%b7%e3%83%a5+%e3%83%8a%e3%83%b3%e3%83%90%e3%83%bc%2b%e6%a1%9c%e3%83%b6%e4%b8%98%e4%b8%83%e6%b5%b7%ef%bc%bbon-off%ef%bc%bd.mp4'>【ガーリッシュナンバー】明日への途中で（パート分け）／ガーリッシュ ナンバー+桜ヶ丘七海［on-off］.mp4</a></div>
+  </div>
+</div>
+<div class='card' data-year='2023' data-yearband='2023' data-updated='20230920' data-priority='999'>
+  <div class='card-title'>
+    <a data-q='%e7%89%b9%e6%8d%9c%e3%82%a8%e3%82%af%e3%82%b7%e3%83%bc%e3%83%89%e3%83%a9%e3%83%95%e3%83%88%e3%80%90%e5%ae%ae%e5%86%85%e3%82%bf%e3%82%ab%e3%83%a6%e3%82%ad%e3%83%bb%e3%82%b9%e3%83%bc%e3%83%91%e3%83%bc%e3%83%92%e3%83%bc%e3%83%ad%e3%83%bc%e9%ad%822000+%e5%a4%8f%e3%81%ae%e9%99%a3(ON%ef%bc%8fVC)%e3%80%91.mp4'>特捜エクシードラフト【宮内タカユキ・スーパーヒーロー魂2000 夏の陣(ON／VC)】</a>
+  </div>
+  <div class='card-body'>
+    <div class='meta'><span class='label'>作品名</span> <a href='search_all.html?q=%e5%ae%ae%e5%86%85%e3%82%bf%e3%82%ab%e3%83%a6%e3%82%ad%e3%83%bb%e3%82%b9%e3%83%bc%e3%83%91%e3%83%bc%e3%83%92%e3%83%bc%e3%83%ad%e3%83%bc%e9%ad%822000+%e5%a4%8f%e3%81%ae%e9%99%a3(ON%ef%bc%8fVC)'>宮内タカユキ・スーパーヒーロー魂2000 夏の陣(ON／VC)</a></div>
+    <div class='meta'><span class='label'>歌い手</span> VC)】</div>
+    <div class='meta'><span class='label'>制作者</span> </div>
+    <div class='meta'><span class='label'>最終更新日</span> 2023/09/20</div>
+    <div class='meta'><span class='label'>ファイル名</span> <a data-q='%e7%89%b9%e6%8d%9c%e3%82%a8%e3%82%af%e3%82%b7%e3%83%bc%e3%83%89%e3%83%a9%e3%83%95%e3%83%88%e3%80%90%e5%ae%ae%e5%86%85%e3%82%bf%e3%82%ab%e3%83%a6%e3%82%ad%e3%83%bb%e3%82%b9%e3%83%bc%e3%83%91%e3%83%bc%e3%83%92%e3%83%bc%e3%83%ad%e3%83%bc%e9%ad%822000+%e5%a4%8f%e3%81%ae%e9%99%a3(ON%ef%bc%8fVC)%e3%80%91.mp4'>特捜エクシードラフト【宮内タカユキ・スーパーヒーロー魂2000 夏の陣(ON／VC)】.mp4</a></div>
+  </div>
+</div>
+<div class='card' data-year='2023' data-yearband='2023' data-updated='20230920' data-priority='2'>
+  <div class='card-title'>
+    <a data-q='%e7%95%b0%e4%b8%96%e7%95%8c%e3%81%8b%e3%82%8b%e3%81%a6%e3%81%a3%e3%81%a8%ef%bc%8f%e3%82%a2%e3%82%a4%e3%83%b3%e3%82%ba%ef%bc%88%e6%97%a5%e9%87%8e%e8%81%a1%ef%bc%89%e3%80%81%e3%82%ab%e3%82%ba%e3%83%9e%ef%bc%88%e7%a6%8f%e5%b3%b6%e6%bd%a4%ef%bc%89%e3%80%81%e3%82%b9%e3%83%90%e3%83%ab%ef%bc%88%e5%b0%8f%e6%9e%97%e8%a3%95%e4%bb%8b%ef%bc%89%e3%80%81%e3%82%bf%e3%83%bc%e3%83%8b%e3%83%a3%ef%bc%88%e6%82%a0%e6%9c%a8%e7%a2%a7%ef%bc%89%ef%bc%8f%e7%95%b0%e4%b8%96%e7%95%8c%e3%81%8b%e3%82%8b%e3%81%a6%e3%81%a3%e3%81%a8+(Off-On)+%e3%80%90%e3%83%91%e3%83%bc%e3%83%88%e5%88%86%e3%81%91%e3%80%91.mp4'>異世界かるてっと／アインズ（日野聡）、カズマ（福島潤）、スバル（小林裕介）、ターニャ（悠木碧）／異世界かるてっと (Off-On) 【パート分け】</a>
+  </div>
+  <div class='card-body'>
+    <div class='meta'><span class='label'>作品名</span> <a href='search_all.html?q=%e3%83%91%e3%83%bc%e3%83%88%e5%88%86%e3%81%91'>パート分け</a></div>
+    <div class='meta'><span class='label'>歌い手</span> 異世界かるてっと</div>
+    <div class='meta'><span class='label'>制作者</span> すみた</div>
+    <div class='meta'><span class='label'>最終更新日</span> 2023/09/20</div>
+    <div class='meta'><span class='label'>ファイル名</span> <a data-q='%e7%95%b0%e4%b8%96%e7%95%8c%e3%81%8b%e3%82%8b%e3%81%a6%e3%81%a3%e3%81%a8%ef%bc%8f%e3%82%a2%e3%82%a4%e3%83%b3%e3%82%ba%ef%bc%88%e6%97%a5%e9%87%8e%e8%81%a1%ef%bc%89%e3%80%81%e3%82%ab%e3%82%ba%e3%83%9e%ef%bc%88%e7%a6%8f%e5%b3%b6%e6%bd%a4%ef%bc%89%e3%80%81%e3%82%b9%e3%83%90%e3%83%ab%ef%bc%88%e5%b0%8f%e6%9e%97%e8%a3%95%e4%bb%8b%ef%bc%89%e3%80%81%e3%82%bf%e3%83%bc%e3%83%8b%e3%83%a3%ef%bc%88%e6%82%a0%e6%9c%a8%e7%a2%a7%ef%bc%89%ef%bc%8f%e7%95%b0%e4%b8%96%e7%95%8c%e3%81%8b%e3%82%8b%e3%81%a6%e3%81%a3%e3%81%a8+(Off-On)+%e3%80%90%e3%83%91%e3%83%bc%e3%83%88%e5%88%86%e3%81%91%e3%80%91.mp4'>異世界かるてっと／アインズ（日野聡）、カズマ（福島潤）、スバル（小林裕介）、ターニャ（悠木碧）／異世界かるてっと (Off-On) 【パート分け】.mp4</a></div>
+  </div>
+</div>
+<div class='card' data-year='2023' data-yearband='2023' data-updated='20230920' data-priority='3'>
+  <div class='card-title'>
+    <a data-q='%e6%96%87%e8%b1%aa%e3%82%b9%e3%83%88%e3%83%ac%e3%82%a4%e3%83%89%e3%83%83%e3%82%b0%e3%82%b9+%e7%ac%ac5%e3%82%b7%e3%83%bc%e3%82%ba%e3%83%b3+(spleeter-on)+%e8%bb%8c%e8%b7%a1%e2%80%bb%e3%83%a9%e3%83%83%e3%82%af%e3%83%a9%e3%82%a4%e3%83%95+MV.mp4'>文豪ストレイドッグス 第5シーズン (spleeter-on) 軌跡※ラックライフ MV</a>
+  </div>
+  <div class='card-body'>
+    <div class='meta'><span class='label'>作品名</span> <a href='search_all.html?q=%e3%81%be%e3%81%a9%e3%81%8b%e3%81%95%e3%82%93(%e3%83%89%e3%83%a9%e3%83%95%e3%83%88)'>まどかさん(ドラフト)</a></div>
+    <div class='meta'><span class='label'>歌い手</span> </div>
+    <div class='meta'><span class='label'>制作者</span> madoka</div>
+    <div class='meta'><span class='label'>最終更新日</span> 2023/09/20</div>
+    <div class='meta'><span class='label'>ファイル名</span> <a data-q='%e6%96%87%e8%b1%aa%e3%82%b9%e3%83%88%e3%83%ac%e3%82%a4%e3%83%89%e3%83%83%e3%82%b0%e3%82%b9+%e7%ac%ac5%e3%82%b7%e3%83%bc%e3%82%ba%e3%83%b3+(spleeter-on)+%e8%bb%8c%e8%b7%a1%e2%80%bb%e3%83%a9%e3%83%83%e3%82%af%e3%83%a9%e3%82%a4%e3%83%95+MV.mp4'>文豪ストレイドッグス 第5シーズン (spleeter-on) 軌跡※ラックライフ MV.mp4</a></div>
+  </div>
+</div>
+<div class='card' data-year='2023' data-yearband='2023' data-updated='20230919' data-priority='999'>
+  <div class='card-title'>
+    <a data-q='%e3%83%af%e3%83%b3%e3%83%81%e3%83%a3%e3%83%b3%e3%82%b9%ef%bc%81%e3%80%90%e3%82%b9%e3%83%bc%e3%83%91%e3%83%bc%e3%83%ad%e3%83%9c%e3%83%83%e3%83%88%e5%a4%a7%e6%88%a6DD%e3%83%bbJAM+Prroject(YOUTUBE%e5%8b%95%e7%94%bb%e4%bd%bf%e7%94%a8)%e3%80%91.mp4'>ワンチャンス！【スーパーロボット大戦DD・JAM Prroject(YOUTUBE動画使用)】</a>
+  </div>
+  <div class='card-body'>
+    <div class='meta'><span class='label'>作品名</span> <a href='search_all.html?q=%e3%82%b9%e3%83%bc%e3%83%91%e3%83%bc%e3%83%ad%e3%83%9c%e3%83%83%e3%83%88%e5%a4%a7%e6%88%a6DD%e3%83%bbJAM+Prroject(YOUTUBE%e5%8b%95%e7%94%bb%e4%bd%bf%e7%94%a8)'>スーパーロボット大戦DD・JAM Prroject(YOUTUBE動画使用)</a></div>
+    <div class='meta'><span class='label'>歌い手</span> </div>
+    <div class='meta'><span class='label'>制作者</span> </div>
+    <div class='meta'><span class='label'>最終更新日</span> 2023/09/19</div>
+    <div class='meta'><span class='label'>ファイル名</span> <a data-q='%e3%83%af%e3%83%b3%e3%83%81%e3%83%a3%e3%83%b3%e3%82%b9%ef%bc%81%e3%80%90%e3%82%b9%e3%83%bc%e3%83%91%e3%83%bc%e3%83%ad%e3%83%9c%e3%83%83%e3%83%88%e5%a4%a7%e6%88%a6DD%e3%83%bbJAM+Prroject(YOUTUBE%e5%8b%95%e7%94%bb%e4%bd%bf%e7%94%a8)%e3%80%91.mp4'>ワンチャンス！【スーパーロボット大戦DD・JAM Prroject(YOUTUBE動画使用)】.mp4</a></div>
+  </div>
+</div>
+<div class='card' data-year='2023' data-yearband='2023' data-updated='20230919' data-priority='999'>
+  <div class='card-title'>
+    <a data-q='In+my+Heart%e3%80%90JAM+Prroject+4thLIVE+VICTORY(ON%ef%bc%8fVC)%e3%80%91.mp4'>In my Heart【JAM Prroject 4thLIVE VICTORY(ON／VC)】</a>
+  </div>
+  <div class='card-body'>
+    <div class='meta'><span class='label'>作品名</span> <a href='search_all.html?q=JAM+Prroject+4thLIVE+VICTORY(ON%ef%bc%8fVC)'>JAM Prroject 4thLIVE VICTORY(ON／VC)</a></div>
+    <div class='meta'><span class='label'>歌い手</span> VC)】</div>
+    <div class='meta'><span class='label'>制作者</span> </div>
+    <div class='meta'><span class='label'>最終更新日</span> 2023/09/19</div>
+    <div class='meta'><span class='label'>ファイル名</span> <a data-q='In+my+Heart%e3%80%90JAM+Prroject+4thLIVE+VICTORY(ON%ef%bc%8fVC)%e3%80%91.mp4'>In my Heart【JAM Prroject 4thLIVE VICTORY(ON／VC)】.mp4</a></div>
+  </div>
+</div>
+<div class='card' data-year='2023' data-yearband='2023' data-updated='20230919' data-priority='999'>
+  <div class='card-title'>
+    <a data-q='%e3%80%90%e3%83%a9%e3%82%a4%e3%83%96%e6%98%a0%e5%83%8f+-+4th+Live+%e6%84%9b%e7%9f%a5%e5%85%ac%e6%bc%94Day2%e3%80%91%5bCatChu%ef%bc%81%5d%e3%82%aa%e3%83%ab%e3%82%bf%e3%83%8d%e3%82%a4%e3%83%88_%e3%83%a9%e3%83%96%e3%83%a9%e3%82%a4%e3%83%96%ef%bc%81%e3%82%b9%e3%83%bc%e3%83%91%e3%83%bc%e3%82%b9%e3%82%bf%e3%83%bc%ef%bc%81%ef%bc%81%5bUnit+Mini+Album%5d_%5b3tr%5d(Live-Cut-CDOn).mp4'>オルタネイト_ラブライブ！スーパースター！！[Unit Mini Album]_[3tr](Live-Cut-CDOn)</a>
+  </div>
+  <div class='card-body'>
+    <div class='meta'><span class='label'>作品名</span> <a href='search_all.html?q=%e3%83%a9%e3%82%a4%e3%83%96%e6%98%a0%e5%83%8f+-+4th+Live+%e6%84%9b%e7%9f%a5%e5%85%ac%e6%bc%94Day2'>ライブ映像 - 4th Live 愛知公演Day2</a></div>
+    <div class='meta'><span class='label'>歌い手</span> </div>
+    <div class='meta'><span class='label'>制作者</span> </div>
+    <div class='meta'><span class='label'>最終更新日</span> 2023/09/19</div>
+    <div class='meta'><span class='label'>ファイル名</span> <a data-q='%e3%80%90%e3%83%a9%e3%82%a4%e3%83%96%e6%98%a0%e5%83%8f+-+4th+Live+%e6%84%9b%e7%9f%a5%e5%85%ac%e6%bc%94Day2%e3%80%91%5bCatChu%ef%bc%81%5d%e3%82%aa%e3%83%ab%e3%82%bf%e3%83%8d%e3%82%a4%e3%83%88_%e3%83%a9%e3%83%96%e3%83%a9%e3%82%a4%e3%83%96%ef%bc%81%e3%82%b9%e3%83%bc%e3%83%91%e3%83%bc%e3%82%b9%e3%82%bf%e3%83%bc%ef%bc%81%ef%bc%81%5bUnit+Mini+Album%5d_%5b3tr%5d(Live-Cut-CDOn).mp4'>【ライブ映像 - 4th Live 愛知公演Day2】[CatChu！]オルタネイト_ラブライブ！スーパースター！！[Unit Mini Album]_[3tr](Live-Cut-CDOn).mp4</a></div>
+  </div>
+</div>
+<div class='card' data-year='2023' data-yearband='2023' data-updated='20230919' data-priority='999'>
+  <div class='card-title'>
+    <a data-q='%e3%80%90%e3%83%a9%e3%82%a4%e3%83%96%e6%98%a0%e5%83%8f+-+4th+Live+%e6%9d%b1%e4%ba%ac%e5%85%ac%e6%bc%94Day2%e3%80%91%5b5yncri5e%ef%bc%81%5dA+Little+Love_%e3%83%a9%e3%83%96%e3%83%a9%e3%82%a4%e3%83%96%ef%bc%81%e3%82%b9%e3%83%bc%e3%83%91%e3%83%bc%e3%82%b9%e3%82%bf%e3%83%bc%ef%bc%81%ef%bc%81%5bUnit+Mini+Album%5d_%5b2tr%5d(Live-Cut-CDOn).mp4'>A Little Love_ラブライブ！スーパースター！！[Unit Mini Album]_[2tr](Live-Cut-CDOn)</a>
+  </div>
+  <div class='card-body'>
+    <div class='meta'><span class='label'>作品名</span> <a href='search_all.html?q=%e3%83%a9%e3%82%a4%e3%83%96%e6%98%a0%e5%83%8f+-+4th+Live+%e6%9d%b1%e4%ba%ac%e5%85%ac%e6%bc%94Day2'>ライブ映像 - 4th Live 東京公演Day2</a></div>
+    <div class='meta'><span class='label'>歌い手</span> </div>
+    <div class='meta'><span class='label'>制作者</span> </div>
+    <div class='meta'><span class='label'>最終更新日</span> 2023/09/19</div>
+    <div class='meta'><span class='label'>ファイル名</span> <a data-q='%e3%80%90%e3%83%a9%e3%82%a4%e3%83%96%e6%98%a0%e5%83%8f+-+4th+Live+%e6%9d%b1%e4%ba%ac%e5%85%ac%e6%bc%94Day2%e3%80%91%5b5yncri5e%ef%bc%81%5dA+Little+Love_%e3%83%a9%e3%83%96%e3%83%a9%e3%82%a4%e3%83%96%ef%bc%81%e3%82%b9%e3%83%bc%e3%83%91%e3%83%bc%e3%82%b9%e3%82%bf%e3%83%bc%ef%bc%81%ef%bc%81%5bUnit+Mini+Album%5d_%5b2tr%5d(Live-Cut-CDOn).mp4'>【ライブ映像 - 4th Live 東京公演Day2】[5yncri5e！]A Little Love_ラブライブ！スーパースター！！[Unit Mini Album]_[2tr](Live-Cut-CDOn).mp4</a></div>
+  </div>
+</div>
+<div class='card' data-year='2023' data-yearband='2023' data-updated='20230919' data-priority='999'>
+  <div class='card-title'>
+    <a data-q='%e3%80%90%e3%83%a9%e3%82%a4%e3%83%96%e6%98%a0%e5%83%8f+-+4th+Live+%e6%84%9b%e7%9f%a5%e5%85%ac%e6%bc%94Day2%e3%80%91%5bCatChu%ef%bc%81%5d%e5%bd%b1%e9%81%8a%e3%81%b3_%e3%83%a9%e3%83%96%e3%83%a9%e3%82%a4%e3%83%96%ef%bc%81%e3%82%b9%e3%83%bc%e3%83%91%e3%83%bc%e3%82%b9%e3%82%bf%e3%83%bc%ef%bc%81%ef%bc%81%5bUnit+Mini+Album%5d_%5b3tr%5d(Live-Cut-CDOn).mp4'>影遊び_ラブライブ！スーパースター！！[Unit Mini Album]_[3tr](Live-Cut-CDOn)</a>
+  </div>
+  <div class='card-body'>
+    <div class='meta'><span class='label'>作品名</span> <a href='search_all.html?q=%e3%83%a9%e3%82%a4%e3%83%96%e6%98%a0%e5%83%8f+-+4th+Live+%e6%84%9b%e7%9f%a5%e5%85%ac%e6%bc%94Day2'>ライブ映像 - 4th Live 愛知公演Day2</a></div>
+    <div class='meta'><span class='label'>歌い手</span> </div>
+    <div class='meta'><span class='label'>制作者</span> </div>
+    <div class='meta'><span class='label'>最終更新日</span> 2023/09/19</div>
+    <div class='meta'><span class='label'>ファイル名</span> <a data-q='%e3%80%90%e3%83%a9%e3%82%a4%e3%83%96%e6%98%a0%e5%83%8f+-+4th+Live+%e6%84%9b%e7%9f%a5%e5%85%ac%e6%bc%94Day2%e3%80%91%5bCatChu%ef%bc%81%5d%e5%bd%b1%e9%81%8a%e3%81%b3_%e3%83%a9%e3%83%96%e3%83%a9%e3%82%a4%e3%83%96%ef%bc%81%e3%82%b9%e3%83%bc%e3%83%91%e3%83%bc%e3%82%b9%e3%82%bf%e3%83%bc%ef%bc%81%ef%bc%81%5bUnit+Mini+Album%5d_%5b3tr%5d(Live-Cut-CDOn).mp4'>【ライブ映像 - 4th Live 愛知公演Day2】[CatChu！]影遊び_ラブライブ！スーパースター！！[Unit Mini Album]_[3tr](Live-Cut-CDOn).mp4</a></div>
+  </div>
+</div>
+<div class='card' data-year='2023' data-yearband='2023' data-updated='20230919' data-priority='2'>
+  <div class='card-title'>
+    <a data-q='Edel+Lilie%ef%bc%8f%e4%b8%80%e6%9f%b3%e9%9a%8a%ef%bc%8f%e3%82%a2%e3%82%b5%e3%83%ab%e3%83%88%e3%83%aa%e3%83%aa%e3%82%a3+BOUQUET+(Off-On)+%e3%80%90%e3%83%91%e3%83%bc%e3%83%88%e5%88%86%e3%81%91%e3%80%91.mp4'>Edel Lilie／一柳隊／アサルトリリィ BOUQUET (Off-On) 【パート分け】</a>
+  </div>
+  <div class='card-body'>
+    <div class='meta'><span class='label'>作品名</span> <a href='search_all.html?q=%e3%83%91%e3%83%bc%e3%83%88%e5%88%86%e3%81%91'>パート分け</a></div>
+    <div class='meta'><span class='label'>歌い手</span> アサルトリリィ BOUQUET</div>
+    <div class='meta'><span class='label'>制作者</span> すみた</div>
+    <div class='meta'><span class='label'>最終更新日</span> 2023/09/19</div>
+    <div class='meta'><span class='label'>ファイル名</span> <a data-q='Edel+Lilie%ef%bc%8f%e4%b8%80%e6%9f%b3%e9%9a%8a%ef%bc%8f%e3%82%a2%e3%82%b5%e3%83%ab%e3%83%88%e3%83%aa%e3%83%aa%e3%82%a3+BOUQUET+(Off-On)+%e3%80%90%e3%83%91%e3%83%bc%e3%83%88%e5%88%86%e3%81%91%e3%80%91.mp4'>Edel Lilie／一柳隊／アサルトリリィ BOUQUET (Off-On) 【パート分け】.mp4</a></div>
+  </div>
+</div>
+<div class='card' data-year='2023' data-yearband='2023' data-updated='20230919' data-priority='4'>
+  <div class='card-title'>
+    <a data-q='%e3%80%90%e3%83%9f%e3%82%a4%e3%83%a9%e3%81%ae%e9%a3%bc%e3%81%84%e6%96%b9%e3%80%91%e3%83%ad%e3%82%bc%e3%83%83%e3%82%bf%e3%83%bb%e3%82%b9%e3%83%88%e3%83%bc%e3%83%b3%ef%bc%88%e3%83%80%e3%83%b3%e3%82%b9%e5%8b%95%e7%94%bb+%e3%83%a1%e3%82%a4%e3%83%b3%e3%82%ad%e3%83%a3%e3%82%b9%e3%83%88Ver%ef%bc%89%ef%bc%8f%e3%82%a4%e3%82%b1%e3%81%a6%e3%82%8b%e3%83%8f%e3%83%bc%e3%83%84.mp4'>ロゼッタ・ストーン（ダンス動画 メインキャストVer）</a>
+  </div>
+  <div class='card-body'>
+    <div class='meta'><span class='label'>作品名</span> <a href='search_all.html?q=%e3%83%9f%e3%82%a4%e3%83%a9%e3%81%ae%e9%a3%bc%e3%81%84%e6%96%b9'>ミイラの飼い方</a></div>
+    <div class='meta'><span class='label'>歌い手</span> イケてるハーツ</div>
+    <div class='meta'><span class='label'>制作者</span> なぎ</div>
+    <div class='meta'><span class='label'>最終更新日</span> 2023/09/19</div>
+    <div class='meta'><span class='label'>ファイル名</span> <a data-q='%e3%80%90%e3%83%9f%e3%82%a4%e3%83%a9%e3%81%ae%e9%a3%bc%e3%81%84%e6%96%b9%e3%80%91%e3%83%ad%e3%82%bc%e3%83%83%e3%82%bf%e3%83%bb%e3%82%b9%e3%83%88%e3%83%bc%e3%83%b3%ef%bc%88%e3%83%80%e3%83%b3%e3%82%b9%e5%8b%95%e7%94%bb+%e3%83%a1%e3%82%a4%e3%83%b3%e3%82%ad%e3%83%a3%e3%82%b9%e3%83%88Ver%ef%bc%89%ef%bc%8f%e3%82%a4%e3%82%b1%e3%81%a6%e3%82%8b%e3%83%8f%e3%83%bc%e3%83%84.mp4'>【ミイラの飼い方】ロゼッタ・ストーン（ダンス動画 メインキャストVer）／イケてるハーツ.mp4</a></div>
+  </div>
+</div>
+<div class='card' data-year='2023' data-yearband='2023' data-updated='20230918' data-priority='999'>
+  <div class='card-title'>
+    <a data-q='%e7%b4%84%e6%9d%9f%e3%81%ae%e5%9c%b0+%e3%80%90JAM+Prroject+4thLIVE+VICTORY(ON%ef%bc%8fVC)%e3%80%91.mp4'>約束の地 【JAM Prroject 4thLIVE VICTORY(ON／VC)】</a>
+  </div>
+  <div class='card-body'>
+    <div class='meta'><span class='label'>作品名</span> <a href='search_all.html?q=JAM+Prroject+4thLIVE+VICTORY(ON%ef%bc%8fVC)'>JAM Prroject 4thLIVE VICTORY(ON／VC)</a></div>
+    <div class='meta'><span class='label'>歌い手</span> VC)】</div>
+    <div class='meta'><span class='label'>制作者</span> </div>
+    <div class='meta'><span class='label'>最終更新日</span> 2023/09/18</div>
+    <div class='meta'><span class='label'>ファイル名</span> <a data-q='%e7%b4%84%e6%9d%9f%e3%81%ae%e5%9c%b0+%e3%80%90JAM+Prroject+4thLIVE+VICTORY(ON%ef%bc%8fVC)%e3%80%91.mp4'>約束の地 【JAM Prroject 4thLIVE VICTORY(ON／VC)】.mp4</a></div>
+  </div>
+</div>
+<div class='card' data-year='2023' data-yearband='2023' data-updated='20230918' data-priority='999'>
+  <div class='card-title'>
+    <a data-q='%e3%80%90BanG+Dream!%e3%80%91Ave+Mujica%ef%bc%8fAve+Mujica(UVRCUT_ON)..mp4'>Ave Mujica</a>
+  </div>
+  <div class='card-body'>
+    <div class='meta'><span class='label'>作品名</span> <a href='search_all.html?q=BanG+Dream!'>BanG Dream!</a></div>
+    <div class='meta'><span class='label'>歌い手</span> Ave Mujica.</div>
+    <div class='meta'><span class='label'>制作者</span> </div>
+    <div class='meta'><span class='label'>最終更新日</span> 2023/09/18</div>
+    <div class='meta'><span class='label'>ファイル名</span> <a data-q='%e3%80%90BanG+Dream!%e3%80%91Ave+Mujica%ef%bc%8fAve+Mujica(UVRCUT_ON)..mp4'>【BanG Dream!】Ave Mujica／Ave Mujica(UVRCUT_ON)..mp4</a></div>
+  </div>
+</div>
+<div class='card' data-year='2023' data-yearband='2023' data-updated='20230918' data-priority='999'>
+  <div class='card-title'>
+    <a data-q='%e6%80%aa%e7%8d%a3%e5%a4%a7%e5%a5%ae%e6%88%a6+%e3%83%80%e3%82%a4%e3%82%b4%e3%83%ad%e3%82%a6%e5%af%be%e3%82%b4%e3%83%aa%e3%82%a2%e3%82%b9_%e3%83%80%e3%82%a4%e3%82%b4%e3%83%ad%e3%82%a6%e5%af%be%e3%82%b4%e3%83%aa%e3%82%a2%e3%82%b9_%e5%ad%90%e9%96%80%e7%9c%9f%e4%ba%ba_2CH+OFF%e6%94%b9.mp4'>怪獣大奮戦 ダイゴロウ対ゴリアス_ダイゴロウ対ゴリアス_子門真人_2CH OFF改</a>
+  </div>
+  <div class='card-body'>
+    <div class='meta'><span class='label'>作品名</span> <a href='search_all.html?q=%e7%89%b9%e6%92%ae%e3%82%bd%e3%83%b3%ef%bc%86%e3%83%89%e3%83%a9%e3%83%9e%ef%bc%86%e6%ad%8c%e8%ac%a1%e6%9b%b2%e7%b3%bb%e5%8b%95%e7%94%bb'>特撮ソン＆ドラマ＆歌謡曲系動画</a></div>
+    <div class='meta'><span class='label'>歌い手</span> </div>
+    <div class='meta'><span class='label'>制作者</span> </div>
+    <div class='meta'><span class='label'>最終更新日</span> 2023/09/18</div>
+    <div class='meta'><span class='label'>ファイル名</span> <a data-q='%e6%80%aa%e7%8d%a3%e5%a4%a7%e5%a5%ae%e6%88%a6+%e3%83%80%e3%82%a4%e3%82%b4%e3%83%ad%e3%82%a6%e5%af%be%e3%82%b4%e3%83%aa%e3%82%a2%e3%82%b9_%e3%83%80%e3%82%a4%e3%82%b4%e3%83%ad%e3%82%a6%e5%af%be%e3%82%b4%e3%83%aa%e3%82%a2%e3%82%b9_%e5%ad%90%e9%96%80%e7%9c%9f%e4%ba%ba_2CH+OFF%e6%94%b9.mp4'>怪獣大奮戦 ダイゴロウ対ゴリアス_ダイゴロウ対ゴリアス_子門真人_2CH OFF改.mp4</a></div>
+  </div>
+</div>
+<div class='card' data-year='2023' data-yearband='2023' data-updated='20230918' data-priority='4'>
+  <div class='card-title'>
+    <a data-q='%e3%80%90%e3%81%98%e3%82%87%e3%81%97%e3%82%89%e3%81%8f%e3%80%91%e3%83%8b%e3%83%83%e3%83%9d%e3%83%b3%e7%ac%91%e9%a1%94%e7%99%be%e6%99%af%ef%bc%88%e3%83%91%e3%83%bc%e3%83%88%e5%88%86%e3%81%91%ef%bc%89%ef%bc%8f%e6%a1%83%e9%bb%92%e4%ba%ad%e4%b8%80%e9%96%80%ef%bc%bbon-off%ef%bc%bd.mp4'>ニッポン笑顔百景（パート分け）</a>
+  </div>
+  <div class='card-body'>
+    <div class='meta'><span class='label'>作品名</span> <a href='search_all.html?q=%e3%81%98%e3%82%87%e3%81%97%e3%82%89%e3%81%8f'>じょしらく</a></div>
+    <div class='meta'><span class='label'>歌い手</span> 桃黒亭一門</div>
+    <div class='meta'><span class='label'>制作者</span> なぎ</div>
+    <div class='meta'><span class='label'>最終更新日</span> 2023/09/18</div>
+    <div class='meta'><span class='label'>ファイル名</span> <a data-q='%e3%80%90%e3%81%98%e3%82%87%e3%81%97%e3%82%89%e3%81%8f%e3%80%91%e3%83%8b%e3%83%83%e3%83%9d%e3%83%b3%e7%ac%91%e9%a1%94%e7%99%be%e6%99%af%ef%bc%88%e3%83%91%e3%83%bc%e3%83%88%e5%88%86%e3%81%91%ef%bc%89%ef%bc%8f%e6%a1%83%e9%bb%92%e4%ba%ad%e4%b8%80%e9%96%80%ef%bc%bbon-off%ef%bc%bd.mp4'>【じょしらく】ニッポン笑顔百景（パート分け）／桃黒亭一門［on-off］.mp4</a></div>
+  </div>
+</div>
+<div class='card' data-year='2023' data-yearband='2023' data-updated='20230918' data-priority='4'>
+  <div class='card-title'>
+    <a data-q='%e3%80%90%e3%81%98%e3%82%87%e3%81%97%e3%82%89%e3%81%8f%e3%80%91%e3%81%8a%e5%be%8c%e3%81%8c%e3%82%88%e3%82%8d%e3%81%97%e3%81%8f%e3%81%a3%e3%81%a6%e2%80%a6%e3%82%88!%ef%bc%88Ver3%ef%bc%89%ef%bc%88%e3%83%91%e3%83%bc%e3%83%88%e5%88%86%e3%81%91%ef%bc%89+%ef%bc%8f%e6%a5%b5%e2%99%a8%e8%90%bd%e5%a5%b3%e4%bc%9a%ef%bc%bbon-off%ef%bc%bd.mp4'>お後がよろしくって…よ!（Ver3）（パート分け）</a>
+  </div>
+  <div class='card-body'>
+    <div class='meta'><span class='label'>作品名</span> <a href='search_all.html?q=%e3%81%98%e3%82%87%e3%81%97%e3%82%89%e3%81%8f'>じょしらく</a></div>
+    <div class='meta'><span class='label'>歌い手</span> 極♨落女会</div>
+    <div class='meta'><span class='label'>制作者</span> なぎ</div>
+    <div class='meta'><span class='label'>最終更新日</span> 2023/09/18</div>
+    <div class='meta'><span class='label'>ファイル名</span> <a data-q='%e3%80%90%e3%81%98%e3%82%87%e3%81%97%e3%82%89%e3%81%8f%e3%80%91%e3%81%8a%e5%be%8c%e3%81%8c%e3%82%88%e3%82%8d%e3%81%97%e3%81%8f%e3%81%a3%e3%81%a6%e2%80%a6%e3%82%88!%ef%bc%88Ver3%ef%bc%89%ef%bc%88%e3%83%91%e3%83%bc%e3%83%88%e5%88%86%e3%81%91%ef%bc%89+%ef%bc%8f%e6%a5%b5%e2%99%a8%e8%90%bd%e5%a5%b3%e4%bc%9a%ef%bc%bbon-off%ef%bc%bd.mp4'>【じょしらく】お後がよろしくって…よ!（Ver3）（パート分け） ／極♨落女会［on-off］.mp4</a></div>
+  </div>
+</div>
+<div class='card' data-year='2023' data-yearband='2023' data-updated='20230917' data-priority='999'>
+  <div class='card-title'>
+    <a data-q='clover+(Solty+Rei_OP)+meg+rock(%e6%97%a5%e5%90%91%e3%82%81%e3%81%90%e3%81%bf)+(2ch_OFF_ON).mp4'>clover (Solty Rei_OP) meg rock(日向めぐみ) (2ch_OFF_ON)</a>
+  </div>
+  <div class='card-body'>
+    <div class='meta'><span class='label'>作品名</span> <a href='search_all.html?q=2023.09'>2023.09</a></div>
+    <div class='meta'><span class='label'>歌い手</span> </div>
+    <div class='meta'><span class='label'>制作者</span> TUK</div>
+    <div class='meta'><span class='label'>最終更新日</span> 2023/09/17</div>
+    <div class='meta'><span class='label'>ファイル名</span> <a data-q='clover+(Solty+Rei_OP)+meg+rock(%e6%97%a5%e5%90%91%e3%82%81%e3%81%90%e3%81%bf)+(2ch_OFF_ON).mp4'>clover (Solty Rei_OP) meg rock(日向めぐみ) (2ch_OFF_ON).mp4</a></div>
+  </div>
+</div>
+<div class='card' data-year='2023' data-yearband='2023' data-updated='20230917' data-priority='999'>
+  <div class='card-title'>
+    <a data-q='%e3%82%aa%e3%83%aa%e3%83%92%e3%83%a1%e3%83%92%e3%82%b3%e3%83%9c%e3%82%b7+AYUMI+ONE%e3%80%90%e6%a0%aa%e5%bc%8f%e4%bc%9a%e7%a4%beAYUMI+ONE.+%e7%a4%be%e6%ad%8c%e3%83%bb%e5%b1%b1%e6%9c%ac%e6%ad%a3%e4%b9%8b%ef%bc%86%e3%83%94%e3%83%b3%e3%82%af%e3%83%94%e3%83%83%e3%82%ae%e3%83%bc%e3%82%ba%e3%80%91.mp4'>オリヒメヒコボシ AYUMI ONE【株式会社AYUMI ONE. 社歌・山本正之＆ピンクピッギーズ】</a>
+  </div>
+  <div class='card-body'>
+    <div class='meta'><span class='label'>作品名</span> <a href='search_all.html?q=%e6%a0%aa%e5%bc%8f%e4%bc%9a%e7%a4%beAYUMI+ONE.+%e7%a4%be%e6%ad%8c%e3%83%bb%e5%b1%b1%e6%9c%ac%e6%ad%a3%e4%b9%8b%ef%bc%86%e3%83%94%e3%83%b3%e3%82%af%e3%83%94%e3%83%83%e3%82%ae%e3%83%bc%e3%82%ba'>株式会社AYUMI ONE. 社歌・山本正之＆ピンクピッギーズ</a></div>
+    <div class='meta'><span class='label'>歌い手</span> </div>
+    <div class='meta'><span class='label'>制作者</span> </div>
+    <div class='meta'><span class='label'>最終更新日</span> 2023/09/17</div>
+    <div class='meta'><span class='label'>ファイル名</span> <a data-q='%e3%82%aa%e3%83%aa%e3%83%92%e3%83%a1%e3%83%92%e3%82%b3%e3%83%9c%e3%82%b7+AYUMI+ONE%e3%80%90%e6%a0%aa%e5%bc%8f%e4%bc%9a%e7%a4%beAYUMI+ONE.+%e7%a4%be%e6%ad%8c%e3%83%bb%e5%b1%b1%e6%9c%ac%e6%ad%a3%e4%b9%8b%ef%bc%86%e3%83%94%e3%83%b3%e3%82%af%e3%83%94%e3%83%83%e3%82%ae%e3%83%bc%e3%82%ba%e3%80%91.mp4'>オリヒメヒコボシ AYUMI ONE【株式会社AYUMI ONE. 社歌・山本正之＆ピンクピッギーズ】.mp4</a></div>
+  </div>
+</div>
+<div class='card' data-year='2023' data-yearband='2023' data-updated='20230917' data-priority='2'>
+  <div class='card-title'>
+    <a data-q='%e9%9d%92%e6%98%a5%e3%82%b3%e3%83%b3%e3%83%97%e3%83%ac%e3%83%83%e3%82%af%e3%82%b9%ef%bc%8f%e7%b5%90%e6%9d%9f%e3%83%90%e3%83%b3%e3%83%89%ef%bc%8f%e3%81%bc%e3%81%a3%e3%81%a1%e3%83%bb%e3%81%96%e3%83%bb%e3%82%8d%e3%81%a3%e3%81%8f%ef%bc%81+(MVC-Off-On).mp4'>青春コンプレックス／結束バンド</a>
+  </div>
+  <div class='card-body'>
+    <div class='meta'><span class='label'>作品名</span> <a href='search_all.html?q=%e3%81%99%e3%81%bf%e3%81%9f%e3%81%95%e3%82%93'>すみたさん</a></div>
+    <div class='meta'><span class='label'>歌い手</span> ぼっち・ざ・ろっく！</div>
+    <div class='meta'><span class='label'>制作者</span> すみた</div>
+    <div class='meta'><span class='label'>最終更新日</span> 2023/09/17</div>
+    <div class='meta'><span class='label'>ファイル名</span> <a data-q='%e9%9d%92%e6%98%a5%e3%82%b3%e3%83%b3%e3%83%97%e3%83%ac%e3%83%83%e3%82%af%e3%82%b9%ef%bc%8f%e7%b5%90%e6%9d%9f%e3%83%90%e3%83%b3%e3%83%89%ef%bc%8f%e3%81%bc%e3%81%a3%e3%81%a1%e3%83%bb%e3%81%96%e3%83%bb%e3%82%8d%e3%81%a3%e3%81%8f%ef%bc%81+(MVC-Off-On).mp4'>青春コンプレックス／結束バンド／ぼっち・ざ・ろっく！ (MVC-Off-On).mp4</a></div>
+  </div>
+</div>
+<div class='card' data-year='2023' data-yearband='2023' data-updated='20230917' data-priority='999'>
+  <div class='card-title'>
+    <a data-q='C)+Cafe+Parade%e3%80%90CDon_LIVEon_off_2ndLive%e3%80%91Cafe+Parade!_1920.mp4'>C) Cafe Parade【CDon_LIVEon_off_2ndLive】Cafe Parade!_1920</a>
+  </div>
+  <div class='card-body'>
+    <div class='meta'><span class='label'>作品名</span> <a href='search_all.html?q=CDon_LIVEon_off_2ndLive'>CDon_LIVEon_off_2ndLive</a></div>
+    <div class='meta'><span class='label'>歌い手</span> </div>
+    <div class='meta'><span class='label'>制作者</span> </div>
+    <div class='meta'><span class='label'>最終更新日</span> 2023/09/17</div>
+    <div class='meta'><span class='label'>ファイル名</span> <a data-q='C)+Cafe+Parade%e3%80%90CDon_LIVEon_off_2ndLive%e3%80%91Cafe+Parade!_1920.mp4'>C) Cafe Parade【CDon_LIVEon_off_2ndLive】Cafe Parade!_1920.mp4</a></div>
+  </div>
+</div>
+<div class='card' data-year='2023' data-yearband='2023' data-updated='20230917' data-priority='999'>
+  <div class='card-title'>
+    <a data-q='%e3%80%90%5b%e5%8a%87%e5%a0%b4%e7%89%88%5d%e3%82%a2%e3%83%aa%e3%82%b9%e3%81%a8%e3%83%86%e3%83%ac%e3%82%b9%e3%81%ae%e3%81%be%e3%81%bc%e3%82%8d%e3%81%97%e5%b7%a5%e5%a0%b4+%e4%b8%bb%e9%a1%8c%e6%ad%8c%e3%80%91+%e5%bf%83%e9%9f%b3(cut%26%e3%82%b3%e3%83%bc%e3%83%a9%e3%82%b9%e5%85%a5-on)+%ef%bc%8f+%e4%b8%ad%e5%b3%b6%e3%81%bf%e3%82%86%e3%81%8d_%e3%81%91%e3%82%93%e3%81%a1%e3%81%83_467.mp4'>心音(cut&amp;コーラス入-on)</a>
+  </div>
+  <div class='card-body'>
+    <div class='meta'><span class='label'>作品名</span> <a href='search_all.html?q=%5b%e5%8a%87%e5%a0%b4%e7%89%88%5d%e3%82%a2%e3%83%aa%e3%82%b9%e3%81%a8%e3%83%86%e3%83%ac%e3%82%b9%e3%81%ae%e3%81%be%e3%81%bc%e3%82%8d%e3%81%97%e5%b7%a5%e5%a0%b4+%e4%b8%bb%e9%a1%8c%e6%ad%8c'>[劇場版]アリスとテレスのまぼろし工場 主題歌</a></div>
+    <div class='meta'><span class='label'>歌い手</span> 中島みゆき_けんちぃ_467</div>
+    <div class='meta'><span class='label'>制作者</span> </div>
+    <div class='meta'><span class='label'>最終更新日</span> 2023/09/17</div>
+    <div class='meta'><span class='label'>ファイル名</span> <a data-q='%e3%80%90%5b%e5%8a%87%e5%a0%b4%e7%89%88%5d%e3%82%a2%e3%83%aa%e3%82%b9%e3%81%a8%e3%83%86%e3%83%ac%e3%82%b9%e3%81%ae%e3%81%be%e3%81%bc%e3%82%8d%e3%81%97%e5%b7%a5%e5%a0%b4+%e4%b8%bb%e9%a1%8c%e6%ad%8c%e3%80%91+%e5%bf%83%e9%9f%b3(cut%26%e3%82%b3%e3%83%bc%e3%83%a9%e3%82%b9%e5%85%a5-on)+%ef%bc%8f+%e4%b8%ad%e5%b3%b6%e3%81%bf%e3%82%86%e3%81%8d_%e3%81%91%e3%82%93%e3%81%a1%e3%81%83_467.mp4'>【[劇場版]アリスとテレスのまぼろし工場 主題歌】 心音(cut&amp;コーラス入-on) ／ 中島みゆき_けんちぃ_467.mp4</a></div>
+  </div>
+</div>
+<div class='card' data-year='2023' data-yearband='2023' data-updated='20230917' data-priority='999'>
+  <div class='card-title'>
+    <a data-q='%e3%81%af)+%e3%83%90%e3%83%bc%e3%83%8b%e3%83%b3%e3%83%bb%e3%82%af%e3%83%bc%e3%83%ab%e3%81%a7%e8%bc%9d%e3%81%84%e3%81%a6%e3%80%90LIVEon_off(%e5%8f%b0%e8%a9%9e%e9%9f%b3%e5%a3%b0%e3%81%82%e3%82%8a)3rd%e4%bb%99%e5%8f%b0DAY1%e3%80%91%e7%a5%9e%e9%80%9f%e4%b8%80%e9%ad%82_1920.mp4'>は) バーニン・クールで輝いて【LIVEon_off(台詞音声あり)3rd仙台DAY1】神速一魂_1920</a>
+  </div>
+  <div class='card-body'>
+    <div class='meta'><span class='label'>作品名</span> <a href='search_all.html?q=LIVEon_off(%e5%8f%b0%e8%a9%9e%e9%9f%b3%e5%a3%b0%e3%81%82%e3%82%8a)3rd%e4%bb%99%e5%8f%b0DAY1'>LIVEon_off(台詞音声あり)3rd仙台DAY1</a></div>
+    <div class='meta'><span class='label'>歌い手</span> </div>
+    <div class='meta'><span class='label'>制作者</span> </div>
+    <div class='meta'><span class='label'>最終更新日</span> 2023/09/17</div>
+    <div class='meta'><span class='label'>ファイル名</span> <a data-q='%e3%81%af)+%e3%83%90%e3%83%bc%e3%83%8b%e3%83%b3%e3%83%bb%e3%82%af%e3%83%bc%e3%83%ab%e3%81%a7%e8%bc%9d%e3%81%84%e3%81%a6%e3%80%90LIVEon_off(%e5%8f%b0%e8%a9%9e%e9%9f%b3%e5%a3%b0%e3%81%82%e3%82%8a)3rd%e4%bb%99%e5%8f%b0DAY1%e3%80%91%e7%a5%9e%e9%80%9f%e4%b8%80%e9%ad%82_1920.mp4'>は) バーニン・クールで輝いて【LIVEon_off(台詞音声あり)3rd仙台DAY1】神速一魂_1920.mp4</a></div>
+  </div>
+</div>
+<div class='card' data-year='2023' data-yearband='2023' data-updated='20230917' data-priority='999'>
+  <div class='card-title'>
+    <a data-q='%e3%81%af)+%e3%83%90%e3%83%bc%e3%83%8b%e3%83%b3%e3%83%bb%e3%82%af%e3%83%bc%e3%83%ab%e3%81%a7%e8%bc%9d%e3%81%84%e3%81%a6%e3%80%90CDon_off(%e5%8f%b0%e8%a9%9e%e9%9f%b3%e5%a3%b0%e3%81%aa%e3%81%97)3rd%e4%bb%99%e5%8f%b0DAY1%e3%80%91%e7%a5%9e%e9%80%9f%e4%b8%80%e9%ad%82_1920.mp4'>は) バーニン・クールで輝いて【CDon_off(台詞音声なし)3rd仙台DAY1】神速一魂_1920</a>
+  </div>
+  <div class='card-body'>
+    <div class='meta'><span class='label'>作品名</span> <a href='search_all.html?q=CDon_off(%e5%8f%b0%e8%a9%9e%e9%9f%b3%e5%a3%b0%e3%81%aa%e3%81%97)3rd%e4%bb%99%e5%8f%b0DAY1'>CDon_off(台詞音声なし)3rd仙台DAY1</a></div>
+    <div class='meta'><span class='label'>歌い手</span> </div>
+    <div class='meta'><span class='label'>制作者</span> </div>
+    <div class='meta'><span class='label'>最終更新日</span> 2023/09/17</div>
+    <div class='meta'><span class='label'>ファイル名</span> <a data-q='%e3%81%af)+%e3%83%90%e3%83%bc%e3%83%8b%e3%83%b3%e3%83%bb%e3%82%af%e3%83%bc%e3%83%ab%e3%81%a7%e8%bc%9d%e3%81%84%e3%81%a6%e3%80%90CDon_off(%e5%8f%b0%e8%a9%9e%e9%9f%b3%e5%a3%b0%e3%81%aa%e3%81%97)3rd%e4%bb%99%e5%8f%b0DAY1%e3%80%91%e7%a5%9e%e9%80%9f%e4%b8%80%e9%ad%82_1920.mp4'>は) バーニン・クールで輝いて【CDon_off(台詞音声なし)3rd仙台DAY1】神速一魂_1920.mp4</a></div>
+  </div>
+</div>
+<div class='card' data-year='2023' data-yearband='2023' data-updated='20230917' data-priority='999'>
+  <div class='card-title'>
+    <a data-q='W)+With...STORY%e3%80%90LIVEon_off_6thLiveTOKYO%e3%80%91F-LAGS_1920.mp4'>W) With...STORY【LIVEon_off_6thLiveTOKYO】F-LAGS_1920</a>
+  </div>
+  <div class='card-body'>
+    <div class='meta'><span class='label'>作品名</span> <a href='search_all.html?q=LIVEon_off_6thLiveTOKYO'>LIVEon_off_6thLiveTOKYO</a></div>
+    <div class='meta'><span class='label'>歌い手</span> </div>
+    <div class='meta'><span class='label'>制作者</span> </div>
+    <div class='meta'><span class='label'>最終更新日</span> 2023/09/17</div>
+    <div class='meta'><span class='label'>ファイル名</span> <a data-q='W)+With...STORY%e3%80%90LIVEon_off_6thLiveTOKYO%e3%80%91F-LAGS_1920.mp4'>W) With...STORY【LIVEon_off_6thLiveTOKYO】F-LAGS_1920.mp4</a></div>
+  </div>
+</div>
+<div class='card' data-year='2023' data-yearband='2023' data-updated='20230917' data-priority='999'>
+  <div class='card-title'>
+    <a data-q='W)+With...STORY%e3%80%90LIVEon_off_2ndLive%e3%80%91F-LAGS_1920.mp4'>W) With...STORY【LIVEon_off_2ndLive】F-LAGS_1920</a>
+  </div>
+  <div class='card-body'>
+    <div class='meta'><span class='label'>作品名</span> <a href='search_all.html?q=LIVEon_off_2ndLive'>LIVEon_off_2ndLive</a></div>
+    <div class='meta'><span class='label'>歌い手</span> </div>
+    <div class='meta'><span class='label'>制作者</span> </div>
+    <div class='meta'><span class='label'>最終更新日</span> 2023/09/17</div>
+    <div class='meta'><span class='label'>ファイル名</span> <a data-q='W)+With...STORY%e3%80%90LIVEon_off_2ndLive%e3%80%91F-LAGS_1920.mp4'>W) With...STORY【LIVEon_off_2ndLive】F-LAGS_1920.mp4</a></div>
+  </div>
+</div>
+<div class='card' data-year='2023' data-yearband='2023' data-updated='20230917' data-priority='999'>
+  <div class='card-title'>
+    <a data-q='S)+String+of+Fate%e3%80%90CDon_LIVEon_off_2ndLive%e3%80%91Legenders_1920.mp4'>S) String of Fate【CDon_LIVEon_off_2ndLive】Legenders_1920</a>
+  </div>
+  <div class='card-body'>
+    <div class='meta'><span class='label'>作品名</span> <a href='search_all.html?q=CDon_LIVEon_off_2ndLive'>CDon_LIVEon_off_2ndLive</a></div>
+    <div class='meta'><span class='label'>歌い手</span> </div>
+    <div class='meta'><span class='label'>制作者</span> </div>
+    <div class='meta'><span class='label'>最終更新日</span> 2023/09/17</div>
+    <div class='meta'><span class='label'>ファイル名</span> <a data-q='S)+String+of+Fate%e3%80%90CDon_LIVEon_off_2ndLive%e3%80%91Legenders_1920.mp4'>S) String of Fate【CDon_LIVEon_off_2ndLive】Legenders_1920.mp4</a></div>
+  </div>
+</div>
+<div class='card' data-year='2023' data-yearband='2023' data-updated='20230917' data-priority='999'>
+  <div class='card-title'>
+    <a data-q='P)+Platinum+MASK%e3%80%90on_LIVEon_off_Live7th%e2%80%bb%e6%92%ae%e5%bd%b1%e7%a6%81%e6%ad%a2%e3%80%91Beit_1920.mp4'>P) Platinum MASK【on_LIVEon_off_Live7th※撮影禁止】Beit_1920</a>
+  </div>
+  <div class='card-body'>
+    <div class='meta'><span class='label'>作品名</span> <a href='search_all.html?q=on_LIVEon_off_Live7th%e2%80%bb%e6%92%ae%e5%bd%b1%e7%a6%81%e6%ad%a2'>on_LIVEon_off_Live7th※撮影禁止</a></div>
+    <div class='meta'><span class='label'>歌い手</span> </div>
+    <div class='meta'><span class='label'>制作者</span> </div>
+    <div class='meta'><span class='label'>最終更新日</span> 2023/09/17</div>
+    <div class='meta'><span class='label'>ファイル名</span> <a data-q='P)+Platinum+MASK%e3%80%90on_LIVEon_off_Live7th%e2%80%bb%e6%92%ae%e5%bd%b1%e7%a6%81%e6%ad%a2%e3%80%91Beit_1920.mp4'>P) Platinum MASK【on_LIVEon_off_Live7th※撮影禁止】Beit_1920.mp4</a></div>
+  </div>
+</div>
+<div class='card' data-year='2023' data-yearband='2023' data-updated='20230917' data-priority='999'>
+  <div class='card-title'>
+    <a data-q='N)+Never+end+%e3%80%8cOpus%e3%80%8d%e3%80%90CDon_LIVEon_off_2ndLive2%e3%80%91Altessimo_1920.mp4'>N) Never end 「Opus」【CDon_LIVEon_off_2ndLive2】Altessimo_1920</a>
+  </div>
+  <div class='card-body'>
+    <div class='meta'><span class='label'>作品名</span> <a href='search_all.html?q=CDon_LIVEon_off_2ndLive2'>CDon_LIVEon_off_2ndLive2</a></div>
+    <div class='meta'><span class='label'>歌い手</span> </div>
+    <div class='meta'><span class='label'>制作者</span> </div>
+    <div class='meta'><span class='label'>最終更新日</span> 2023/09/17</div>
+    <div class='meta'><span class='label'>ファイル名</span> <a data-q='N)+Never+end+%e3%80%8cOpus%e3%80%8d%e3%80%90CDon_LIVEon_off_2ndLive2%e3%80%91Altessimo_1920.mp4'>N) Never end 「Opus」【CDon_LIVEon_off_2ndLive2】Altessimo_1920.mp4</a></div>
+  </div>
+</div>
+<div class='card' data-year='2023' data-yearband='2023' data-updated='20230917' data-priority='999'>
+  <div class='card-title'>
+    <a data-q='D)+Dawning+Angels%e3%80%90on_off_MVFull2%e3%80%91fineO_1920.mp4'>D) Dawning Angels【on_off_MVFull2】fineO_1920</a>
+  </div>
+  <div class='card-body'>
+    <div class='meta'><span class='label'>作品名</span> <a href='search_all.html?q=on_off_MVFull2'>on_off_MVFull2</a></div>
+    <div class='meta'><span class='label'>歌い手</span> </div>
+    <div class='meta'><span class='label'>制作者</span> </div>
+    <div class='meta'><span class='label'>最終更新日</span> 2023/09/17</div>
+    <div class='meta'><span class='label'>ファイル名</span> <a data-q='D)+Dawning+Angels%e3%80%90on_off_MVFull2%e3%80%91fineO_1920.mp4'>D) Dawning Angels【on_off_MVFull2】fineO_1920.mp4</a></div>
+  </div>
+</div>
+<div class='card' data-year='2023' data-yearband='2023' data-updated='20230917' data-priority='999'>
+  <div class='card-title'>
+    <a data-q='C)+Crush+of+Judgment%e3%80%90on_off_MV2%e3%80%91%e3%83%8a%e3%82%a4%e3%83%88%e3%82%ad%e3%83%a9%e3%83%bc%e3%82%ba_1920.mp4'>C) Crush of Judgment【on_off_MV2】ナイトキラーズ_1920</a>
+  </div>
+  <div class='card-body'>
+    <div class='meta'><span class='label'>作品名</span> <a href='search_all.html?q=on_off_MV2'>on_off_MV2</a></div>
+    <div class='meta'><span class='label'>歌い手</span> </div>
+    <div class='meta'><span class='label'>制作者</span> </div>
+    <div class='meta'><span class='label'>最終更新日</span> 2023/09/17</div>
+    <div class='meta'><span class='label'>ファイル名</span> <a data-q='C)+Crush+of+Judgment%e3%80%90on_off_MV2%e3%80%91%e3%83%8a%e3%82%a4%e3%83%88%e3%82%ad%e3%83%a9%e3%83%bc%e3%82%ba_1920.mp4'>C) Crush of Judgment【on_off_MV2】ナイトキラーズ_1920.mp4</a></div>
+  </div>
+</div>
+<div class='card' data-year='2023' data-yearband='2023' data-updated='20230916' data-priority='999'>
+  <div class='card-title'>
+    <a data-q='%e5%8a%87%e5%a0%b4%e7%89%88+%e5%90%8d%e6%8e%a2%e5%81%b5%e3%82%b3%e3%83%8a%e3%83%b3+%e9%bb%92%e9%89%84%e3%81%ae%e9%ad%9a%e5%bd%b1+(%e3%82%b5%e3%83%96%e3%83%9e%e3%83%aa%e3%83%b3)+%e4%b8%bb%e9%a1%8c%e6%ad%8c_%e7%be%8e%e3%81%97%e3%81%84%e9%b0%ad_%e3%82%b9%e3%83%94%e3%83%83%e3%83%84_2CH_.mp4'>劇場版 名探偵コナン 黒鉄の魚影 (サブマリン) 主題歌_美しい鰭_スピッツ_2CH_</a>
+  </div>
+  <div class='card-body'>
+    <div class='meta'><span class='label'>作品名</span> <a href='search_all.html?q=%e3%82%a2%e3%83%8b%e3%82%bd%e3%83%b3%ef%bc%86%e3%82%b2%e3%83%bc%e3%82%bd%e3%83%b3%ef%bc%86MAD%e7%b3%bb%e5%8b%95%e7%94%bb'>アニソン＆ゲーソン＆MAD系動画</a></div>
+    <div class='meta'><span class='label'>歌い手</span> </div>
+    <div class='meta'><span class='label'>制作者</span> </div>
+    <div class='meta'><span class='label'>最終更新日</span> 2023/09/16</div>
+    <div class='meta'><span class='label'>ファイル名</span> <a data-q='%e5%8a%87%e5%a0%b4%e7%89%88+%e5%90%8d%e6%8e%a2%e5%81%b5%e3%82%b3%e3%83%8a%e3%83%b3+%e9%bb%92%e9%89%84%e3%81%ae%e9%ad%9a%e5%bd%b1+(%e3%82%b5%e3%83%96%e3%83%9e%e3%83%aa%e3%83%b3)+%e4%b8%bb%e9%a1%8c%e6%ad%8c_%e7%be%8e%e3%81%97%e3%81%84%e9%b0%ad_%e3%82%b9%e3%83%94%e3%83%83%e3%83%84_2CH_.mp4'>劇場版 名探偵コナン 黒鉄の魚影 (サブマリン) 主題歌_美しい鰭_スピッツ_2CH_.mp4</a></div>
+  </div>
+</div>
+<div class='card' data-year='2023' data-yearband='2023' data-updated='20230916' data-priority='999'>
+  <div class='card-title'>
+    <a data-q='%e3%81%84%e3%81%a4%e3%81%8b%e6%98%9f%e3%81%ae%e6%b5%b7%e3%81%a7+(%e5%8b%87%e8%80%85%e7%8e%8b%e3%82%ac%e3%82%aa%e3%82%ac%e3%82%a4%e3%82%ac%e3%83%bc_ED)+%e4%b8%8b%e6%88%90%e4%bd%90%e7%99%bb%e5%ad%90+(2ch_OFF_ON).mp4'>いつか星の海で (勇者王ガオガイガー_ED) 下成佐登子 (2ch_OFF_ON)</a>
+  </div>
+  <div class='card-body'>
+    <div class='meta'><span class='label'>作品名</span> <a href='search_all.html?q=2023.09'>2023.09</a></div>
+    <div class='meta'><span class='label'>歌い手</span> </div>
+    <div class='meta'><span class='label'>制作者</span> TUK</div>
+    <div class='meta'><span class='label'>最終更新日</span> 2023/09/16</div>
+    <div class='meta'><span class='label'>ファイル名</span> <a data-q='%e3%81%84%e3%81%a4%e3%81%8b%e6%98%9f%e3%81%ae%e6%b5%b7%e3%81%a7+(%e5%8b%87%e8%80%85%e7%8e%8b%e3%82%ac%e3%82%aa%e3%82%ac%e3%82%a4%e3%82%ac%e3%83%bc_ED)+%e4%b8%8b%e6%88%90%e4%bd%90%e7%99%bb%e5%ad%90+(2ch_OFF_ON).mp4'>いつか星の海で (勇者王ガオガイガー_ED) 下成佐登子 (2ch_OFF_ON).mp4</a></div>
+  </div>
+</div>
+<div class='card' data-year='2023' data-yearband='2023' data-updated='20230916' data-priority='999'>
+  <div class='card-title'>
+    <a data-q='GO!+GO!+%e3%83%ac%e3%82%b9%e3%82%ad%e3%83%a5%e3%83%bc%e3%80%90JAM+Prroject+4thLIVE+VICTORY%e3%83%bb%e3%81%b7%e3%81%a1JAM(ON%ef%bc%8fVC)%e3%80%91.mp4'>GO! GO! レスキュー【JAM Prroject 4thLIVE VICTORY・ぷちJAM(ON／VC)】</a>
+  </div>
+  <div class='card-body'>
+    <div class='meta'><span class='label'>作品名</span> <a href='search_all.html?q=JAM+Prroject+4thLIVE+VICTORY%e3%83%bb%e3%81%b7%e3%81%a1JAM(ON%ef%bc%8fVC)'>JAM Prroject 4thLIVE VICTORY・ぷちJAM(ON／VC)</a></div>
+    <div class='meta'><span class='label'>歌い手</span> VC)】</div>
+    <div class='meta'><span class='label'>制作者</span> </div>
+    <div class='meta'><span class='label'>最終更新日</span> 2023/09/16</div>
+    <div class='meta'><span class='label'>ファイル名</span> <a data-q='GO!+GO!+%e3%83%ac%e3%82%b9%e3%82%ad%e3%83%a5%e3%83%bc%e3%80%90JAM+Prroject+4thLIVE+VICTORY%e3%83%bb%e3%81%b7%e3%81%a1JAM(ON%ef%bc%8fVC)%e3%80%91.mp4'>GO! GO! レスキュー【JAM Prroject 4thLIVE VICTORY・ぷちJAM(ON／VC)】.mp4</a></div>
+  </div>
+</div>
+<div class='card' data-year='2023' data-yearband='2023' data-updated='20230916' data-priority='2'>
+  <div class='card-title'>
+    <a data-q='%e3%80%90%e4%ba%94%e7%ad%89%e5%88%86%e3%81%ae%e8%8a%b1%e5%ab%81%e2%88%bd%e3%80%91%e4%ba%94%e7%ad%89%e5%88%86%e3%81%ae%e6%9c%aa%e6%9d%a5(MV)(%e3%83%91%e3%83%bc%e3%83%88%e5%88%86%e3%81%91)%ef%bc%8f%e4%b8%ad%e9%87%8e%e5%ae%b6%e3%81%ae%e4%ba%94%e3%81%a4%e5%ad%90%5bon-off%5d.mp4'>五等分の未来(MV)(パート分け)／中野家の五つ子[on-off]</a>
+  </div>
+  <div class='card-body'>
+    <div class='meta'><span class='label'>作品名</span> <a href='search_all.html?q=%e4%ba%94%e7%ad%89%e5%88%86%e3%81%ae%e8%8a%b1%e5%ab%81%e2%88%bd'>五等分の花嫁∽</a></div>
+    <div class='meta'><span class='label'>歌い手</span> 中野家の五つ子</div>
+    <div class='meta'><span class='label'>制作者</span> タマ兄</div>
+    <div class='meta'><span class='label'>最終更新日</span> 2023/09/16</div>
+    <div class='meta'><span class='label'>ファイル名</span> <a data-q='%e3%80%90%e4%ba%94%e7%ad%89%e5%88%86%e3%81%ae%e8%8a%b1%e5%ab%81%e2%88%bd%e3%80%91%e4%ba%94%e7%ad%89%e5%88%86%e3%81%ae%e6%9c%aa%e6%9d%a5(MV)(%e3%83%91%e3%83%bc%e3%83%88%e5%88%86%e3%81%91)%ef%bc%8f%e4%b8%ad%e9%87%8e%e5%ae%b6%e3%81%ae%e4%ba%94%e3%81%a4%e5%ad%90%5bon-off%5d.mp4'>【五等分の花嫁∽】五等分の未来(MV)(パート分け)／中野家の五つ子[on-off].mp4</a></div>
+  </div>
+</div>
+<div class='card' data-year='2023' data-yearband='2023' data-updated='20230916' data-priority='2'>
+  <div class='card-title'>
+    <a data-q='%e3%80%90NEEDLESS%e3%80%91+WANTED!+for+the+love%ef%bc%8f%e3%83%8b%e3%83%bc%e3%83%89%e3%83%ac%e3%82%b9%e2%98%86%e3%82%ac%e3%83%bc%e3%83%ab%e3%82%ba%2b(%e3%82%a4%e3%83%b4(%e5%96%9c%e5%a4%9a%e6%9d%91%e8%8b%b1%e6%a2%a8)%e3%80%81%e3%83%87%e3%82%a3%e3%82%b9%e3%82%af(%e5%8a%a0%e8%97%a4%e8%8b%b1%e7%be%8e%e9%87%8c)%e3%80%81%e3%82%bb%e3%83%84%e3%83%8a(%e5%be%8c%e8%97%a4%e6%b2%99%e7%b7%92%e9%87%8c)%e3%80%81%e6%9c%aa%e5%a4%ae(%e7%89%a7%e9%87%8e%e7%94%b1%e4%be%9d)%e3%80%81%e6%a2%94(%e8%8c%85%e5%8e%9f%e5%ae%9f%e9%87%8c))%5bon-off%5d.mp4'>WANTED! for the love／ニードレス☆ガールズ+(イヴ(喜多村英梨)、ディスク(加藤英美里)、セツナ(後藤沙緒里)、未央(牧野由依)、梔(茅原実里))[on-off]</a>
+  </div>
+  <div class='card-body'>
+    <div class='meta'><span class='label'>作品名</span> <a href='search_all.html?q=NEEDLESS'>NEEDLESS</a></div>
+    <div class='meta'><span class='label'>歌い手</span> ニードレス☆ガールズ</div>
+    <div class='meta'><span class='label'>制作者</span> タマ兄</div>
+    <div class='meta'><span class='label'>最終更新日</span> 2023/09/16</div>
+    <div class='meta'><span class='label'>ファイル名</span> <a data-q='%e3%80%90NEEDLESS%e3%80%91+WANTED!+for+the+love%ef%bc%8f%e3%83%8b%e3%83%bc%e3%83%89%e3%83%ac%e3%82%b9%e2%98%86%e3%82%ac%e3%83%bc%e3%83%ab%e3%82%ba%2b(%e3%82%a4%e3%83%b4(%e5%96%9c%e5%a4%9a%e6%9d%91%e8%8b%b1%e6%a2%a8)%e3%80%81%e3%83%87%e3%82%a3%e3%82%b9%e3%82%af(%e5%8a%a0%e8%97%a4%e8%8b%b1%e7%be%8e%e9%87%8c)%e3%80%81%e3%82%bb%e3%83%84%e3%83%8a(%e5%be%8c%e8%97%a4%e6%b2%99%e7%b7%92%e9%87%8c)%e3%80%81%e6%9c%aa%e5%a4%ae(%e7%89%a7%e9%87%8e%e7%94%b1%e4%be%9d)%e3%80%81%e6%a2%94(%e8%8c%85%e5%8e%9f%e5%ae%9f%e9%87%8c))%5bon-off%5d.mp4'>【NEEDLESS】 WANTED! for the love／ニードレス☆ガールズ+(イヴ(喜多村英梨)、ディスク(加藤英美里)、セツナ(後藤沙緒里)、未央(牧野由依)、梔(茅原実里))[on-off].mp4</a></div>
+  </div>
+</div>
+<div class='card' data-year='2023' data-yearband='2023' data-updated='20230916' data-priority='999'>
+  <div class='card-title'>
+    <a data-q='%e3%80%90PT_Maria-%e5%a4%a9%e4%bd%bf%e3%81%ae%e3%82%ad%e3%82%b9%e3%81%a8%e6%82%aa%e9%ad%94%e3%81%ae%e8%8a%b1%e5%ab%81-+OP%e4%b8%bb%e9%a1%8c%e6%ad%8c%e3%80%91%e8%96%94%e8%96%87%e3%81%ab%e6%8a%b1%e3%81%8b%e3%82%8c%e3%81%a6%ef%bc%8fRiryka_v1%e3%80%90ON-cut%e3%80%91.avi'>薔薇に抱かれて／Riryka_v1【ON-cut】</a>
+  </div>
+  <div class='card-body'>
+    <div class='meta'><span class='label'>作品名</span> <a href='search_all.html?q=PT_Maria-%e5%a4%a9%e4%bd%bf%e3%81%ae%e3%82%ad%e3%82%b9%e3%81%a8%e6%82%aa%e9%ad%94%e3%81%ae%e8%8a%b1%e5%ab%81-+OP%e4%b8%bb%e9%a1%8c%e6%ad%8c'>PT_Maria-天使のキスと悪魔の花嫁- OP主題歌</a></div>
+    <div class='meta'><span class='label'>歌い手</span> Riryka_v1</div>
+    <div class='meta'><span class='label'>制作者</span> ポケ鉄</div>
+    <div class='meta'><span class='label'>最終更新日</span> 2023/09/16</div>
+    <div class='meta'><span class='label'>ファイル名</span> <a data-q='%e3%80%90PT_Maria-%e5%a4%a9%e4%bd%bf%e3%81%ae%e3%82%ad%e3%82%b9%e3%81%a8%e6%82%aa%e9%ad%94%e3%81%ae%e8%8a%b1%e5%ab%81-+OP%e4%b8%bb%e9%a1%8c%e6%ad%8c%e3%80%91%e8%96%94%e8%96%87%e3%81%ab%e6%8a%b1%e3%81%8b%e3%82%8c%e3%81%a6%ef%bc%8fRiryka_v1%e3%80%90ON-cut%e3%80%91.avi'>【PT_Maria-天使のキスと悪魔の花嫁- OP主題歌】薔薇に抱かれて／Riryka_v1【ON-cut】.avi</a></div>
+  </div>
+</div>
+<div class='card' data-year='2023' data-yearband='2023' data-updated='20230916' data-priority='999'>
+  <div class='card-title'>
+    <a data-q='%e3%80%90%e3%81%aa%e3%81%a4%e3%83%89%e3%82%ad%e3%83%83%ef%bc%81_OP%e3%80%91%e3%81%aa%e3%81%a4%e9%a2%a8%e3%81%ab%e4%b9%97%e3%81%a3%e3%81%a6%ef%bc%8f%e9%9d%92%e8%91%89%e3%82%8a%e3%82%93%e3%81%94_on-off.mp4'>なつ風に乗って</a>
+  </div>
+  <div class='card-body'>
+    <div class='meta'><span class='label'>作品名</span> <a href='search_all.html?q=%e3%81%aa%e3%81%a4%e3%83%89%e3%82%ad%e3%83%83%ef%bc%81_OP'>なつドキッ！_OP</a></div>
+    <div class='meta'><span class='label'>歌い手</span> 青葉りんご_on</div>
+    <div class='meta'><span class='label'>制作者</span> カボス</div>
+    <div class='meta'><span class='label'>最終更新日</span> 2023/09/16</div>
+    <div class='meta'><span class='label'>ファイル名</span> <a data-q='%e3%80%90%e3%81%aa%e3%81%a4%e3%83%89%e3%82%ad%e3%83%83%ef%bc%81_OP%e3%80%91%e3%81%aa%e3%81%a4%e9%a2%a8%e3%81%ab%e4%b9%97%e3%81%a3%e3%81%a6%ef%bc%8f%e9%9d%92%e8%91%89%e3%82%8a%e3%82%93%e3%81%94_on-off.mp4'>【なつドキッ！_OP】なつ風に乗って／青葉りんご_on-off.mp4</a></div>
+  </div>
+</div>
+<div class='card' data-year='2023' data-yearband='2023' data-updated='20230915' data-priority='999'>
+  <div class='card-title'>
+    <a data-q='%e3%80%90%e3%82%a2%e3%82%a4%e3%83%89%e3%83%ab%e3%83%9e%e3%82%b9%e3%82%bf%e3%83%bc%e3%82%b7%e3%83%b3%e3%83%87%e3%83%ac%e3%83%a9%e3%82%ac%e3%83%bc%e3%83%ab%e3%82%ba%e3%80%91%5bIN%5dLast+Kiss%ef%bc%8f%e4%b8%89%e8%88%b9%e7%be%8e%e5%84%aa+CV.%e5%8e%9f%e7%94%b0%e5%bd%a9%e6%a5%93(On)%e2%80%bbLIVE%e6%98%a0%e5%83%8f%e3%80%90naoo%e3%80%91.mp4'>Last Kiss／三船美優 CV.原田彩楓(On)※LIVE映像【naoo】</a>
+  </div>
+  <div class='card-body'>
+    <div class='meta'><span class='label'>作品名</span> <a href='search_all.html?q=%e3%82%a2%e3%82%a4%e3%83%89%e3%83%ab%e3%83%9e%e3%82%b9%e3%82%bf%e3%83%bc%e3%82%b7%e3%83%b3%e3%83%87%e3%83%ac%e3%83%a9%e3%82%ac%e3%83%bc%e3%83%ab%e3%82%ba'>アイドルマスターシンデレラガールズ</a></div>
+    <div class='meta'><span class='label'>歌い手</span> 三船美優 CV.原田彩楓※LIVE映像</div>
+    <div class='meta'><span class='label'>制作者</span> </div>
+    <div class='meta'><span class='label'>最終更新日</span> 2023/09/15</div>
+    <div class='meta'><span class='label'>ファイル名</span> <a data-q='%e3%80%90%e3%82%a2%e3%82%a4%e3%83%89%e3%83%ab%e3%83%9e%e3%82%b9%e3%82%bf%e3%83%bc%e3%82%b7%e3%83%b3%e3%83%87%e3%83%ac%e3%83%a9%e3%82%ac%e3%83%bc%e3%83%ab%e3%82%ba%e3%80%91%5bIN%5dLast+Kiss%ef%bc%8f%e4%b8%89%e8%88%b9%e7%be%8e%e5%84%aa+CV.%e5%8e%9f%e7%94%b0%e5%bd%a9%e6%a5%93(On)%e2%80%bbLIVE%e6%98%a0%e5%83%8f%e3%80%90naoo%e3%80%91.mp4'>【アイドルマスターシンデレラガールズ】[IN]Last Kiss／三船美優 CV.原田彩楓(On)※LIVE映像【naoo】.mp4</a></div>
+  </div>
+</div>
+<div class='card' data-year='2023' data-yearband='2023' data-updated='20230915' data-priority='999'>
+  <div class='card-title'>
+    <a data-q='%e7%96%be%e9%a2%a8%e3%81%ab%e3%81%aa%e3%82%8c%e3%80%90JAM+Prroject+4thLIVE+VICTORY%e3%83%bbfeaturing+%e6%9d%be%e6%9c%ac%e6%a2%a8%e9%a6%99%e3%80%81%e5%bd%b1%e5%b1%b1%e3%83%92%e3%83%ad%e3%83%8e%e3%83%96(ON%ef%bc%8fVC)%e3%80%91.mp4'>疾風になれ【JAM Prroject 4thLIVE VICTORY・featuring 松本梨香、影山ヒロノブ(ON／VC)】</a>
+  </div>
+  <div class='card-body'>
+    <div class='meta'><span class='label'>作品名</span> <a href='search_all.html?q=JAM+Prroject+4thLIVE+VICTORY%e3%83%bbfeaturing+%e6%9d%be%e6%9c%ac%e6%a2%a8%e9%a6%99%e3%80%81%e5%bd%b1%e5%b1%b1%e3%83%92%e3%83%ad%e3%83%8e%e3%83%96(ON%ef%bc%8fVC)'>JAM Prroject 4thLIVE VICTORY・featuring 松本梨香、影山ヒロノブ(ON／VC)</a></div>
+    <div class='meta'><span class='label'>歌い手</span> VC)】</div>
+    <div class='meta'><span class='label'>制作者</span> </div>
+    <div class='meta'><span class='label'>最終更新日</span> 2023/09/15</div>
+    <div class='meta'><span class='label'>ファイル名</span> <a data-q='%e7%96%be%e9%a2%a8%e3%81%ab%e3%81%aa%e3%82%8c%e3%80%90JAM+Prroject+4thLIVE+VICTORY%e3%83%bbfeaturing+%e6%9d%be%e6%9c%ac%e6%a2%a8%e9%a6%99%e3%80%81%e5%bd%b1%e5%b1%b1%e3%83%92%e3%83%ad%e3%83%8e%e3%83%96(ON%ef%bc%8fVC)%e3%80%91.mp4'>疾風になれ【JAM Prroject 4thLIVE VICTORY・featuring 松本梨香、影山ヒロノブ(ON／VC)】.mp4</a></div>
+  </div>
+</div>
+<div class='card' data-year='2023' data-yearband='2023' data-updated='20230915' data-priority='2'>
+  <div class='card-title'>
+    <a data-q='%e5%be%92%e8%8a%b1%e3%83%8d%e3%82%af%e3%83%ad%e3%83%9e%e3%83%b3%e3%82%b7%e3%83%bc%ef%bc%8f%e3%83%95%e3%83%a9%e3%83%b3%e3%82%b7%e3%83%a5%e3%82%b7%e3%83%a5%ef%bc%8f%e3%82%be%e3%83%b3%e3%83%93%e3%83%a9%e3%83%b3%e3%83%89%e3%82%b5%e3%82%ac+(Off-On-On%5bSE%e5%85%a5%e3%82%8a%5d)+%e3%80%90%e3%83%91%e3%83%bc%e3%83%88%e5%88%86%e3%81%91%e3%80%91.mp4'>徒花ネクロマンシー／フランシュシュ／ゾンビランドサガ (Off-On-On[SE入り]) 【パート分け】</a>
+  </div>
+  <div class='card-body'>
+    <div class='meta'><span class='label'>作品名</span> <a href='search_all.html?q=%e3%83%91%e3%83%bc%e3%83%88%e5%88%86%e3%81%91'>パート分け</a></div>
+    <div class='meta'><span class='label'>歌い手</span> ゾンビランドサガ</div>
+    <div class='meta'><span class='label'>制作者</span> すみた</div>
+    <div class='meta'><span class='label'>最終更新日</span> 2023/09/15</div>
+    <div class='meta'><span class='label'>ファイル名</span> <a data-q='%e5%be%92%e8%8a%b1%e3%83%8d%e3%82%af%e3%83%ad%e3%83%9e%e3%83%b3%e3%82%b7%e3%83%bc%ef%bc%8f%e3%83%95%e3%83%a9%e3%83%b3%e3%82%b7%e3%83%a5%e3%82%b7%e3%83%a5%ef%bc%8f%e3%82%be%e3%83%b3%e3%83%93%e3%83%a9%e3%83%b3%e3%83%89%e3%82%b5%e3%82%ac+(Off-On-On%5bSE%e5%85%a5%e3%82%8a%5d)+%e3%80%90%e3%83%91%e3%83%bc%e3%83%88%e5%88%86%e3%81%91%e3%80%91.mp4'>徒花ネクロマンシー／フランシュシュ／ゾンビランドサガ (Off-On-On[SE入り]) 【パート分け】.mp4</a></div>
+  </div>
+</div>
+<div class='card' data-year='2023' data-yearband='2023' data-updated='20230915' data-priority='999'>
+  <div class='card-title'>
+    <a data-q='%e3%80%90PT_%e9%81%8b%e5%91%bd%e4%ba%88%e5%a0%b1%e3%82%92%e3%81%8a%e7%9f%a5%e3%82%89%e3%81%9b%e3%81%97%e3%81%be%e3%81%99+OP%e4%b8%bb%e9%a1%8c%e6%ad%8c%e3%80%91%e5%90%9b%e3%81%a8%e3%80%81%e4%ba%8c%e4%ba%ba%e3%81%a7%ef%bc%8fPrico_v1_%e6%ad%8c%e8%a9%9eWSP%e3%80%90ON-OFF%e3%80%91.avi'>君と、二人で／Prico_v1_歌詞WSP【ON-OFF】</a>
+  </div>
+  <div class='card-body'>
+    <div class='meta'><span class='label'>作品名</span> <a href='search_all.html?q=PT_%e9%81%8b%e5%91%bd%e4%ba%88%e5%a0%b1%e3%82%92%e3%81%8a%e7%9f%a5%e3%82%89%e3%81%9b%e3%81%97%e3%81%be%e3%81%99+OP%e4%b8%bb%e9%a1%8c%e6%ad%8c'>PT_運命予報をお知らせします OP主題歌</a></div>
+    <div class='meta'><span class='label'>歌い手</span> Prico_v1_歌詞WSP</div>
+    <div class='meta'><span class='label'>制作者</span> ポケ鉄</div>
+    <div class='meta'><span class='label'>最終更新日</span> 2023/09/15</div>
+    <div class='meta'><span class='label'>ファイル名</span> <a data-q='%e3%80%90PT_%e9%81%8b%e5%91%bd%e4%ba%88%e5%a0%b1%e3%82%92%e3%81%8a%e7%9f%a5%e3%82%89%e3%81%9b%e3%81%97%e3%81%be%e3%81%99+OP%e4%b8%bb%e9%a1%8c%e6%ad%8c%e3%80%91%e5%90%9b%e3%81%a8%e3%80%81%e4%ba%8c%e4%ba%ba%e3%81%a7%ef%bc%8fPrico_v1_%e6%ad%8c%e8%a9%9eWSP%e3%80%90ON-OFF%e3%80%91.avi'>【PT_運命予報をお知らせします OP主題歌】君と、二人で／Prico_v1_歌詞WSP【ON-OFF】.avi</a></div>
+  </div>
+</div>
+<div class='card' data-year='2023' data-yearband='2023' data-updated='20230915' data-priority='999'>
+  <div class='card-title'>
+    <a data-q='%e3%80%90PT_%e5%a7%89%e3%81%af%e3%82%a8%e3%83%ad%e3%82%b3%e3%83%9f%e7%b7%a8%e9%9b%86%e8%80%85+OP%e4%b8%bb%e9%a1%8c%e6%ad%8c%e3%80%91%e3%81%82%e3%81%a3%e3%81%9b%e3%82%93%e3%81%b6%e3%82%8b%e2%98%86LOVE%e3%81%95%e3%82%93%e3%81%b6%e3%82%8b%ef%bc%8ffripSide+NAO+project!_v1%e3%80%90ON%e3%80%91.avi'>あっせんぶる☆LOVEさんぶる／fripSide NAO project!_v1【ON】</a>
+  </div>
+  <div class='card-body'>
+    <div class='meta'><span class='label'>作品名</span> <a href='search_all.html?q=PT_%e5%a7%89%e3%81%af%e3%82%a8%e3%83%ad%e3%82%b3%e3%83%9f%e7%b7%a8%e9%9b%86%e8%80%85+OP%e4%b8%bb%e9%a1%8c%e6%ad%8c'>PT_姉はエロコミ編集者 OP主題歌</a></div>
+    <div class='meta'><span class='label'>歌い手</span> fripSide NAO project!_v1</div>
+    <div class='meta'><span class='label'>制作者</span> ポケ鉄</div>
+    <div class='meta'><span class='label'>最終更新日</span> 2023/09/15</div>
+    <div class='meta'><span class='label'>ファイル名</span> <a data-q='%e3%80%90PT_%e5%a7%89%e3%81%af%e3%82%a8%e3%83%ad%e3%82%b3%e3%83%9f%e7%b7%a8%e9%9b%86%e8%80%85+OP%e4%b8%bb%e9%a1%8c%e6%ad%8c%e3%80%91%e3%81%82%e3%81%a3%e3%81%9b%e3%82%93%e3%81%b6%e3%82%8b%e2%98%86LOVE%e3%81%95%e3%82%93%e3%81%b6%e3%82%8b%ef%bc%8ffripSide+NAO+project!_v1%e3%80%90ON%e3%80%91.avi'>【PT_姉はエロコミ編集者 OP主題歌】あっせんぶる☆LOVEさんぶる／fripSide NAO project!_v1【ON】.avi</a></div>
+  </div>
+</div>
+<div class='card' data-year='2023' data-yearband='2023' data-updated='20230915' data-priority='999'>
+  <div class='card-title'>
+    <a data-q='%e3%83%87%e3%83%83%e3%83%89%e3%83%9e%e3%82%a6%e3%83%b3%e3%83%88%e3%83%bb%e3%83%87%e3%82%b9%e3%83%97%e3%83%ac%e3%82%a4+-+%e3%82%b9%e3%82%af%e3%83%a9%e3%83%83%e3%83%97%e3%82%a2%e3%83%bc%e3%83%88+(PV+ver.)%ef%bc%8f%e6%b0%b4%e7%80%ac%e3%81%84%e3%81%ae%e3%82%8a%e3%80%8eon-cut%e3%80%8f.mp4'>デッドマウント・デスプレイ - スクラップアート (PV ver.)</a>
+  </div>
+  <div class='card-body'>
+    <div class='meta'><span class='label'>作品名</span> <a href='search_all.html?q=2023%e5%b9%b4'>2023年</a></div>
+    <div class='meta'><span class='label'>歌い手</span> 水瀬いのり</div>
+    <div class='meta'><span class='label'>制作者</span> スフィーナ</div>
+    <div class='meta'><span class='label'>最終更新日</span> 2023/09/15</div>
+    <div class='meta'><span class='label'>ファイル名</span> <a data-q='%e3%83%87%e3%83%83%e3%83%89%e3%83%9e%e3%82%a6%e3%83%b3%e3%83%88%e3%83%bb%e3%83%87%e3%82%b9%e3%83%97%e3%83%ac%e3%82%a4+-+%e3%82%b9%e3%82%af%e3%83%a9%e3%83%83%e3%83%97%e3%82%a2%e3%83%bc%e3%83%88+(PV+ver.)%ef%bc%8f%e6%b0%b4%e7%80%ac%e3%81%84%e3%81%ae%e3%82%8a%e3%80%8eon-cut%e3%80%8f.mp4'>デッドマウント・デスプレイ - スクラップアート (PV ver.)／水瀬いのり『on-cut』.mp4</a></div>
+  </div>
+</div>
+<div class='card' data-year='2023' data-yearband='2023' data-updated='20230914' data-priority='999'>
+  <div class='card-title'>
+    <a data-q='%e5%bc%b7%e9%a2%a8%e3%82%aa%e3%83%bc%e3%83%ab%e3%83%90%e3%83%83%e3%82%af(%e3%82%81%e3%81%a1%e3%82%83%e3%81%8b%e3%82%8f%e3%81%84%e3%81%84%e3%81%ae%e5%88%9d%e9%9f%b3%e3%83%9f%e3%82%af+cover)(cut%26%e3%82%b3%e3%83%bc%e3%83%a9%e3%82%b9%e5%85%a5-on)+%ef%bc%8f+%e5%88%9d%e9%9f%b3%e3%83%9f%e3%82%af_%e3%81%91%e3%82%93%e3%81%a1%e3%81%83_456.mp4'>強風オールバック(めちゃかわいいの初音ミク cover)(cut&amp;コーラス入-on)</a>
+  </div>
+  <div class='card-body'>
+    <div class='meta'><span class='label'>作品名</span> <a href='search_all.html?q=%e3%81%9d%e3%81%ae%e4%bb%96'>その他</a></div>
+    <div class='meta'><span class='label'>歌い手</span> 初音ミク_けんちぃ_456</div>
+    <div class='meta'><span class='label'>制作者</span> </div>
+    <div class='meta'><span class='label'>最終更新日</span> 2023/09/14</div>
+    <div class='meta'><span class='label'>ファイル名</span> <a data-q='%e5%bc%b7%e9%a2%a8%e3%82%aa%e3%83%bc%e3%83%ab%e3%83%90%e3%83%83%e3%82%af(%e3%82%81%e3%81%a1%e3%82%83%e3%81%8b%e3%82%8f%e3%81%84%e3%81%84%e3%81%ae%e5%88%9d%e9%9f%b3%e3%83%9f%e3%82%af+cover)(cut%26%e3%82%b3%e3%83%bc%e3%83%a9%e3%82%b9%e5%85%a5-on)+%ef%bc%8f+%e5%88%9d%e9%9f%b3%e3%83%9f%e3%82%af_%e3%81%91%e3%82%93%e3%81%a1%e3%81%83_456.mp4'>強風オールバック(めちゃかわいいの初音ミク cover)(cut&amp;コーラス入-on) ／ 初音ミク_けんちぃ_456.mp4</a></div>
+  </div>
+</div>
+<div class='card' data-year='2023' data-yearband='2023' data-updated='20230914' data-priority='3'>
+  <div class='card-title'>
+    <a data-q='%e3%80%90%e3%83%97%e3%83%ad%e3%82%b8%e3%82%a7%e3%82%af%e3%83%88%e3%82%bb%e3%82%ab%e3%82%a4+%e3%82%ab%e3%83%a9%e3%83%95%e3%83%ab%e3%82%b9%e3%83%86%e3%83%bc%e3%82%b8!+feat.+%e5%88%9d%e9%9f%b3%e3%83%9f%e3%82%af%e3%80%91-MORE+MORE+JUMP!-DREAM+PLACE(cut-on)3DMV.mp4'>-MORE MORE JUMP!-DREAM PLACE(cut-on)3DMV</a>
+  </div>
+  <div class='card-body'>
+    <div class='meta'><span class='label'>作品名</span> <a href='search_all.html?q=%e3%83%97%e3%83%ad%e3%82%b8%e3%82%a7%e3%82%af%e3%83%88%e3%82%bb%e3%82%ab%e3%82%a4+%e3%82%ab%e3%83%a9%e3%83%95%e3%83%ab%e3%82%b9%e3%83%86%e3%83%bc%e3%82%b8!+feat.+%e5%88%9d%e9%9f%b3%e3%83%9f%e3%82%af'>プロジェクトセカイ カラフルステージ! feat. 初音ミク</a></div>
+    <div class='meta'><span class='label'>歌い手</span> </div>
+    <div class='meta'><span class='label'>制作者</span> けんしん</div>
+    <div class='meta'><span class='label'>最終更新日</span> 2023/09/14</div>
+    <div class='meta'><span class='label'>ファイル名</span> <a data-q='%e3%80%90%e3%83%97%e3%83%ad%e3%82%b8%e3%82%a7%e3%82%af%e3%83%88%e3%82%bb%e3%82%ab%e3%82%a4+%e3%82%ab%e3%83%a9%e3%83%95%e3%83%ab%e3%82%b9%e3%83%86%e3%83%bc%e3%82%b8!+feat.+%e5%88%9d%e9%9f%b3%e3%83%9f%e3%82%af%e3%80%91-MORE+MORE+JUMP!-DREAM+PLACE(cut-on)3DMV.mp4'>【プロジェクトセカイ カラフルステージ! feat. 初音ミク】-MORE MORE JUMP!-DREAM PLACE(cut-on)3DMV.mp4</a></div>
+  </div>
+</div>
+<div class='card' data-year='2023' data-yearband='2023' data-updated='20230914' data-priority='3'>
+  <div class='card-title'>
+    <a data-q='%e3%80%90BanG+Dream!+It%27s+MyGO!!!!!%e3%80%91-MyGO!!!!!-%e7%a2%a7%e5%a4%a9%e4%bc%b4%e8%b5%b0(cut-on).mp4'>-MyGO!!!!!-碧天伴走(cut-on)</a>
+  </div>
+  <div class='card-body'>
+    <div class='meta'><span class='label'>作品名</span> <a href='search_all.html?q=BanG+Dream!+It%27s+MyGO!!!!!'>BanG Dream! It&#39;s MyGO!!!!!</a></div>
+    <div class='meta'><span class='label'>歌い手</span> </div>
+    <div class='meta'><span class='label'>制作者</span> けんしん</div>
+    <div class='meta'><span class='label'>最終更新日</span> 2023/09/14</div>
+    <div class='meta'><span class='label'>ファイル名</span> <a data-q='%e3%80%90BanG+Dream!+It%27s+MyGO!!!!!%e3%80%91-MyGO!!!!!-%e7%a2%a7%e5%a4%a9%e4%bc%b4%e8%b5%b0(cut-on).mp4'>【BanG Dream! It&#39;s MyGO!!!!!】-MyGO!!!!!-碧天伴走(cut-on).mp4</a></div>
+  </div>
+</div>
+<div class='card' data-year='2023' data-yearband='2023' data-updated='20230914' data-priority='999'>
+  <div class='card-title'>
+    <a data-q='DRAGON%e3%80%90JAM+Prroject+4thLIVE+VICTORY(ON%ef%bc%8fVC)%e3%80%91.mp4'>DRAGON【JAM Prroject 4thLIVE VICTORY(ON／VC)】</a>
+  </div>
+  <div class='card-body'>
+    <div class='meta'><span class='label'>作品名</span> <a href='search_all.html?q=JAM+Prroject+4thLIVE+VICTORY(ON%ef%bc%8fVC)'>JAM Prroject 4thLIVE VICTORY(ON／VC)</a></div>
+    <div class='meta'><span class='label'>歌い手</span> VC)】</div>
+    <div class='meta'><span class='label'>制作者</span> </div>
+    <div class='meta'><span class='label'>最終更新日</span> 2023/09/14</div>
+    <div class='meta'><span class='label'>ファイル名</span> <a data-q='DRAGON%e3%80%90JAM+Prroject+4thLIVE+VICTORY(ON%ef%bc%8fVC)%e3%80%91.mp4'>DRAGON【JAM Prroject 4thLIVE VICTORY(ON／VC)】.mp4</a></div>
+  </div>
+</div>
+<div class='card' data-year='2023' data-yearband='2023' data-updated='20230914' data-priority='999'>
+  <div class='card-title'>
+    <a data-q='%e5%a5%bd%e3%81%8d%e3%81%aa%e5%ad%90%e3%81%8c%e3%82%81%e3%81%8c%e3%81%ad%e3%82%92%e5%bf%98%e3%82%8c%e3%81%9f+-+NAME%ef%bc%8f%e3%83%9e%e3%82%b5%e3%83%a8%e3%82%b7%e3%81%8c%e3%82%81%e3%81%8c%e3%81%ad%e3%82%92%e5%bf%98%e3%82%8c%e3%81%9f%e3%80%8eon-off%e3%80%8f%e2%80%bbOP%e3%82%ab%e3%83%90%e3%83%bc%e6%9b%b2%e3%80%81%e3%83%91%e3%83%bc%e3%83%88%e5%88%86%e3%81%91%e6%9c%89%e3%82%8a%e3%80%81%e5%85%ac%e5%bc%8fMV.mp4'>好きな子がめがねを忘れた - NAME</a>
+  </div>
+  <div class='card-body'>
+    <div class='meta'><span class='label'>作品名</span> <a href='search_all.html?q=2023%e5%b9%b4'>2023年</a></div>
+    <div class='meta'><span class='label'>歌い手</span> マサヨシがめがねを忘れた※OPカバー曲、パート分け有り、公式MV</div>
+    <div class='meta'><span class='label'>制作者</span> スフィーナ</div>
+    <div class='meta'><span class='label'>最終更新日</span> 2023/09/14</div>
+    <div class='meta'><span class='label'>ファイル名</span> <a data-q='%e5%a5%bd%e3%81%8d%e3%81%aa%e5%ad%90%e3%81%8c%e3%82%81%e3%81%8c%e3%81%ad%e3%82%92%e5%bf%98%e3%82%8c%e3%81%9f+-+NAME%ef%bc%8f%e3%83%9e%e3%82%b5%e3%83%a8%e3%82%b7%e3%81%8c%e3%82%81%e3%81%8c%e3%81%ad%e3%82%92%e5%bf%98%e3%82%8c%e3%81%9f%e3%80%8eon-off%e3%80%8f%e2%80%bbOP%e3%82%ab%e3%83%90%e3%83%bc%e6%9b%b2%e3%80%81%e3%83%91%e3%83%bc%e3%83%88%e5%88%86%e3%81%91%e6%9c%89%e3%82%8a%e3%80%81%e5%85%ac%e5%bc%8fMV.mp4'>好きな子がめがねを忘れた - NAME／マサヨシがめがねを忘れた『on-off』※OPカバー曲、パート分け有り、公式MV.mp4</a></div>
+  </div>
+</div>
+<div class='card' data-year='2023' data-yearband='2023' data-updated='20230914' data-priority='999'>
+  <div class='card-title'>
+    <a data-q='%e3%80%90%e7%a5%9e%e3%81%ae%e3%81%bf%e3%81%9e%e7%9f%a5%e3%82%8b%e3%82%bb%e3%82%ab%e3%82%a4%e3%80%91%e3%80%8c%e9%9d%92%e6%98%a5%e3%83%91%e3%83%a9%e3%83%80%e3%82%a4%e3%82%b9%e3%80%8d%5bIM%5d%5b%e4%b8%ad%e5%b7%9d%e3%81%8b%e3%81%ae%e3%82%93+starring+%e6%9d%b1%e5%b1%b1%e5%a5%88%e5%a4%ae%5d%5bOn-Off%5d%5b%e3%82%a2%e3%83%8b%e3%83%a1%5d%5b%e8%8a%9d%e3%81%a1%e3%82%83%e3%82%93%5d.mp4'>「青春パラダイス」[IM][中川かのん starring 東山奈央][On-Off][アニメ][芝ちゃん]</a>
+  </div>
+  <div class='card-body'>
+    <div class='meta'><span class='label'>作品名</span> <a href='search_all.html?q=%e7%a5%9e%e3%81%ae%e3%81%bf%e3%81%9e%e7%9f%a5%e3%82%8b%e3%82%bb%e3%82%ab%e3%82%a4'>神のみぞ知るセカイ</a></div>
+    <div class='meta'><span class='label'>歌い手</span> </div>
+    <div class='meta'><span class='label'>制作者</span> 芝ちゃん</div>
+    <div class='meta'><span class='label'>最終更新日</span> 2023/09/14</div>
+    <div class='meta'><span class='label'>ファイル名</span> <a data-q='%e3%80%90%e7%a5%9e%e3%81%ae%e3%81%bf%e3%81%9e%e7%9f%a5%e3%82%8b%e3%82%bb%e3%82%ab%e3%82%a4%e3%80%91%e3%80%8c%e9%9d%92%e6%98%a5%e3%83%91%e3%83%a9%e3%83%80%e3%82%a4%e3%82%b9%e3%80%8d%5bIM%5d%5b%e4%b8%ad%e5%b7%9d%e3%81%8b%e3%81%ae%e3%82%93+starring+%e6%9d%b1%e5%b1%b1%e5%a5%88%e5%a4%ae%5d%5bOn-Off%5d%5b%e3%82%a2%e3%83%8b%e3%83%a1%5d%5b%e8%8a%9d%e3%81%a1%e3%82%83%e3%82%93%5d.mp4'>【神のみぞ知るセカイ】「青春パラダイス」[IM][中川かのん starring 東山奈央][On-Off][アニメ][芝ちゃん].mp4</a></div>
+  </div>
+</div>
+<div class='card' data-year='2023' data-yearband='2023' data-updated='20230913' data-priority='4'>
+  <div class='card-title'>
+    <a data-q='%e3%82%ab%e3%83%bc%e3%83%93%e3%82%a3%e2%98%86%e3%82%b9%e3%83%86%e3%83%83%e3%83%97!+(off)+%e6%98%9f%e3%81%ae%e3%82%ab%e3%83%bc%e3%83%93%e3%82%a3%e3%80%90KONISHIKI%e3%80%91.mp4'>カービィ☆ステップ! (off) 星のカービィ【KONISHIKI】</a>
+  </div>
+  <div class='card-body'>
+    <div class='meta'><span class='label'>作品名</span> <a href='search_all.html?q=KONISHIKI'>KONISHIKI</a></div>
+    <div class='meta'><span class='label'>歌い手</span> </div>
+    <div class='meta'><span class='label'>制作者</span> FKN</div>
+    <div class='meta'><span class='label'>最終更新日</span> 2023/09/13</div>
+    <div class='meta'><span class='label'>ファイル名</span> <a data-q='%e3%82%ab%e3%83%bc%e3%83%93%e3%82%a3%e2%98%86%e3%82%b9%e3%83%86%e3%83%83%e3%83%97!+(off)+%e6%98%9f%e3%81%ae%e3%82%ab%e3%83%bc%e3%83%93%e3%82%a3%e3%80%90KONISHIKI%e3%80%91.mp4'>カービィ☆ステップ! (off) 星のカービィ【KONISHIKI】.mp4</a></div>
+  </div>
+</div>
+<div class='card' data-year='2023' data-yearband='2023' data-updated='20230913' data-priority='4'>
+  <div class='card-title'>
+    <a data-q='%e3%82%ab%e3%83%bc%e3%83%93%e3%82%a3!+(off)+%e6%98%9f%e3%81%ae%e3%82%ab%e3%83%bc%e3%83%93%e3%82%a3%e3%80%90%e6%9c%9d%e5%b7%9d%e3%81%b2%e3%82%8d%e3%81%93%e3%80%91.mp4'>カービィ! (off) 星のカービィ【朝川ひろこ】</a>
+  </div>
+  <div class='card-body'>
+    <div class='meta'><span class='label'>作品名</span> <a href='search_all.html?q=%e6%9c%9d%e5%b7%9d%e3%81%b2%e3%82%8d%e3%81%93'>朝川ひろこ</a></div>
+    <div class='meta'><span class='label'>歌い手</span> </div>
+    <div class='meta'><span class='label'>制作者</span> FKN</div>
+    <div class='meta'><span class='label'>最終更新日</span> 2023/09/13</div>
+    <div class='meta'><span class='label'>ファイル名</span> <a data-q='%e3%82%ab%e3%83%bc%e3%83%93%e3%82%a3!+(off)+%e6%98%9f%e3%81%ae%e3%82%ab%e3%83%bc%e3%83%93%e3%82%a3%e3%80%90%e6%9c%9d%e5%b7%9d%e3%81%b2%e3%82%8d%e3%81%93%e3%80%91.mp4'>カービィ! (off) 星のカービィ【朝川ひろこ】.mp4</a></div>
+  </div>
+</div>
+<div class='card' data-year='2023' data-yearband='2023' data-updated='20230913' data-priority='999'>
+  <div class='card-title'>
+    <a data-q='%e7%b4%85%e3%83%8e%e7%89%99%e3%80%90JAM+Prroject+4thLIVE+VICTORY(ON%ef%bc%8fVC)%e3%80%91.mp4'>紅ノ牙【JAM Prroject 4thLIVE VICTORY(ON／VC)】</a>
+  </div>
+  <div class='card-body'>
+    <div class='meta'><span class='label'>作品名</span> <a href='search_all.html?q=JAM+Prroject+4thLIVE+VICTORY(ON%ef%bc%8fVC)'>JAM Prroject 4thLIVE VICTORY(ON／VC)</a></div>
+    <div class='meta'><span class='label'>歌い手</span> VC)】</div>
+    <div class='meta'><span class='label'>制作者</span> </div>
+    <div class='meta'><span class='label'>最終更新日</span> 2023/09/13</div>
+    <div class='meta'><span class='label'>ファイル名</span> <a data-q='%e7%b4%85%e3%83%8e%e7%89%99%e3%80%90JAM+Prroject+4thLIVE+VICTORY(ON%ef%bc%8fVC)%e3%80%91.mp4'>紅ノ牙【JAM Prroject 4thLIVE VICTORY(ON／VC)】.mp4</a></div>
+  </div>
+</div>
+<div class='card' data-year='2023' data-yearband='2023' data-updated='20230913' data-priority='3'>
+  <div class='card-title'>
+    <a data-q='%e5%a2%83%e7%95%8c%e6%88%a6%e6%a9%9f+%e6%a5%b5%e9%8b%bc%e3%83%8e%e8%a3%85%e9%ac%bc+(spleeter-on)+Organic+Call+%e5%91%bc%e3%81%b6%e5%a3%b0%e3%81%8c%e3%81%aa%e3%82%8b%e6%96%b9%e8%a7%92%e3%81%b8%e2%80%bbOrganic+Call+MV.mp4'>境界戦機 極鋼ノ装鬼 (spleeter-on) Organic Call 呼ぶ声がなる方角へ※Organic Call MV</a>
+  </div>
+  <div class='card-body'>
+    <div class='meta'><span class='label'>作品名</span> <a href='search_all.html?q=%e3%81%be%e3%81%a9%e3%81%8b%e3%81%95%e3%82%93(%e3%83%89%e3%83%a9%e3%83%95%e3%83%88)'>まどかさん(ドラフト)</a></div>
+    <div class='meta'><span class='label'>歌い手</span> </div>
+    <div class='meta'><span class='label'>制作者</span> madoka</div>
+    <div class='meta'><span class='label'>最終更新日</span> 2023/09/13</div>
+    <div class='meta'><span class='label'>ファイル名</span> <a data-q='%e5%a2%83%e7%95%8c%e6%88%a6%e6%a9%9f+%e6%a5%b5%e9%8b%bc%e3%83%8e%e8%a3%85%e9%ac%bc+(spleeter-on)+Organic+Call+%e5%91%bc%e3%81%b6%e5%a3%b0%e3%81%8c%e3%81%aa%e3%82%8b%e6%96%b9%e8%a7%92%e3%81%b8%e2%80%bbOrganic+Call+MV.mp4'>境界戦機 極鋼ノ装鬼 (spleeter-on) Organic Call 呼ぶ声がなる方角へ※Organic Call MV.mp4</a></div>
+  </div>
+</div>
+<div class='card' data-year='2023' data-yearband='2023' data-updated='20230913' data-priority='999'>
+  <div class='card-title'>
+    <a data-q='%e3%80%90%e6%a0%aa%e5%bc%8f%e4%bc%9a%e7%a4%beAYUMI+ONE.+%e7%a4%be%e6%ad%8c%e3%80%91%e3%80%8c%e3%82%aa%e3%83%aa%e3%83%92%e3%83%a1%e3%83%92%e3%82%b3%e3%83%9c%e3%82%b7+AYUMI+ONE.%e3%80%8d%5bIM%5d%5b%e5%b1%b1%e6%9c%ac%e6%ad%a3%e4%b9%8b%ef%bc%86%e3%83%94%e3%83%b3%e3%82%af%e3%83%94%e3%83%83%e3%82%ae%e3%83%bc%e3%82%ba%5d%5b2tr+Off-On%5d.mp4'>「オリヒメヒコボシ AYUMI ONE.」[IM][山本正之＆ピンクピッギーズ][2tr Off-On]</a>
+  </div>
+  <div class='card-body'>
+    <div class='meta'><span class='label'>作品名</span> <a href='search_all.html?q=%e6%a0%aa%e5%bc%8f%e4%bc%9a%e7%a4%beAYUMI+ONE.+%e7%a4%be%e6%ad%8c'>株式会社AYUMI ONE. 社歌</a></div>
+    <div class='meta'><span class='label'>歌い手</span> </div>
+    <div class='meta'><span class='label'>制作者</span> </div>
+    <div class='meta'><span class='label'>最終更新日</span> 2023/09/13</div>
+    <div class='meta'><span class='label'>ファイル名</span> <a data-q='%e3%80%90%e6%a0%aa%e5%bc%8f%e4%bc%9a%e7%a4%beAYUMI+ONE.+%e7%a4%be%e6%ad%8c%e3%80%91%e3%80%8c%e3%82%aa%e3%83%aa%e3%83%92%e3%83%a1%e3%83%92%e3%82%b3%e3%83%9c%e3%82%b7+AYUMI+ONE.%e3%80%8d%5bIM%5d%5b%e5%b1%b1%e6%9c%ac%e6%ad%a3%e4%b9%8b%ef%bc%86%e3%83%94%e3%83%b3%e3%82%af%e3%83%94%e3%83%83%e3%82%ae%e3%83%bc%e3%82%ba%5d%5b2tr+Off-On%5d.mp4'>【株式会社AYUMI ONE. 社歌】「オリヒメヒコボシ AYUMI ONE.」[IM][山本正之＆ピンクピッギーズ][2tr Off-On].mp4</a></div>
+  </div>
+</div>
+<div class='card' data-year='2023' data-yearband='2023' data-updated='20230913' data-priority='999'>
+  <div class='card-title'>
+    <a data-q='%e3%80%90%e7%99%bd%e7%8c%ab%e3%83%97%e3%83%ad%e3%82%b8%e3%82%a7%e3%82%af%e3%83%88%e3%80%91%e3%80%8cLINK+to+DESTINY(%e3%83%91%e3%83%bc%e3%83%88%e5%88%86%e3%81%91%e6%9c%89)%e3%80%8d%5bTM%5d%5b%e3%82%a2%e3%82%a4%e3%83%aa%e3%82%b9(%e5%a0%80%e6%b1%9f%e7%94%b1%e8%a1%a3)+%e3%83%bb%e3%82%a4%e3%82%af%e3%82%b7%e3%82%a2(%e5%90%89%e4%b9%83)%5d%5b2tr+Off-On%5d.mp4'>「LINK to DESTINY(パート分け有)」[TM][アイリス(堀江由衣) ・イクシア(吉乃)][2tr Off-On]</a>
+  </div>
+  <div class='card-body'>
+    <div class='meta'><span class='label'>作品名</span> <a href='search_all.html?q=%e7%99%bd%e7%8c%ab%e3%83%97%e3%83%ad%e3%82%b8%e3%82%a7%e3%82%af%e3%83%88'>白猫プロジェクト</a></div>
+    <div class='meta'><span class='label'>歌い手</span> </div>
+    <div class='meta'><span class='label'>制作者</span> </div>
+    <div class='meta'><span class='label'>最終更新日</span> 2023/09/13</div>
+    <div class='meta'><span class='label'>ファイル名</span> <a data-q='%e3%80%90%e7%99%bd%e7%8c%ab%e3%83%97%e3%83%ad%e3%82%b8%e3%82%a7%e3%82%af%e3%83%88%e3%80%91%e3%80%8cLINK+to+DESTINY(%e3%83%91%e3%83%bc%e3%83%88%e5%88%86%e3%81%91%e6%9c%89)%e3%80%8d%5bTM%5d%5b%e3%82%a2%e3%82%a4%e3%83%aa%e3%82%b9(%e5%a0%80%e6%b1%9f%e7%94%b1%e8%a1%a3)+%e3%83%bb%e3%82%a4%e3%82%af%e3%82%b7%e3%82%a2(%e5%90%89%e4%b9%83)%5d%5b2tr+Off-On%5d.mp4'>【白猫プロジェクト】「LINK to DESTINY(パート分け有)」[TM][アイリス(堀江由衣) ・イクシア(吉乃)][2tr Off-On].mp4</a></div>
+  </div>
+</div>
+<div class='card' data-year='2023' data-yearband='2023' data-updated='20230912' data-priority='4'>
+  <div class='card-title'>
+    <a data-q='%e3%80%90%e3%82%8d%e3%82%93%e3%81%90%e3%82%89%e3%81%84%e3%81%a0%e3%81%81%e3%81%99%ef%bc%81%e3%80%91%e2%99%a1km%ef%bc%8fh(MV)%ef%bc%8fRay.mp4'>♡km／h(MV)</a>
+  </div>
+  <div class='card-body'>
+    <div class='meta'><span class='label'>作品名</span> <a href='search_all.html?q=%e3%82%8d%e3%82%93%e3%81%90%e3%82%89%e3%81%84%e3%81%a0%e3%81%81%e3%81%99%ef%bc%81'>ろんぐらいだぁす！</a></div>
+    <div class='meta'><span class='label'>歌い手</span> Ray</div>
+    <div class='meta'><span class='label'>制作者</span> なぎ</div>
+    <div class='meta'><span class='label'>最終更新日</span> 2023/09/12</div>
+    <div class='meta'><span class='label'>ファイル名</span> <a data-q='%e3%80%90%e3%82%8d%e3%82%93%e3%81%90%e3%82%89%e3%81%84%e3%81%a0%e3%81%81%e3%81%99%ef%bc%81%e3%80%91%e2%99%a1km%ef%bc%8fh(MV)%ef%bc%8fRay.mp4'>【ろんぐらいだぁす！】♡km／h(MV)／Ray.mp4</a></div>
+  </div>
+</div>
+<div class='card' data-year='2023' data-yearband='2023' data-updated='20230912' data-priority='3'>
+  <div class='card-title'>
+    <a data-q='%e5%a5%b3%e4%bd%93%e5%8c%96%e3%81%97%e3%81%9f%e5%83%95%e3%82%92%e9%a8%8e%e5%a3%ab%e6%a7%98%e9%81%94%e3%81%8c%e3%81%ad%e3%82%89%e3%81%a3%e3%81%a6%e3%81%84%e3%81%be%e3%81%99+(spleeter-on)+%e3%83%88%e3%83%a9%e3%82%a4%e3%82%a2%e3%83%b3%e3%82%b0%e3%83%ab%e3%83%bb%e3%83%a1%e3%83%a2%e3%83%aa%e3%83%bc%e3%80%90%e8%97%a4%e5%9f%8e%e3%83%aa%e3%82%a8%e3%80%91%e2%80%bb%e8%80%b3%e3%82%b3%e3%83%94+2nd+season+ED.mp4'>女体化した僕を騎士様達がねらっています (spleeter-on) トライアングル・メモリー【藤城リエ】※耳コピ 2nd season ED</a>
+  </div>
+  <div class='card-body'>
+    <div class='meta'><span class='label'>作品名</span> <a href='search_all.html?q=%e8%97%a4%e5%9f%8e%e3%83%aa%e3%82%a8'>藤城リエ</a></div>
+    <div class='meta'><span class='label'>歌い手</span> </div>
+    <div class='meta'><span class='label'>制作者</span> madoka</div>
+    <div class='meta'><span class='label'>最終更新日</span> 2023/09/12</div>
+    <div class='meta'><span class='label'>ファイル名</span> <a data-q='%e5%a5%b3%e4%bd%93%e5%8c%96%e3%81%97%e3%81%9f%e5%83%95%e3%82%92%e9%a8%8e%e5%a3%ab%e6%a7%98%e9%81%94%e3%81%8c%e3%81%ad%e3%82%89%e3%81%a3%e3%81%a6%e3%81%84%e3%81%be%e3%81%99+(spleeter-on)+%e3%83%88%e3%83%a9%e3%82%a4%e3%82%a2%e3%83%b3%e3%82%b0%e3%83%ab%e3%83%bb%e3%83%a1%e3%83%a2%e3%83%aa%e3%83%bc%e3%80%90%e8%97%a4%e5%9f%8e%e3%83%aa%e3%82%a8%e3%80%91%e2%80%bb%e8%80%b3%e3%82%b3%e3%83%94+2nd+season+ED.mp4'>女体化した僕を騎士様達がねらっています (spleeter-on) トライアングル・メモリー【藤城リエ】※耳コピ 2nd season ED.mp4</a></div>
+  </div>
+</div>
+<div class='card' data-year='2023' data-yearband='2023' data-updated='20230912' data-priority='2'>
+  <div class='card-title'>
+    <a data-q='%e3%83%89%e3%82%af%e3%83%ad%e3%83%8b%e3%83%b3%e3%82%b8%e3%83%a3%e3%82%b3%e3%83%8e%e3%83%8f%ef%bc%8f%e6%b2%b3%e9%87%8e%e6%a1%9c%ef%bc%88%e8%bf%91%e8%97%a4%e7%8e%b2%e5%a5%88%ef%bc%89%c3%97%e6%9f%b3%e6%98%8e%e9%9f%b3%ef%bc%88%e7%a6%8f%e5%b1%b1%e6%bd%a4%ef%bc%89%ef%bc%8f%e3%83%9b%e3%83%aa%e3%83%9f%e3%83%a4+-piece-+(VC-On).mp4'>ドクロニンジャコノハ／河野桜（近藤玲奈）&#215;柳明音（福山潤）</a>
+  </div>
+  <div class='card-body'>
+    <div class='meta'><span class='label'>作品名</span> <a href='search_all.html?q=%e3%81%99%e3%81%bf%e3%81%9f%e3%81%95%e3%82%93'>すみたさん</a></div>
+    <div class='meta'><span class='label'>歌い手</span> ホリミヤ</div>
+    <div class='meta'><span class='label'>制作者</span> すみた</div>
+    <div class='meta'><span class='label'>最終更新日</span> 2023/09/12</div>
+    <div class='meta'><span class='label'>ファイル名</span> <a data-q='%e3%83%89%e3%82%af%e3%83%ad%e3%83%8b%e3%83%b3%e3%82%b8%e3%83%a3%e3%82%b3%e3%83%8e%e3%83%8f%ef%bc%8f%e6%b2%b3%e9%87%8e%e6%a1%9c%ef%bc%88%e8%bf%91%e8%97%a4%e7%8e%b2%e5%a5%88%ef%bc%89%c3%97%e6%9f%b3%e6%98%8e%e9%9f%b3%ef%bc%88%e7%a6%8f%e5%b1%b1%e6%bd%a4%ef%bc%89%ef%bc%8f%e3%83%9b%e3%83%aa%e3%83%9f%e3%83%a4+-piece-+(VC-On).mp4'>ドクロニンジャコノハ／河野桜（近藤玲奈）&#215;柳明音（福山潤）／ホリミヤ -piece- (VC-On).mp4</a></div>
+  </div>
+</div>
+<div class='card' data-year='2023' data-yearband='2023' data-updated='20230912' data-priority='999'>
+  <div class='card-title'>
+    <a data-q='%e3%80%90%e3%82%a2%e3%82%a4%e3%83%89%e3%83%ab%e3%83%9e%e3%82%b9%e3%82%bf%e3%83%bc%e3%83%9f%e3%83%aa%e3%82%aa%e3%83%b3%e3%83%a9%e3%82%a4%e3%83%96%ef%bc%81%e3%82%b7%e3%82%a2%e3%82%bf%e3%83%bc%e3%83%87%e3%82%a4%e3%82%ba%e3%80%91Dreaming!%ef%bc%8f765+MILLION+ALLSTARS(on-off).mp4'>Dreaming!</a>
+  </div>
+  <div class='card-body'>
+    <div class='meta'><span class='label'>作品名</span> <a href='search_all.html?q=%e3%82%a2%e3%82%a4%e3%83%89%e3%83%ab%e3%83%9e%e3%82%b9%e3%82%bf%e3%83%bc%e3%83%9f%e3%83%aa%e3%82%aa%e3%83%b3%e3%83%a9%e3%82%a4%e3%83%96%ef%bc%81%e3%82%b7%e3%82%a2%e3%82%bf%e3%83%bc%e3%83%87%e3%82%a4%e3%82%ba'>アイドルマスターミリオンライブ！シアターデイズ</a></div>
+    <div class='meta'><span class='label'>歌い手</span> 765 MILLION ALLSTARS</div>
+    <div class='meta'><span class='label'>制作者</span> </div>
+    <div class='meta'><span class='label'>最終更新日</span> 2023/09/12</div>
+    <div class='meta'><span class='label'>ファイル名</span> <a data-q='%e3%80%90%e3%82%a2%e3%82%a4%e3%83%89%e3%83%ab%e3%83%9e%e3%82%b9%e3%82%bf%e3%83%bc%e3%83%9f%e3%83%aa%e3%82%aa%e3%83%b3%e3%83%a9%e3%82%a4%e3%83%96%ef%bc%81%e3%82%b7%e3%82%a2%e3%82%bf%e3%83%bc%e3%83%87%e3%82%a4%e3%82%ba%e3%80%91Dreaming!%ef%bc%8f765+MILLION+ALLSTARS(on-off).mp4'>【アイドルマスターミリオンライブ！シアターデイズ】Dreaming!／765 MILLION ALLSTARS(on-off).mp4</a></div>
+  </div>
+</div>
+<div class='card' data-year='2023' data-yearband='2023' data-updated='20230911' data-priority='999'>
+  <div class='card-title'>
+    <a data-q='%e3%80%90IDOLY+PRIDE%e3%80%91%e3%81%a4%e3%81%aa%e3%81%8c%e3%82%8b%e5%bf%83Binary%ef%bc%8f%e7%99%bd%e7%9f%b3%e6%b2%99%e5%ad%a3(%e5%ae%ae%e6%b2%a2%e5%b0%8f%e6%98%a5)%c3%97%e7%99%bd%e7%9f%b3%e5%8d%83%e7%b4%97(%e9%ab%98%e5%b0%be%e5%a5%8f%e9%9f%b3)(on-cut).mp4'>つながる心Binary</a>
+  </div>
+  <div class='card-body'>
+    <div class='meta'><span class='label'>作品名</span> <a href='search_all.html?q=IDOLY+PRIDE'>IDOLY PRIDE</a></div>
+    <div class='meta'><span class='label'>歌い手</span> 白石沙季&#215;白石千紗</div>
+    <div class='meta'><span class='label'>制作者</span> </div>
+    <div class='meta'><span class='label'>最終更新日</span> 2023/09/11</div>
+    <div class='meta'><span class='label'>ファイル名</span> <a data-q='%e3%80%90IDOLY+PRIDE%e3%80%91%e3%81%a4%e3%81%aa%e3%81%8c%e3%82%8b%e5%bf%83Binary%ef%bc%8f%e7%99%bd%e7%9f%b3%e6%b2%99%e5%ad%a3(%e5%ae%ae%e6%b2%a2%e5%b0%8f%e6%98%a5)%c3%97%e7%99%bd%e7%9f%b3%e5%8d%83%e7%b4%97(%e9%ab%98%e5%b0%be%e5%a5%8f%e9%9f%b3)(on-cut).mp4'>【IDOLY PRIDE】つながる心Binary／白石沙季(宮沢小春)&#215;白石千紗(高尾奏音)(on-cut).mp4</a></div>
+  </div>
+</div>
+<div class='card' data-year='2023' data-yearband='2023' data-updated='20230911' data-priority='3'>
+  <div class='card-title'>
+    <a data-q='%e5%a5%b3%e4%bd%93%e5%8c%96%e3%81%97%e3%81%9f%e5%83%95%e3%82%92%e9%a8%8e%e5%a3%ab%e6%a7%98%e9%81%94%e3%81%8c%e3%81%ad%e3%82%89%e3%81%a3%e3%81%a6%e3%81%84%e3%81%be%e3%81%99+(spleeter-on)+%e3%83%88%e3%83%a9%e3%82%a4%e3%82%a2%e3%83%b3%e3%82%b0%e3%83%ab%e3%83%bb%e3%83%a1%e3%83%a2%e3%83%aa%e3%83%bc%e3%80%90%e8%97%a4%e5%9f%8e%e3%83%aa%e3%82%a8%e3%80%91%e2%80%bb%e6%ad%8c%e8%a9%9e%e3%81%ae%e3%81%bf+%e8%80%b3%e3%82%b3%e3%83%94+%e3%82%a2%e3%83%8b%e3%83%a1%e5%85%ac%e5%bc%8f+PV.mp4'>女体化した僕を騎士様達がねらっています (spleeter-on) トライアングル・メモリー【藤城リエ】※歌詞のみ 耳コピ アニメ公式 PV</a>
+  </div>
+  <div class='card-body'>
+    <div class='meta'><span class='label'>作品名</span> <a href='search_all.html?q=%e8%97%a4%e5%9f%8e%e3%83%aa%e3%82%a8'>藤城リエ</a></div>
+    <div class='meta'><span class='label'>歌い手</span> </div>
+    <div class='meta'><span class='label'>制作者</span> madoka</div>
+    <div class='meta'><span class='label'>最終更新日</span> 2023/09/11</div>
+    <div class='meta'><span class='label'>ファイル名</span> <a data-q='%e5%a5%b3%e4%bd%93%e5%8c%96%e3%81%97%e3%81%9f%e5%83%95%e3%82%92%e9%a8%8e%e5%a3%ab%e6%a7%98%e9%81%94%e3%81%8c%e3%81%ad%e3%82%89%e3%81%a3%e3%81%a6%e3%81%84%e3%81%be%e3%81%99+(spleeter-on)+%e3%83%88%e3%83%a9%e3%82%a4%e3%82%a2%e3%83%b3%e3%82%b0%e3%83%ab%e3%83%bb%e3%83%a1%e3%83%a2%e3%83%aa%e3%83%bc%e3%80%90%e8%97%a4%e5%9f%8e%e3%83%aa%e3%82%a8%e3%80%91%e2%80%bb%e6%ad%8c%e8%a9%9e%e3%81%ae%e3%81%bf+%e8%80%b3%e3%82%b3%e3%83%94+%e3%82%a2%e3%83%8b%e3%83%a1%e5%85%ac%e5%bc%8f+PV.mp4'>女体化した僕を騎士様達がねらっています (spleeter-on) トライアングル・メモリー【藤城リエ】※歌詞のみ 耳コピ アニメ公式 PV.mp4</a></div>
+  </div>
+</div>
+<div class='card' data-year='2023' data-yearband='2023' data-updated='20230911' data-priority='3'>
+  <div class='card-title'>
+    <a data-q='%e3%83%95%e3%82%a7%ef%bd%9e%e3%83%ac%e3%83%b3%e3%82%b6%e3%82%a4+-%e7%a5%9e%e3%81%95%e3%81%be%e3%81%ae%e6%97%a5%e5%b8%b8-+(spleeter-on)+%e3%81%95%e3%82%88%e3%81%aa%e3%82%89%e3%81%be%e3%81%9f%e3%81%ad%e3%82%82%e3%81%86%e3%81%a1%e3%82%87%e3%81%a3%e3%81%a8%e3%80%907+MEN+%e4%be%8d%e3%80%91%e2%80%bb%e6%ad%8c%e8%a9%9e%e3%81%ae%e3%81%bf+TV%e3%82%b5%e3%82%a4%e3%82%ba+Ver.mp4'>フェ～レンザイ -神さまの日常- (spleeter-on) さよならまたねもうちょっと【7 MEN 侍】※歌詞のみ TVサイズ Ver</a>
+  </div>
+  <div class='card-body'>
+    <div class='meta'><span class='label'>作品名</span> <a href='search_all.html?q=7+MEN+%e4%be%8d'>7 MEN 侍</a></div>
+    <div class='meta'><span class='label'>歌い手</span> </div>
+    <div class='meta'><span class='label'>制作者</span> madoka</div>
+    <div class='meta'><span class='label'>最終更新日</span> 2023/09/11</div>
+    <div class='meta'><span class='label'>ファイル名</span> <a data-q='%e3%83%95%e3%82%a7%ef%bd%9e%e3%83%ac%e3%83%b3%e3%82%b6%e3%82%a4+-%e7%a5%9e%e3%81%95%e3%81%be%e3%81%ae%e6%97%a5%e5%b8%b8-+(spleeter-on)+%e3%81%95%e3%82%88%e3%81%aa%e3%82%89%e3%81%be%e3%81%9f%e3%81%ad%e3%82%82%e3%81%86%e3%81%a1%e3%82%87%e3%81%a3%e3%81%a8%e3%80%907+MEN+%e4%be%8d%e3%80%91%e2%80%bb%e6%ad%8c%e8%a9%9e%e3%81%ae%e3%81%bf+TV%e3%82%b5%e3%82%a4%e3%82%ba+Ver.mp4'>フェ～レンザイ -神さまの日常- (spleeter-on) さよならまたねもうちょっと【7 MEN 侍】※歌詞のみ TVサイズ Ver.mp4</a></div>
+  </div>
+</div>
+<div class='card' data-year='2023' data-yearband='2023' data-updated='20230911' data-priority='3'>
+  <div class='card-title'>
+    <a data-q='%e3%83%95%e3%82%a7%ef%bd%9e%e3%83%ac%e3%83%b3%e3%82%b6%e3%82%a4+-%e7%a5%9e%e3%81%95%e3%81%be%e3%81%ae%e6%97%a5%e5%b8%b8-+(spleeter-on)+%e7%b4%94%e6%83%85%e3%82%a6%e3%82%a9%e3%83%bc%e3%82%a2%e3%82%a4%e3%83%8b%e3%83%bc%e3%80%90HiHi+Jets%e3%80%91%e2%80%bb%e6%ad%8c%e8%a9%9e%e3%81%ae%e3%81%bf+TV%e3%82%b5%e3%82%a4%e3%82%ba+Ver.mp4'>フェ～レンザイ -神さまの日常- (spleeter-on) 純情ウォーアイニー【HiHi Jets】※歌詞のみ TVサイズ Ver</a>
+  </div>
+  <div class='card-body'>
+    <div class='meta'><span class='label'>作品名</span> <a href='search_all.html?q=HiHi+Jets'>HiHi Jets</a></div>
+    <div class='meta'><span class='label'>歌い手</span> </div>
+    <div class='meta'><span class='label'>制作者</span> madoka</div>
+    <div class='meta'><span class='label'>最終更新日</span> 2023/09/11</div>
+    <div class='meta'><span class='label'>ファイル名</span> <a data-q='%e3%83%95%e3%82%a7%ef%bd%9e%e3%83%ac%e3%83%b3%e3%82%b6%e3%82%a4+-%e7%a5%9e%e3%81%95%e3%81%be%e3%81%ae%e6%97%a5%e5%b8%b8-+(spleeter-on)+%e7%b4%94%e6%83%85%e3%82%a6%e3%82%a9%e3%83%bc%e3%82%a2%e3%82%a4%e3%83%8b%e3%83%bc%e3%80%90HiHi+Jets%e3%80%91%e2%80%bb%e6%ad%8c%e8%a9%9e%e3%81%ae%e3%81%bf+TV%e3%82%b5%e3%82%a4%e3%82%ba+Ver.mp4'>フェ～レンザイ -神さまの日常- (spleeter-on) 純情ウォーアイニー【HiHi Jets】※歌詞のみ TVサイズ Ver.mp4</a></div>
+  </div>
+</div>
+<div class='card' data-year='2023' data-yearband='2023' data-updated='20230911' data-priority='3'>
+  <div class='card-title'>
+    <a data-q='%e3%80%90BanG+Dream!+%e3%82%ac%e3%83%bc%e3%83%ab%e3%82%ba%e3%83%90%e3%83%b3%e3%83%89%e3%83%91%e3%83%bc%e3%83%86%e3%82%a3!%e3%80%91-RAISE+A+SUILEN-mind+of+Prominence(cut-on).mp4'>-RAISE A SUILEN-mind of Prominence(cut-on)</a>
+  </div>
+  <div class='card-body'>
+    <div class='meta'><span class='label'>作品名</span> <a href='search_all.html?q=BanG+Dream!+%e3%82%ac%e3%83%bc%e3%83%ab%e3%82%ba%e3%83%90%e3%83%b3%e3%83%89%e3%83%91%e3%83%bc%e3%83%86%e3%82%a3!'>BanG Dream! ガールズバンドパーティ!</a></div>
+    <div class='meta'><span class='label'>歌い手</span> </div>
+    <div class='meta'><span class='label'>制作者</span> けんしん</div>
+    <div class='meta'><span class='label'>最終更新日</span> 2023/09/11</div>
+    <div class='meta'><span class='label'>ファイル名</span> <a data-q='%e3%80%90BanG+Dream!+%e3%82%ac%e3%83%bc%e3%83%ab%e3%82%ba%e3%83%90%e3%83%b3%e3%83%89%e3%83%91%e3%83%bc%e3%83%86%e3%82%a3!%e3%80%91-RAISE+A+SUILEN-mind+of+Prominence(cut-on).mp4'>【BanG Dream! ガールズバンドパーティ!】-RAISE A SUILEN-mind of Prominence(cut-on).mp4</a></div>
+  </div>
+</div>
+<div class='card' data-year='2023' data-yearband='2023' data-updated='20230911' data-priority='999'>
+  <div class='card-title'>
+    <a data-q='%e6%9c%88%e3%81%ae%e6%98%8e%e3%82%8a(%e6%84%9b%e3%81%ae%e3%83%86%e3%83%bc%e3%83%9e)(off-on)+%ef%bc%8f+FINAL+FANTASY+IV+%ef%bc%8f+%e4%bc%8a%e7%94%b0%e6%81%b5%e7%be%8e+%ef%bc%8f+%e3%81%91%e3%82%93%e3%81%a1%e3%81%83_69.mp4'>月の明り(愛のテーマ)(off-on) ／ FINAL FANTASY IV ／ 伊田恵美</a>
+  </div>
+  <div class='card-body'>
+    <div class='meta'><span class='label'>作品名</span> <a href='search_all.html?q=2020%e4%bb%a5%e5%89%8d(001-)'>2020以前(001-)</a></div>
+    <div class='meta'><span class='label'>歌い手</span> けんちぃ_69</div>
+    <div class='meta'><span class='label'>制作者</span> </div>
+    <div class='meta'><span class='label'>最終更新日</span> 2023/09/11</div>
+    <div class='meta'><span class='label'>ファイル名</span> <a data-q='%e6%9c%88%e3%81%ae%e6%98%8e%e3%82%8a(%e6%84%9b%e3%81%ae%e3%83%86%e3%83%bc%e3%83%9e)(off-on)+%ef%bc%8f+FINAL+FANTASY+IV+%ef%bc%8f+%e4%bc%8a%e7%94%b0%e6%81%b5%e7%be%8e+%ef%bc%8f+%e3%81%91%e3%82%93%e3%81%a1%e3%81%83_69.mp4'>月の明り(愛のテーマ)(off-on) ／ FINAL FANTASY IV ／ 伊田恵美 ／ けんちぃ_69.mp4</a></div>
+  </div>
+</div>
+<div class='card' data-year='2023' data-yearband='2023' data-updated='20230911' data-priority='999'>
+  <div class='card-title'>
+    <a data-q='CRUSH+GEAR+FIGHT!!%e3%80%90JAM+Prroject+4thLIVE+VICTORY(ON%ef%bc%8fVC)%e3%80%91.mp4'>CRUSH GEAR FIGHT!!【JAM Prroject 4thLIVE VICTORY(ON／VC)】</a>
+  </div>
+  <div class='card-body'>
+    <div class='meta'><span class='label'>作品名</span> <a href='search_all.html?q=JAM+Prroject+4thLIVE+VICTORY(ON%ef%bc%8fVC)'>JAM Prroject 4thLIVE VICTORY(ON／VC)</a></div>
+    <div class='meta'><span class='label'>歌い手</span> VC)】</div>
+    <div class='meta'><span class='label'>制作者</span> </div>
+    <div class='meta'><span class='label'>最終更新日</span> 2023/09/11</div>
+    <div class='meta'><span class='label'>ファイル名</span> <a data-q='CRUSH+GEAR+FIGHT!!%e3%80%90JAM+Prroject+4thLIVE+VICTORY(ON%ef%bc%8fVC)%e3%80%91.mp4'>CRUSH GEAR FIGHT!!【JAM Prroject 4thLIVE VICTORY(ON／VC)】.mp4</a></div>
+  </div>
+</div>
+<div class='card' data-year='2023' data-yearband='2023' data-updated='20230911' data-priority='999'>
+  <div class='card-title'>
+    <a data-q='%e9%ad%94%e6%b3%95%e4%bd%bf%e3%81%84%e3%82%b5%e3%83%aa%e3%83%bc%e3%80%90%e3%83%91%e3%83%91%e3%83%91%e3%81%ae%e3%83%81%e3%83%a7%e3%82%a4%e3%83%8a%e3%81%ae%e3%81%86%e3%81%9f-%e6%b0%b4%e5%9e%a3%e6%b4%8b%e5%ad%90%e3%80%81%e3%83%95%e3%82%a9%e3%83%bc%e3%83%a1%e3%82%a4%e3%83%84%e3%80%91UVRVC_ON.mp4'>魔法使いサリー【パパパのチョイナのうた-水垣洋子、フォーメイツ】UVRVC_ON</a>
+  </div>
+  <div class='card-body'>
+    <div class='meta'><span class='label'>作品名</span> <a href='search_all.html?q=%e3%83%91%e3%83%91%e3%83%91%e3%81%ae%e3%83%81%e3%83%a7%e3%82%a4%e3%83%8a%e3%81%ae%e3%81%86%e3%81%9f-%e6%b0%b4%e5%9e%a3%e6%b4%8b%e5%ad%90%e3%80%81%e3%83%95%e3%82%a9%e3%83%bc%e3%83%a1%e3%82%a4%e3%83%84'>パパパのチョイナのうた-水垣洋子、フォーメイツ</a></div>
+    <div class='meta'><span class='label'>歌い手</span> </div>
+    <div class='meta'><span class='label'>制作者</span> </div>
+    <div class='meta'><span class='label'>最終更新日</span> 2023/09/11</div>
+    <div class='meta'><span class='label'>ファイル名</span> <a data-q='%e9%ad%94%e6%b3%95%e4%bd%bf%e3%81%84%e3%82%b5%e3%83%aa%e3%83%bc%e3%80%90%e3%83%91%e3%83%91%e3%83%91%e3%81%ae%e3%83%81%e3%83%a7%e3%82%a4%e3%83%8a%e3%81%ae%e3%81%86%e3%81%9f-%e6%b0%b4%e5%9e%a3%e6%b4%8b%e5%ad%90%e3%80%81%e3%83%95%e3%82%a9%e3%83%bc%e3%83%a1%e3%82%a4%e3%83%84%e3%80%91UVRVC_ON.mp4'>魔法使いサリー【パパパのチョイナのうた-水垣洋子、フォーメイツ】UVRVC_ON.mp4</a></div>
+  </div>
+</div>
+<div class='card' data-year='2023' data-yearband='2023' data-updated='20230911' data-priority='999'>
+  <div class='card-title'>
+    <a data-q='%e9%ad%94%e6%b3%95%e4%bd%bf%e3%81%84%e3%82%b5%e3%83%aa%e3%83%bc%e3%80%90%e3%81%84%e3%81%9f%e3%81%9a%e3%82%89%e3%81%ae%e3%81%86%e3%81%9f-%e6%9c%9d%e4%ba%95%e3%82%86%e3%81%8b%e3%82%8a%e3%80%81%e9%87%8e%e6%b2%a2%e9%9b%85%e5%ad%90%e3%80%81%e5%8a%a0%e8%97%a4%e3%81%bf%e3%81%a9%e3%82%8a%e3%80%81%e5%8d%83%e3%80%85%e6%9d%be%e5%b9%b8%e5%ad%90%e3%80%81%e5%b9%b3%e4%ba%95%e9%81%93%e5%ad%90%e3%80%91UVRVC_ON.mp4'>魔法使いサリー【いたずらのうた-朝井ゆかり、野沢雅子、加藤みどり、千々松幸子、平井道子】UVRVC_ON</a>
+  </div>
+  <div class='card-body'>
+    <div class='meta'><span class='label'>作品名</span> <a href='search_all.html?q=%e3%81%84%e3%81%9f%e3%81%9a%e3%82%89%e3%81%ae%e3%81%86%e3%81%9f-%e6%9c%9d%e4%ba%95%e3%82%86%e3%81%8b%e3%82%8a%e3%80%81%e9%87%8e%e6%b2%a2%e9%9b%85%e5%ad%90%e3%80%81%e5%8a%a0%e8%97%a4%e3%81%bf%e3%81%a9%e3%82%8a%e3%80%81%e5%8d%83%e3%80%85%e6%9d%be%e5%b9%b8%e5%ad%90%e3%80%81%e5%b9%b3%e4%ba%95%e9%81%93%e5%ad%90'>いたずらのうた-朝井ゆかり、野沢雅子、加藤みどり、千々松幸子、平井道子</a></div>
+    <div class='meta'><span class='label'>歌い手</span> </div>
+    <div class='meta'><span class='label'>制作者</span> </div>
+    <div class='meta'><span class='label'>最終更新日</span> 2023/09/11</div>
+    <div class='meta'><span class='label'>ファイル名</span> <a data-q='%e9%ad%94%e6%b3%95%e4%bd%bf%e3%81%84%e3%82%b5%e3%83%aa%e3%83%bc%e3%80%90%e3%81%84%e3%81%9f%e3%81%9a%e3%82%89%e3%81%ae%e3%81%86%e3%81%9f-%e6%9c%9d%e4%ba%95%e3%82%86%e3%81%8b%e3%82%8a%e3%80%81%e9%87%8e%e6%b2%a2%e9%9b%85%e5%ad%90%e3%80%81%e5%8a%a0%e8%97%a4%e3%81%bf%e3%81%a9%e3%82%8a%e3%80%81%e5%8d%83%e3%80%85%e6%9d%be%e5%b9%b8%e5%ad%90%e3%80%81%e5%b9%b3%e4%ba%95%e9%81%93%e5%ad%90%e3%80%91UVRVC_ON.mp4'>魔法使いサリー【いたずらのうた-朝井ゆかり、野沢雅子、加藤みどり、千々松幸子、平井道子】UVRVC_ON.mp4</a></div>
+  </div>
+</div>
+<div class='card' data-year='2023' data-yearband='2023' data-updated='20230911' data-priority='999'>
+  <div class='card-title'>
+    <a data-q='%e9%ad%94%e6%b3%95%e4%bd%bf%e3%81%84%e3%82%b5%e3%83%aa%e3%83%bc%e3%80%90%e9%ad%94%e6%b3%95%e3%81%ae%e3%83%9e%e3%83%b3%e3%83%9c-%e5%89%8d%e5%b7%9d%e9%99%bd%e5%ad%90%e3%80%81%e3%83%8f%e3%83%8b%e3%83%bc%e3%83%bb%e3%83%8a%e3%82%a4%e3%83%84%e3%80%91UVRVC_ON.mp4'>魔法使いサリー【魔法のマンボ-前川陽子、ハニー・ナイツ】UVRVC_ON</a>
+  </div>
+  <div class='card-body'>
+    <div class='meta'><span class='label'>作品名</span> <a href='search_all.html?q=%e9%ad%94%e6%b3%95%e3%81%ae%e3%83%9e%e3%83%b3%e3%83%9c-%e5%89%8d%e5%b7%9d%e9%99%bd%e5%ad%90%e3%80%81%e3%83%8f%e3%83%8b%e3%83%bc%e3%83%bb%e3%83%8a%e3%82%a4%e3%83%84'>魔法のマンボ-前川陽子、ハニー・ナイツ</a></div>
+    <div class='meta'><span class='label'>歌い手</span> </div>
+    <div class='meta'><span class='label'>制作者</span> </div>
+    <div class='meta'><span class='label'>最終更新日</span> 2023/09/11</div>
+    <div class='meta'><span class='label'>ファイル名</span> <a data-q='%e9%ad%94%e6%b3%95%e4%bd%bf%e3%81%84%e3%82%b5%e3%83%aa%e3%83%bc%e3%80%90%e9%ad%94%e6%b3%95%e3%81%ae%e3%83%9e%e3%83%b3%e3%83%9c-%e5%89%8d%e5%b7%9d%e9%99%bd%e5%ad%90%e3%80%81%e3%83%8f%e3%83%8b%e3%83%bc%e3%83%bb%e3%83%8a%e3%82%a4%e3%83%84%e3%80%91UVRVC_ON.mp4'>魔法使いサリー【魔法のマンボ-前川陽子、ハニー・ナイツ】UVRVC_ON.mp4</a></div>
+  </div>
+</div>
+<div class='card' data-year='2023' data-yearband='2023' data-updated='20230910' data-priority='2'>
+  <div class='card-title'>
+    <a data-q='ALIVE%ef%bc%8fClariS%ef%bc%8f%e3%83%aa%e3%82%b3%e3%83%aa%e3%82%b9%e3%83%bb%e3%83%aa%e3%82%b3%e3%82%a4%e3%83%ab+(Off-On)+%e3%80%90%e3%83%91%e3%83%bc%e3%83%88%e5%88%86%e3%81%91%e3%80%91.mp4'>ALIVE／ClariS／リコリス・リコイル (Off-On) 【パート分け】</a>
+  </div>
+  <div class='card-body'>
+    <div class='meta'><span class='label'>作品名</span> <a href='search_all.html?q=%e3%83%91%e3%83%bc%e3%83%88%e5%88%86%e3%81%91'>パート分け</a></div>
+    <div class='meta'><span class='label'>歌い手</span> リコリス・リコイル</div>
+    <div class='meta'><span class='label'>制作者</span> すみた</div>
+    <div class='meta'><span class='label'>最終更新日</span> 2023/09/10</div>
+    <div class='meta'><span class='label'>ファイル名</span> <a data-q='ALIVE%ef%bc%8fClariS%ef%bc%8f%e3%83%aa%e3%82%b3%e3%83%aa%e3%82%b9%e3%83%bb%e3%83%aa%e3%82%b3%e3%82%a4%e3%83%ab+(Off-On)+%e3%80%90%e3%83%91%e3%83%bc%e3%83%88%e5%88%86%e3%81%91%e3%80%91.mp4'>ALIVE／ClariS／リコリス・リコイル (Off-On) 【パート分け】.mp4</a></div>
+  </div>
+</div>
+    </div>
+  </div>
+
+  <div class='pager' id='pager-list-year-14'><a href='year_2023_13.html'>前へ</a>
+<a href='year_2023.html'>1</a>
+<a href='year_2023_2.html'>2</a>
+<a href='year_2023_3.html'>3</a>
+<a href='year_2023_4.html'>4</a>
+<a href='year_2023_5.html'>5</a>
+<a href='year_2023_6.html'>6</a>
+<a href='year_2023_7.html'>7</a>
+<a href='year_2023_8.html'>8</a>
+<a href='year_2023_9.html'>9</a>
+<a href='year_2023_10.html'>10</a>
+<a href='year_2023_11.html'>11</a>
+<a href='year_2023_12.html'>12</a>
+<a href='year_2023_13.html'>13</a>
+<span class='current'>14</span>
+<a href='year_2023_15.html'>15</a>
+<a href='year_2023_16.html'>16</a>
+<a href='year_2023_17.html'>17</a>
+<a href='year_2023_18.html'>18</a>
+<a href='year_2023_19.html'>19</a>
+<a href='year_2023_20.html'>20</a>
+<a href='year_2023_21.html'>21</a>
+<a href='year_2023_22.html'>22</a>
+<a href='year_2023_23.html'>23</a>
+<a href='year_2023_24.html'>24</a>
+<a href='year_2023_25.html'>25</a>
+<a href='year_2023_26.html'>26</a>
+<a href='year_2023_27.html'>27</a>
+<a href='year_2023_28.html'>28</a>
+<a href='year_2023_29.html'>29</a>
+<a href='year_2023_30.html'>30</a>
+<a href='year_2023_31.html'>31</a>
+<a href='year_2023_32.html'>32</a>
+<a href='year_2023_33.html'>33</a>
+<a href='year_2023_34.html'>34</a>
+<a href='year_2023_35.html'>35</a>
+<a href='year_2023_36.html'>36</a>
+<a href='year_2023_37.html'>37</a>
+<a href='year_2023_38.html'>38</a>
+<a href='year_2023_39.html'>39</a>
+<a href='year_2023_40.html'>40</a>
+<a href='year_2023_15.html'>次へ</a></div>
+</div>
+<script>
+  const init = qparam('q').trim();
+  if(init){
+    document.getElementById('q-list-year-14').value = init.replace(/\+/g,' ');
+    filterCards('list-year-14','q-list-year-14');
+  }else{
+    document.getElementById('count-list-year-14').textContent = '表示件数: ' + document.querySelectorAll('#list-year-14 .card').length;
+  }
+</script>
+</div>
+</body></html>

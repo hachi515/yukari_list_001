@@ -1,0 +1,222 @@
+﻿<!DOCTYPE html>
+<html lang='ja'>
+<head>
+<meta charset='UTF-8'>
+<title>作品名（る 行）</title>
+<meta name='viewport' content='width=device-width, initial-scale=1.0'>
+<meta property='og:title' content='つぼはち・オフライン検索'>
+<meta property='og:description' content='ゆかりのオフライン時に検索可能のサイトです'>
+<meta property='og:image' content='https://raw.githubusercontent.com/hachi515/yukari_list_001/main/Hasunosora_3.png'>
+<meta property='og:url' content=''>
+<meta name='twitter:card' content='summary_large_image'>
+<meta name='twitter:title' content='つぼはち・オフライン検索'>
+<meta name='twitter:description' content='ゆかりのオフライン時に検索可能のサイトです'>
+<meta name='twitter:image' content='https://raw.githubusercontent.com/hachi515/yukari_list_001/main/Hasunosora_3.png'>
+<style>:root{
+  --accent:#1B64C2;
+  --accent-50: rgba(27,100,194,.50);
+  --accent-70: rgba(27,100,194,.70);
+  --accent-90: rgba(27,100,194,.90);
+  --border:#1B64C2;
+  --panel:rgba(255,255,255,.55);
+  --panel-strong:rgba(255,255,255,.60);
+  --ui-gray:#a1a1a1;
+}
+*{box-sizing:border-box}
+html,body{width:100%}
+body{
+  font-family:'ヒラギノ角ゴ ProN W3','Hiragino Kaku Gothic ProN','Hiragino Sans','ヒラギノ角ゴシック','Yu Gothic','メイリオ',Meiryo,Arial,sans-serif;
+  font-size:14px; color:#222; background:#eef2f5; font-weight:400;
+  background-image:url('https://raw.githubusercontent.com/hachi515/yukari_list_001/main/Hasunosora_1.png'); background-size:cover; background-attachment:fixed; background-position:center; margin:0;
+}
+.wrap{ max-width:1100px; margin:24px auto; padding:12px; background:var(--panel); border:0; border-radius:0; box-shadow:none; overflow-x:auto; }
+
+h1{ display:inline-block; margin:0 0 14px 0; padding:4px 0; background:transparent; color:#0b1b2e; font-size:18px; font-weight:500 }
+h2{ margin:10px 0 8px; padding:0; color:#0b1b2e; font-size:18px; font-weight:500; background:transparent } /* ← h1と同サイズ */
+
+.back{ text-align:right; margin:-6px 0 6px 0 }
+.back a{ color:var(--accent); text-decoration:none; border-bottom:1px dotted var(--accent) }
+
+.section{margin:10px 0 18px}
+.search{display:flex; gap:8px; margin:8px 0 4px; align-items:center; justify-content:flex-start}
+.search select{ padding:8px 10px; font-size:14px; background:var(--panel); border:1px solid var(--ui-gray); border-radius:0; font-weight:400 }
+.search input[type=text]{ flex:0 0 260px; width:260px; padding:8px; font-size:14px; background:var(--panel); border:1px solid var(--ui-gray); border-radius:0; font-weight:400 }
+.search button{ padding:8px 12px; font-size:14px; color:#fff; background:var(--accent-90); border:1px solid var(--ui-gray); border-radius:0; cursor:pointer }
+.count{font-size:11px; color:#222; margin:4px 0 8px}
+a{ color:var(--accent); }
+
+.btn{display:inline-block; padding:8px 10px; background:var(--accent-70); color:#fff; text-decoration:none; border:1px solid var(--border); border-radius:0; font-weight:400 }
+.btn-outline{background:var(--panel); color:#1b1b1b; border:1px solid var(--border)}
+.year-buttons,.new-buttons{display:flex; flex-wrap:wrap; gap:8px}
+
+.kana-row{display:flex; gap:24px; margin-bottom:8px}
+.kana-group{display:flex; gap:6px}
+.kana-btn{display:inline-block; padding:6px 10px; background:var(--accent-70); color:#fff; text-decoration:none; border:1px solid var(--border); border-radius:0; font-size:14px; font-weight:400}
+.kana-btn.disabled{opacity:.35; pointer-events:none}
+
+/* 作品名グリッド：1行2個 */
+.prog-grid{display:grid; grid-template-columns:repeat(2, minmax(0,1fr)); gap:8px}
+.prog-grid a{display:block}
+
+/* カード */
+.card{margin:12px 0; border:0; background:transparent}
+.card-title{padding:0; background:transparent}
+.card-title a{display:block; padding:8px 10px; background:var(--accent-70); color:#fff; text-decoration:none; white-space:normal; font-weight:500}
+.card-body{padding:10px; background:var(--panel-strong)}
+.meta{margin:3px 0; font-weight:400}
+.meta .label{display:inline-block; min-width:84px; color:#0b1b2e; font-weight:400}
+
+/* ページャ */
+.pager{display:flex; gap:6px; flex-wrap:wrap; margin:14px 0}
+.pager a,.pager span{padding:6px 10px; border:1px solid var(--border); text-decoration:none; color:#fff; background:var(--accent-70); font-weight:400}
+.pager .current{background:var(--accent-90); color:#fff}
+
+/* スクロール枠（search_all / 年別 / 新着 / 五十音） */
+.list-container{max-height:900px; overflow-y:auto; border:1px solid var(--ui-gray); background:rgba(255,255,255,.35); padding:8px; box-shadow:0 4px 8px rgba(0,0,0,.06)}
+.stickybar{position:sticky; top:0; z-index:20; background:rgba(255,255,255,.6); border-bottom:1px solid var(--ui-gray); padding:8px; margin:-8px -8px 8px -8px}
+.stickybar.no-bg{background:transparent; border:none; padding:0; margin:0 0 8px 0}
+
+@media (max-width:768px){
+  body{ background-image:url('https://raw.githubusercontent.com/hachi515/yukari_list_001/main/Hasunosora_2.png'); font-size:13px }
+  .search select, .search input[type=text], .search button{ font-size:13px; padding:7px 10px }
+  /* 入力幅をスマホではやや広めに */
+  .search input[type=text]{ flex:0 0 56vw; width:56vw }
+  .list-container{ max-height:450px }
+}
+  .search select, .search input[type=text], .search button{ font-size:13px; padding:7px 10px }
+  .list-container{ max-height:450px }
+}</style>
+<script>const SEARCH_BASE = 'http://ykr.moe:11059/';
+
+function tokensHalf(v){return v.toLowerCase().trim().split(/ +/).filter(Boolean)}
+function qparam(name){ const m = location.search.match(new RegExp('[?&]'+name+'=([^&]+)')); return m ? decodeURIComponent(m[1]) : ''; }
+
+// 軽量リンク化：data-q を href に展開
+document.addEventListener('DOMContentLoaded', ()=>{
+  document.querySelectorAll('a[data-q]').forEach(a=>{
+    try{
+      const q = a.getAttribute('data-q')||'';
+      a.href = SEARCH_BASE + 'search.php?searchword=' + q;
+      a.target = '_blank';
+    }catch(e){}
+  });
+});
+
+function filterCards(listId, boxId){
+  const q = tokensHalf(document.getElementById(boxId).value);
+  const list = document.getElementById(listId);
+  if(!list){return}
+  const cards = list.querySelectorAll('.card');
+  let vis = 0;
+  cards.forEach(c=>{
+    const hit = q.every(tok => c.innerText.toLowerCase().includes(tok));
+    c.style.display = hit ? '' : 'none';
+    if(hit) vis++;
+  });
+  const cEl = document.getElementById('count-'+listId);
+  if(cEl){ cEl.textContent = '表示件数: ' + vis; }
+  const pager = document.getElementById('pager-'+listId);
+  const per = parseInt(list.dataset.per || '100',10);
+  if(pager){ if(q.length===0){ pager.style.display = ''; } else { pager.style.display = (vis<=per) ? 'none' : ''; } }
+}
+
+/* ===== 検索結果専用：表示中カードを「制作者優先度→日付」で並べ替え ===== */
+const DEFAULT_PRIO = 999;
+function reorderByPriority(listId){
+  const list = document.getElementById(listId);
+  if(!list){return}
+  const visible = Array.from(list.querySelectorAll('.card')).filter(c => c.style.display !== 'none');
+  visible.sort((a,b)=>{
+    const pa = parseInt(a.dataset.priority||DEFAULT_PRIO);
+    const pb = parseInt(b.dataset.priority||DEFAULT_PRIO);
+    if(pa !== pb) return pa - pb;
+    const da = parseInt(a.dataset.updated||0); // yyyymmdd
+    const db = parseInt(b.dataset.updated||0);
+    return db - da;
+  });
+  visible.forEach(c => list.appendChild(c));
+}
+
+function filterCardsAdv(listId, boxId, yearId){
+  const q = tokensHalf(document.getElementById(boxId).value);
+  const yEl = document.getElementById(yearId);
+  const y = yEl ? (yEl.value||'').trim() : '';
+  const list = document.getElementById(listId);
+  if(!list){return}
+  const cards = list.querySelectorAll('.card');
+  let vis = 0;
+  cards.forEach(c=>{
+    const okText = q.every(tok => c.innerText.toLowerCase().includes(tok));
+    const band = (c.dataset.yearband||'');
+    const yr = (c.dataset.year||'');
+    const okYear = (y==='' || yr===y || band===y);
+    const show = okText && okYear;
+    c.style.display = show ? '' : 'none';
+    if(show) vis++;
+  });
+  const cEl = document.getElementById('count-'+listId);
+  if(cEl){ cEl.textContent = '表示件数: ' + vis; }
+
+  // ★検索（キーワード or 年帯）を使ったときだけ優先度並び替えを実施
+  if(q.length>0 || y!==''){ reorderByPriority(listId); }
+}
+
+function filterGrid(gridSel, boxId, countId){
+  const q = tokensHalf(document.getElementById(boxId).value);
+  const nodes = document.querySelectorAll(gridSel+' a');
+  let vis=0; nodes.forEach(a=>{ const hit=q.every(t=>a.innerText.toLowerCase().includes(t)); a.style.display=hit?'':'none'; if(hit) vis++; });
+  if(countId){ const el=document.getElementById(countId); if(el){ el.textContent='表示件数: '+vis; } }
+}</script>
+</head>
+<body>
+<div class='wrap'>
+<h1>作品名（る 行）</h1>
+<div class='back'><a href='index.html'>一覧に戻る</a></div>
+
+<div class='section'>
+  <div class='search'>
+    <input type='text' id='q-る' placeholder='この行の作品名を絞り込み（半角スペースAND）'>
+    <button onclick="filterGrid('.list-る a','q-る','count-list-る')">検索</button>
+  </div>
+  <div class='count' id='count-list-る'></div>
+
+  <div class='list-container'>
+    <div class='prog-grid list-る'><a class='btn' href='search_all.html?q=%e2%88%9e%e3%83%ab%e3%83%bc%e3%83%97%ef%bc%8fheidi'>∞ループ／heidi</a>
+<a class='btn' href='search_all.html?q=%e3%82%8b%ef%bc%89%e3%83%ab%e3%82%af%e3%82%b9%e3%83%9a%e3%82%a4%e3%83%b3'>る）ルクスペイン</a>
+<a class='btn' href='search_all.html?q=%e3%82%8b%ef%bc%89%e3%83%ab%e3%83%9f%e3%83%8a%e3%82%b9%e3%82%a2%e3%83%bc%e3%82%af'>る）ルミナスアーク</a>
+<a class='btn' href='search_all.html?q=%e3%82%8b%ef%bc%89%e3%83%ab%e3%83%9f%e3%83%8a%e3%82%b9%e3%82%a2%e3%83%bc%e3%82%af%ef%bc%92%ef%bd%9e%ef%bd%b3%ef%bd%a8%ef%be%99%ef%bd%9e'>る）ルミナスアーク２～ｳｨﾙ～</a>
+<a class='btn' href='search_all.html?q=%e3%82%8b%e3%81%84%e3%81%af%e6%99%ba%e3%82%92%e5%91%bc%e3%81%b6'>るいは智を呼ぶ</a>
+<a class='btn' href='search_all.html?q=%e3%83%ab%e3%83%bc%e3%83%977%e5%9b%9e%e7%9b%ae%e3%81%ae%e6%82%aa%e5%bd%b9%e4%bb%a4%e5%ac%a2%e3%81%af%e3%80%81%e5%85%83%e6%95%b5%e5%9b%bd%e3%81%a7%e8%87%aa%e7%94%b1%e6%b0%97%e3%81%be%e3%81%be%e3%81%aa%e8%8a%b1%e5%ab%81%e7%94%9f%e6%b4%bb%e3%82%92%e6%ba%80%e5%96%ab%e3%81%99%e3%82%8b'>ループ7回目の悪役令嬢は、元敵国で自由気ままな花嫁生活を満喫する</a>
+<a class='btn' href='search_all.html?q=%e3%83%ab%e3%83%bc%e3%83%977%e5%9b%9e%e7%9b%ae%e3%81%ae%e6%82%aa%e5%bd%b9%e4%bb%a4%e5%ac%a2%e3%81%af%e3%80%81%e5%85%83%e6%95%b5%e5%9b%bd%e3%81%a7%e8%87%aa%e7%94%b1%e6%b0%97%e3%81%be%e3%81%be%e3%81%aa%e8%8a%b1%e5%ab%81%e7%94%9f%e6%b4%bb%e3%82%92%e6%ba%80%e5%96%ab%e3%81%99%e3%82%8b+ED'>ループ7回目の悪役令嬢は、元敵国で自由気ままな花嫁生活を満喫する ED</a>
+<a class='btn' href='search_all.html?q=%e3%83%ab%e3%83%bc%e3%83%977%e5%9b%9e%e7%9b%ae%e3%81%ae%e6%82%aa%e5%bd%b9%e4%bb%a4%e5%ac%a2%e3%81%af%e3%80%81%e5%85%83%e6%95%b5%e5%9b%bd%e3%81%a7%e8%87%aa%e7%94%b1%e6%b0%97%e3%81%be%e3%81%be%e3%81%aa%e8%8a%b1%e5%ab%81%e7%94%9f%e6%b4%bb%e3%82%92%e6%ba%80%e5%96%ab%e3%81%99%e3%82%8b+OP'>ループ7回目の悪役令嬢は、元敵国で自由気ままな花嫁生活を満喫する OP</a>
+<a class='btn' href='search_all.html?q=%e3%82%8b%e3%81%8b'>るか</a>
+<a class='btn' href='search_all.html?q=%e3%83%ab%e3%83%91%e3%83%b3%e4%b8%89%e4%b8%96'>ルパン三世</a>
+<a class='btn' href='search_all.html?q=%e3%83%ab%e3%83%91%e3%83%b3%e4%b8%89%e4%b8%96+OP3'>ルパン三世 OP3</a>
+<a class='btn' href='search_all.html?q=%e3%83%ab%e3%83%91%e3%83%b3%e4%b8%89%e4%b8%96+PART5'>ルパン三世 PART5</a>
+<a class='btn' href='search_all.html?q=%e3%83%ab%e3%83%91%e3%83%b3%e4%b8%89%e4%b8%96+Part6'>ルパン三世 Part6</a>
+<a class='btn' href='search_all.html?q=%e3%83%ab%e3%83%91%e3%83%b3%e4%b8%89%e4%b8%96(2015)'>ルパン三世(2015)</a>
+<a class='btn' href='search_all.html?q=%e3%83%ab%e3%83%91%e3%83%b3%e4%b8%89%e4%b8%96%e3%83%bb%e5%bd%b1%e5%b1%b1%e3%83%92%e3%83%ad%e3%83%8e%e3%83%96(%e3%82%ab%e3%83%90%e3%83%bc)'>ルパン三世・影山ヒロノブ(カバー)</a>
+<a class='btn' href='search_all.html?q=%e3%83%ab%e3%83%91%e3%83%b3%e4%b8%89%e4%b8%96%ef%bc%b6%ef%bc%b3%e3%82%ad%e3%83%a3%e3%83%83%e3%83%84%e3%83%bb%e3%82%a2%e3%82%a4'>ルパン三世ＶＳキャッツ・アイ</a>
+<a class='btn' href='search_all.html?q=%e3%83%ab%e3%83%91%e3%83%b3%e4%b8%89%e4%b8%96%e3%82%ab%e3%83%aa%e3%82%aa%e3%82%b9%e3%83%88%e3%83%ad%e3%81%ae%e5%9f%8e%e3%83%bb%e5%bd%b1%e5%b1%b1%e3%83%92%e3%83%ad%e3%83%8e%e3%83%96(%e3%82%ab%e3%83%90%e3%83%bc)(YOUTUBE%e5%8b%95%e7%94%bb%e4%bd%bf%e7%94%a8)'>ルパン三世カリオストロの城・影山ヒロノブ(カバー)(YOUTUBE動画使用)</a>
+<a class='btn' href='search_all.html?q=%e3%83%ab%e3%83%9f%e3%83%8a%e3%82%b9%e3%82%a6%e3%82%a3%e3%83%83%e3%83%81%e3%83%bc%e3%82%ba'>ルミナスウィッチーズ</a>
+<a class='btn' href='search_all.html?q=%e3%83%ab%e3%83%ab%e3%83%8a(CV%e5%b1%b1%e6%9d%91%e9%9f%bf)'>ルルナ(CV山村響)</a>
+<a class='btn' href='search_all.html?q=%e3%82%8b%e3%82%8d%e3%81%86%e3%81%ab%e5%89%a3%e5%bf%83+-%e6%98%8e%e6%b2%bb%e5%89%a3%e5%ae%a2%e6%b5%aa%e6%bc%ab%e8%ad%9a-'>るろうに剣心 -明治剣客浪漫譚-</a>
+<a class='btn' href='search_all.html?q=%e3%82%8b%e3%82%8d%e3%81%86%e3%81%ab%e5%89%a3%e5%bf%83+-%e6%98%8e%e6%b2%bb%e5%89%a3%e5%ae%a2%e6%b5%aa%e6%bc%ab%e8%ad%9a-+%e4%ba%ac%e9%83%bd%e5%8b%95%e4%b9%b1+ED'>るろうに剣心 -明治剣客浪漫譚- 京都動乱 ED</a>
+<a class='btn' href='search_all.html?q=%e3%82%8b%e3%82%8d%e3%81%86%e3%81%ab%e5%89%a3%e5%bf%83+-%e6%98%8e%e6%b2%bb%e5%89%a3%e5%ae%a2%e6%b5%aa%e6%bc%ab%e8%ad%9a-+%e4%ba%ac%e9%83%bd%e5%8b%95%e4%b9%b1+ED2'>るろうに剣心 -明治剣客浪漫譚- 京都動乱 ED2</a>
+<a class='btn' href='search_all.html?q=%e3%82%8b%e3%82%8d%e3%81%86%e3%81%ab%e5%89%a3%e5%bf%83+-%e6%98%8e%e6%b2%bb%e5%89%a3%e5%ae%a2%e6%b5%aa%e6%bc%ab%e8%ad%9a-+%e4%ba%ac%e9%83%bd%e5%8b%95%e4%b9%b1+OP'>るろうに剣心 -明治剣客浪漫譚- 京都動乱 OP</a>
+<a class='btn' href='search_all.html?q=%e3%82%8b%e3%82%8d%e3%81%86%e3%81%ab%e5%89%a3%e5%bf%83+-%e6%98%8e%e6%b2%bb%e5%89%a3%e5%ae%a2%e6%b5%aa%e6%bc%ab%e8%ad%9a-+%e4%ba%ac%e9%83%bd%e5%8b%95%e4%b9%b1+OP2'>るろうに剣心 -明治剣客浪漫譚- 京都動乱 OP2</a>
+<a class='btn' href='search_all.html?q=%e3%82%8b%e3%82%8d%e3%81%86%e3%81%ab%e5%89%a3%e5%bf%83-%e6%98%8e%e6%b2%bb%e5%89%a3%e5%ae%a2%e6%b5%aa%e6%bc%ab%e8%ad%9a-'>るろうに剣心-明治剣客浪漫譚-</a>
+<a class='btn' href='search_all.html?q=%e3%82%8b%e3%82%8d%e3%81%86%e3%81%ab%e5%89%a3%e5%bf%83%ef%bc%8d%e6%98%8e%e6%b2%bb%e5%89%a3%e5%ae%a2%e6%b5%aa%e6%bc%ab%e8%ad%9a%ef%bc%8d'>るろうに剣心－明治剣客浪漫譚－</a>
+<a class='btn' href='search_all.html?q=%e3%82%8b%e3%82%8d%e3%81%86%e3%81%ab%e5%89%a3%e5%bf%83-%e6%98%8e%e6%b2%bb%e5%89%a3%e5%ae%a2%e6%b5%aa%e6%bc%ab%e8%ad%9a-+%e7%b6%ad%e6%96%b0%e5%bf%97%e5%a3%ab%e3%81%b8%e3%81%ae%e9%8e%ae%e9%ad%82%e6%ad%8c'>るろうに剣心-明治剣客浪漫譚- 維新志士への鎮魂歌</a></div>
+  </div>
+
+  <script>
+    (function(){
+      const list=document.querySelectorAll('.list-る a');
+      const el=document.getElementById('count-list-る');
+      if(el){ el.textContent='表示件数: '+list.length; }
+    })();
+  </script>
+</div>
+</div>
+</body></html>

@@ -1,0 +1,410 @@
+﻿<!DOCTYPE html>
+<html lang='ja'>
+<head>
+<meta charset='UTF-8'>
+<title>作品名（は 行）</title>
+<meta name='viewport' content='width=device-width, initial-scale=1.0'>
+<meta property='og:title' content='つぼはち・オフライン検索'>
+<meta property='og:description' content='ゆかりのオフライン時に検索可能のサイトです'>
+<meta property='og:image' content='https://raw.githubusercontent.com/hachi515/yukari_list_001/main/Hasunosora_3.png'>
+<meta property='og:url' content=''>
+<meta name='twitter:card' content='summary_large_image'>
+<meta name='twitter:title' content='つぼはち・オフライン検索'>
+<meta name='twitter:description' content='ゆかりのオフライン時に検索可能のサイトです'>
+<meta name='twitter:image' content='https://raw.githubusercontent.com/hachi515/yukari_list_001/main/Hasunosora_3.png'>
+<style>:root{
+  --accent:#1B64C2;
+  --accent-50: rgba(27,100,194,.50);
+  --accent-70: rgba(27,100,194,.70);
+  --accent-90: rgba(27,100,194,.90);
+  --border:#1B64C2;
+  --panel:rgba(255,255,255,.55);
+  --panel-strong:rgba(255,255,255,.60);
+  --ui-gray:#a1a1a1;
+}
+*{box-sizing:border-box}
+html,body{width:100%}
+body{
+  font-family:'ヒラギノ角ゴ ProN W3','Hiragino Kaku Gothic ProN','Hiragino Sans','ヒラギノ角ゴシック','Yu Gothic','メイリオ',Meiryo,Arial,sans-serif;
+  font-size:14px; color:#222; background:#eef2f5; font-weight:400;
+  background-image:url('https://raw.githubusercontent.com/hachi515/yukari_list_001/main/Hasunosora_1.png'); background-size:cover; background-attachment:fixed; background-position:center; margin:0;
+}
+.wrap{ max-width:1100px; margin:24px auto; padding:12px; background:var(--panel); border:0; border-radius:0; box-shadow:none; overflow-x:auto; }
+
+h1{ display:inline-block; margin:0 0 14px 0; padding:4px 0; background:transparent; color:#0b1b2e; font-size:18px; font-weight:500 }
+h2{ margin:10px 0 8px; padding:0; color:#0b1b2e; font-size:18px; font-weight:500; background:transparent } /* ← h1と同サイズ */
+
+.back{ text-align:right; margin:-6px 0 6px 0 }
+.back a{ color:var(--accent); text-decoration:none; border-bottom:1px dotted var(--accent) }
+
+.section{margin:10px 0 18px}
+.search{display:flex; gap:8px; margin:8px 0 4px; align-items:center; justify-content:flex-start}
+.search select{ padding:8px 10px; font-size:14px; background:var(--panel); border:1px solid var(--ui-gray); border-radius:0; font-weight:400 }
+.search input[type=text]{ flex:0 0 260px; width:260px; padding:8px; font-size:14px; background:var(--panel); border:1px solid var(--ui-gray); border-radius:0; font-weight:400 }
+.search button{ padding:8px 12px; font-size:14px; color:#fff; background:var(--accent-90); border:1px solid var(--ui-gray); border-radius:0; cursor:pointer }
+.count{font-size:11px; color:#222; margin:4px 0 8px}
+a{ color:var(--accent); }
+
+.btn{display:inline-block; padding:8px 10px; background:var(--accent-70); color:#fff; text-decoration:none; border:1px solid var(--border); border-radius:0; font-weight:400 }
+.btn-outline{background:var(--panel); color:#1b1b1b; border:1px solid var(--border)}
+.year-buttons,.new-buttons{display:flex; flex-wrap:wrap; gap:8px}
+
+.kana-row{display:flex; gap:24px; margin-bottom:8px}
+.kana-group{display:flex; gap:6px}
+.kana-btn{display:inline-block; padding:6px 10px; background:var(--accent-70); color:#fff; text-decoration:none; border:1px solid var(--border); border-radius:0; font-size:14px; font-weight:400}
+.kana-btn.disabled{opacity:.35; pointer-events:none}
+
+/* 作品名グリッド：1行2個 */
+.prog-grid{display:grid; grid-template-columns:repeat(2, minmax(0,1fr)); gap:8px}
+.prog-grid a{display:block}
+
+/* カード */
+.card{margin:12px 0; border:0; background:transparent}
+.card-title{padding:0; background:transparent}
+.card-title a{display:block; padding:8px 10px; background:var(--accent-70); color:#fff; text-decoration:none; white-space:normal; font-weight:500}
+.card-body{padding:10px; background:var(--panel-strong)}
+.meta{margin:3px 0; font-weight:400}
+.meta .label{display:inline-block; min-width:84px; color:#0b1b2e; font-weight:400}
+
+/* ページャ */
+.pager{display:flex; gap:6px; flex-wrap:wrap; margin:14px 0}
+.pager a,.pager span{padding:6px 10px; border:1px solid var(--border); text-decoration:none; color:#fff; background:var(--accent-70); font-weight:400}
+.pager .current{background:var(--accent-90); color:#fff}
+
+/* スクロール枠（search_all / 年別 / 新着 / 五十音） */
+.list-container{max-height:900px; overflow-y:auto; border:1px solid var(--ui-gray); background:rgba(255,255,255,.35); padding:8px; box-shadow:0 4px 8px rgba(0,0,0,.06)}
+.stickybar{position:sticky; top:0; z-index:20; background:rgba(255,255,255,.6); border-bottom:1px solid var(--ui-gray); padding:8px; margin:-8px -8px 8px -8px}
+.stickybar.no-bg{background:transparent; border:none; padding:0; margin:0 0 8px 0}
+
+@media (max-width:768px){
+  body{ background-image:url('https://raw.githubusercontent.com/hachi515/yukari_list_001/main/Hasunosora_2.png'); font-size:13px }
+  .search select, .search input[type=text], .search button{ font-size:13px; padding:7px 10px }
+  /* 入力幅をスマホではやや広めに */
+  .search input[type=text]{ flex:0 0 56vw; width:56vw }
+  .list-container{ max-height:450px }
+}
+  .search select, .search input[type=text], .search button{ font-size:13px; padding:7px 10px }
+  .list-container{ max-height:450px }
+}</style>
+<script>const SEARCH_BASE = 'http://ykr.moe:11059/';
+
+function tokensHalf(v){return v.toLowerCase().trim().split(/ +/).filter(Boolean)}
+function qparam(name){ const m = location.search.match(new RegExp('[?&]'+name+'=([^&]+)')); return m ? decodeURIComponent(m[1]) : ''; }
+
+// 軽量リンク化：data-q を href に展開
+document.addEventListener('DOMContentLoaded', ()=>{
+  document.querySelectorAll('a[data-q]').forEach(a=>{
+    try{
+      const q = a.getAttribute('data-q')||'';
+      a.href = SEARCH_BASE + 'search.php?searchword=' + q;
+      a.target = '_blank';
+    }catch(e){}
+  });
+});
+
+function filterCards(listId, boxId){
+  const q = tokensHalf(document.getElementById(boxId).value);
+  const list = document.getElementById(listId);
+  if(!list){return}
+  const cards = list.querySelectorAll('.card');
+  let vis = 0;
+  cards.forEach(c=>{
+    const hit = q.every(tok => c.innerText.toLowerCase().includes(tok));
+    c.style.display = hit ? '' : 'none';
+    if(hit) vis++;
+  });
+  const cEl = document.getElementById('count-'+listId);
+  if(cEl){ cEl.textContent = '表示件数: ' + vis; }
+  const pager = document.getElementById('pager-'+listId);
+  const per = parseInt(list.dataset.per || '100',10);
+  if(pager){ if(q.length===0){ pager.style.display = ''; } else { pager.style.display = (vis<=per) ? 'none' : ''; } }
+}
+
+/* ===== 検索結果専用：表示中カードを「制作者優先度→日付」で並べ替え ===== */
+const DEFAULT_PRIO = 999;
+function reorderByPriority(listId){
+  const list = document.getElementById(listId);
+  if(!list){return}
+  const visible = Array.from(list.querySelectorAll('.card')).filter(c => c.style.display !== 'none');
+  visible.sort((a,b)=>{
+    const pa = parseInt(a.dataset.priority||DEFAULT_PRIO);
+    const pb = parseInt(b.dataset.priority||DEFAULT_PRIO);
+    if(pa !== pb) return pa - pb;
+    const da = parseInt(a.dataset.updated||0); // yyyymmdd
+    const db = parseInt(b.dataset.updated||0);
+    return db - da;
+  });
+  visible.forEach(c => list.appendChild(c));
+}
+
+function filterCardsAdv(listId, boxId, yearId){
+  const q = tokensHalf(document.getElementById(boxId).value);
+  const yEl = document.getElementById(yearId);
+  const y = yEl ? (yEl.value||'').trim() : '';
+  const list = document.getElementById(listId);
+  if(!list){return}
+  const cards = list.querySelectorAll('.card');
+  let vis = 0;
+  cards.forEach(c=>{
+    const okText = q.every(tok => c.innerText.toLowerCase().includes(tok));
+    const band = (c.dataset.yearband||'');
+    const yr = (c.dataset.year||'');
+    const okYear = (y==='' || yr===y || band===y);
+    const show = okText && okYear;
+    c.style.display = show ? '' : 'none';
+    if(show) vis++;
+  });
+  const cEl = document.getElementById('count-'+listId);
+  if(cEl){ cEl.textContent = '表示件数: ' + vis; }
+
+  // ★検索（キーワード or 年帯）を使ったときだけ優先度並び替えを実施
+  if(q.length>0 || y!==''){ reorderByPriority(listId); }
+}
+
+function filterGrid(gridSel, boxId, countId){
+  const q = tokensHalf(document.getElementById(boxId).value);
+  const nodes = document.querySelectorAll(gridSel+' a');
+  let vis=0; nodes.forEach(a=>{ const hit=q.every(t=>a.innerText.toLowerCase().includes(t)); a.style.display=hit?'':'none'; if(hit) vis++; });
+  if(countId){ const el=document.getElementById(countId); if(el){ el.textContent='表示件数: '+vis; } }
+}</script>
+</head>
+<body>
+<div class='wrap'>
+<h1>作品名（は 行）</h1>
+<div class='back'><a href='index.html'>一覧に戻る</a></div>
+
+<div class='section'>
+  <div class='search'>
+    <input type='text' id='q-は' placeholder='この行の作品名を絞り込み（半角スペースAND）'>
+    <button onclick="filterGrid('.list-は a','q-は','count-list-は')">検索</button>
+  </div>
+  <div class='count' id='count-list-は'></div>
+
+  <div class='list-container'>
+    <div class='prog-grid list-は'><a class='btn' href='search_all.html?q=%ef%bc%88%e3%83%91%e3%83%bc%e3%83%88%e8%89%b2%e5%88%86%e3%81%91%e3%81%be%e3%81%a7%ef%bc%89%e3%83%a9%e3%82%a4%e3%83%96%e6%98%a0%e5%83%8f+-+2ndLive+%e5%9f%bc%e7%8e%89Day1'>（パート色分けまで）ライブ映像 - 2ndLive 埼玉Day1</a>
+<a class='btn' href='search_all.html?q=%ef%bc%88%e3%83%91%e3%83%bc%e3%83%88%e8%89%b2%e5%88%86%e3%81%91%e6%b8%88%e3%81%bf%ef%bc%89%e3%83%a9%e3%82%a4%e3%83%96%e6%98%a0%e5%83%8f+-+2ndLive+%e5%9f%bc%e7%8e%89Day1'>（パート色分け済み）ライブ映像 - 2ndLive 埼玉Day1</a>
+<a class='btn' href='search_all.html?q=%ef%bc%88%e3%83%91%e3%83%bc%e3%83%88%e5%88%86%e3%81%91%e3%81%aa%e3%81%97%ef%bc%89ALLStar%e6%98%a0%e5%83%8f%e7%89%88'>（パート分けなし）ALLStar映像版</a>
+<a class='btn' href='search_all.html?q=%ef%bc%88%e3%83%91%e3%83%bc%e3%83%88%e5%88%86%e3%81%91%e3%81%aa%e3%81%97%ef%bc%89%e3%83%8e%e3%83%bc%e3%83%9e%e3%83%abPV%e7%89%88'>（パート分けなし）ノーマルPV版</a>
+<a class='btn' href='search_all.html?q=%e3%81%b0%ef%bc%89BALDR+FORCE+EXE+RESOLUTION'>ば）BALDR FORCE EXE RESOLUTION</a>
+<a class='btn' href='search_all.html?q=%e3%81%af%ef%bc%89HAPPY%e2%98%86LESSON'>は）HAPPY☆LESSON</a>
+<a class='btn' href='search_all.html?q=%e3%81%b1%ef%bc%89%e3%81%b1%e3%81%ab%e3%81%bd%e3%81%ab%e3%83%bb%e3%81%a0%e3%81%a3%e3%81%97%e3%82%85%ef%bc%81'>ぱ）ぱにぽに・だっしゅ！</a>
+<a class='btn' href='search_all.html?q=%e3%81%af%ef%bc%89%e3%81%af%e3%81%b4%e3%81%ad%e3%81%99%ef%bc%81'>は）はぴねす！</a>
+<a class='btn' href='search_all.html?q=%e3%81%af%ef%bc%89%e5%88%9d%e9%9f%b3%e3%83%9f%e3%82%af'>は）初音ミク</a>
+<a class='btn' href='search_all.html?q=%e3%81%af%ef%bc%89%e5%88%9d%e9%9f%b3%e3%83%9f%e3%82%af+Project+DIVA'>は）初音ミク Project DIVA</a>
+<a class='btn' href='search_all.html?q=%e3%81%af%ef%bc%89%e5%88%9d%e9%9f%b3%e3%83%9f%e3%82%af_ProjectDIVA_Future_Tone'>は）初音ミク_ProjectDIVA_Future_Tone</a>
+<a class='btn' href='search_all.html?q=%e3%81%b0%ef%bc%89%e7%88%86%e8%a3%82%e5%a4%a9%e4%bd%bf'>ば）爆裂天使</a>
+<a class='btn' href='search_all.html?q=%e3%81%b0%e3%81%82%e3%81%a1%e3%82%83%e3%82%8b48%ef%bc%8f%e3%81%ad%e3%81%93%e3%81%be%e3%81%99%ef%bc%bfHIMEHINA'>ばあちゃる48／ねこます＿HIMEHINA</a>
+<a class='btn' href='search_all.html?q=%e3%83%90%e3%83%bc%e3%83%81%e3%83%a3%e3%83%ab%e3%81%95%e3%82%93%e3%81%af%e3%81%bf%e3%81%a6%e3%81%84%e3%82%8b'>バーチャルさんはみている</a>
+<a class='btn' href='search_all.html?q=%e3%83%91%e3%83%bc%e3%83%86%e3%82%a3%e3%83%bc%e3%81%8b%e3%82%89%e8%bf%bd%e6%94%be%e3%81%95%e3%82%8c%e3%81%9f%e3%81%9d%e3%81%ae%e6%b2%bb%e7%99%92%e5%b8%ab%e3%80%81%e5%ae%9f%e3%81%af%e6%9c%80%e5%bc%b7%e3%81%ab%e3%81%a4%e3%81%8d'>パーティーから追放されたその治癒師、実は最強につき</a>
+<a class='btn' href='search_all.html?q=%e3%83%91%e3%83%bc%e3%83%86%e3%82%a3%e3%83%bc%e3%81%8b%e3%82%89%e8%bf%bd%e6%94%be%e3%81%95%e3%82%8c%e3%81%9f%e3%81%9d%e3%81%ae%e6%b2%bb%e7%99%92%e5%b8%ab%e3%80%81%e5%ae%9f%e3%81%af%e6%9c%80%e5%bc%b7%e3%81%ab%e3%81%a4%e3%81%8d+ED'>パーティーから追放されたその治癒師、実は最強につき ED</a>
+<a class='btn' href='search_all.html?q=%e3%83%90%e3%83%bc%e3%83%86%e3%83%b3%e3%83%80%e3%83%bc'>バーテンダー</a>
+<a class='btn' href='search_all.html?q=%e3%83%90%e3%83%bc%e3%83%86%e3%83%b3%e3%83%80%e3%83%bc+%e7%a5%9e%e3%81%ae%e3%82%b0%e3%83%a9%e3%82%b9'>バーテンダー 神のグラス</a>
+<a class='btn' href='search_all.html?q=%e3%83%8f%e3%83%bc%e3%83%88%e3%82%aa%e3%83%b3%e3%83%a9%e3%82%a4%e3%83%b3%ef%bc%8f%e3%81%95%e3%81%8f%e3%82%89%e3%81%bf%e3%81%93'>ハートオンライン／さくらみこ</a>
+<a class='btn' href='search_all.html?q=%e3%83%8f%e3%83%bc%e3%83%88%e3%82%ad%e3%83%a3%e3%83%83%e3%83%81%e3%83%97%e3%83%aa%e3%82%ad%e3%83%a5%e3%82%a2!'>ハートキャッチプリキュア!</a>
+<a class='btn' href='search_all.html?q=%e3%83%8f%e3%83%bc%e3%83%88%e3%82%ad%e3%83%a3%e3%83%83%e3%83%81%e3%83%97%e3%83%aa%e3%82%ad%e3%83%a5%e3%82%a2%ef%bc%81'>ハートキャッチプリキュア！</a>
+<a class='btn' href='search_all.html?q=%e3%83%8f%e3%83%bc%e3%83%88%e3%81%ae%e5%9b%bd%e3%81%ae%e3%82%a2%e3%83%aa%e3%82%b9'>ハートの国のアリス</a>
+<a class='btn' href='search_all.html?q=%e3%83%8f%e3%83%bc%e3%83%88%e3%83%9e%e3%83%bc%e3%82%af'>ハートマーク</a>
+<a class='btn' href='search_all.html?q=%e3%83%91%e3%83%bc%e3%83%88%e5%88%86%e3%81%91'>パート分け</a>
+<a class='btn' href='search_all.html?q=%e3%83%91%e3%83%bc%e3%83%9e%e3%83%b3(%e7%ac%ac1%e4%bd%9c)+%e6%8c%bf%e5%85%a5%e6%ad%8c'>パーマン(第1作) 挿入歌</a>
+<a class='btn' href='search_all.html?q=%e3%83%8f%e3%83%bc%e3%83%a1%e3%83%ab%e3%83%b3%e3%81%ae%e3%83%90%e3%82%a4%e3%82%aa%e3%83%aa%e3%83%b3%e5%bc%be%e3%81%8d'>ハーメルンのバイオリン弾き</a>
+<a class='btn' href='search_all.html?q=%e3%83%91%e3%83%bc%e3%83%ab(CV%ef%bc%9a%e7%ab%8b%e8%8a%b1%e6%97%a5%e8%8f%9c)'>パール(CV：立花日菜)</a>
+<a class='btn' href='search_all.html?q=%e3%83%8f%e3%82%a4%e2%98%86%e3%82%b9%e3%83%94%e3%83%bc%e3%83%89!+-Free!+Starting+Days-'>ハイ☆スピード! -Free! Starting Days-</a>
+<a class='btn' href='search_all.html?q=%e3%83%90%e3%82%a4%e3%82%aa%e3%83%8b%e3%83%83%e3%82%af+%e3%82%b3%e3%83%9e%e3%83%b3%e3%83%89%e3%83%bc%e3%83%bb%e6%b0%b4%e6%9c%a8%e4%b8%80%e9%83%8e'>バイオニック コマンドー・水木一郎</a>
+<a class='btn' href='search_all.html?q=%e3%83%8f%e3%82%a4%e3%82%ac%e3%82%af%e3%83%a9'>ハイガクラ</a>
+<a class='btn' href='search_all.html?q=%e3%83%8f%e3%82%a4%e3%82%ac%e3%82%af%e3%83%a9+OP'>ハイガクラ OP</a>
+<a class='btn' href='search_all.html?q=%e3%81%af%e3%81%84%e3%81%8b%e3%82%89%e3%81%95%e3%82%93%e3%81%8c%e9%80%9a%e3%82%8b+%e5%89%8d%e7%b7%a8+%e7%b4%85%e7%b7%92%e3%80%81%e8%8a%b1%e3%81%ae17%e6%ad%b3'>はいからさんが通る 前編 紅緒、花の17歳</a>
+<a class='btn' href='search_all.html?q=%e3%83%8f%e3%82%a4%e3%82%ad%e3%83%a5%e3%83%bc!!'>ハイキュー!!</a>
+<a class='btn' href='search_all.html?q=%e3%83%8f%e3%82%a4%e3%82%ad%e3%83%a5%e3%83%bc!!+'>ハイキュー!! </a>
+<a class='btn' href='search_all.html?q=%e3%83%8f%e3%82%a4%e3%82%ad%e3%83%a5%e3%83%bc!!+%e3%82%bb%e3%82%ab%e3%83%b3%e3%83%89%e3%82%b7%e3%83%bc%e3%82%ba%e3%83%b3'>ハイキュー!! セカンドシーズン</a>
+<a class='btn' href='search_all.html?q=%e3%83%8f%e3%82%a4%e3%82%ad%e3%83%a5%e3%83%bc!!+%e7%83%8f%e9%87%8e%e9%ab%98%e6%a0%a1+VS+%e7%99%bd%e9%b3%a5%e6%b2%a2%e5%ad%a6%e5%9c%92%e9%ab%98%e6%a0%a1'>ハイキュー!! 烏野高校 VS 白鳥沢学園高校</a>
+<a class='btn' href='search_all.html?q=%e3%83%8f%e3%82%a4%e3%82%b9%e3%82%af%e3%83%bc%e3%83%ab!+%e5%a5%87%e9%9d%a2%e7%b5%84'>ハイスクール! 奇面組</a>
+<a class='btn' href='search_all.html?q=%e3%83%8f%e3%82%a4%e3%82%b9%e3%82%af%e3%83%bc%e3%83%ab%e3%83%bb%e3%83%95%e3%83%aa%e3%83%bc%e3%83%88'>ハイスクール・フリート</a>
+<a class='btn' href='search_all.html?q=%e3%83%8f%e3%82%a4%e3%82%b9%e3%82%af%e3%83%bc%e3%83%ab%e3%83%bb%e3%83%95%e3%83%aa%e3%83%bc%e3%83%88+%e5%8a%87%e5%a0%b4%e7%89%88'>ハイスクール・フリート 劇場版</a>
+<a class='btn' href='search_all.html?q=%e3%83%8f%e3%82%a4%e3%82%b9%e3%82%af%e3%83%bc%e3%83%abD%c3%97D'>ハイスクールD&#215;D</a>
+<a class='btn' href='search_all.html?q=%e3%83%8f%e3%82%a4%e3%82%b9%e3%82%af%e3%83%bc%e3%83%abD%c3%97D+BorN'>ハイスクールD&#215;D BorN</a>
+<a class='btn' href='search_all.html?q=%e3%83%8f%e3%82%a4%e3%82%b9%e3%82%af%e3%83%bc%e3%83%abD%c3%97D+NEW'>ハイスクールD&#215;D NEW</a>
+<a class='btn' href='search_all.html?q=%e3%83%8f%e3%82%a4%e3%82%b9%e3%82%b3%e3%82%a2%e3%82%ac%e3%83%bc%e3%83%ab'>ハイスコアガール</a>
+<a class='btn' href='search_all.html?q=%e3%83%8f%e3%82%a4%e3%82%b9%e3%82%b3%e3%82%a2%e3%82%ac%e3%83%bc%e3%83%abII'>ハイスコアガールII</a>
+<a class='btn' href='search_all.html?q=%e3%83%90%e3%82%a4%e3%82%b9%e3%83%88%e3%83%b3%e3%83%bb%e3%82%a6%e3%82%a7%e3%83%ab%e7%89%a9%e8%aa%9e+%e3%82%ac%e3%83%bc%e3%82%bc%e3%82%a3%e3%81%ae%e7%bf%bc'>バイストン・ウェル物語 ガーゼィの翼</a>
+<a class='btn' href='search_all.html?q=%e3%81%af%e3%81%84%e3%81%9f%e3%81%84%e4%b8%83%e8%91%89'>はいたい七葉</a>
+<a class='btn' href='search_all.html?q=%e3%83%91%e3%82%a4%e3%83%ad%e3%83%83%e3%83%88%e7%89%88'>パイロット版</a>
+<a class='btn' href='search_all.html?q=%e3%83%90%e3%82%ab%e3%81%a8%e3%83%86%e3%82%b9%e3%83%88%e3%81%a8%e5%8f%ac%e5%96%9a%e7%8d%a3'>バカとテストと召喚獣</a>
+<a class='btn' href='search_all.html?q=%e3%83%90%e3%82%ab%e3%81%a8%e3%83%86%e3%82%b9%e3%83%88%e3%81%a8%e5%8f%ac%e5%96%9a%e7%8d%a3+%e3%81%ab%e3%81%a3!'>バカとテストと召喚獣 にっ!</a>
+<a class='btn' href='search_all.html?q=%e3%83%90%e3%82%ab%e3%81%a8%e3%83%86%e3%82%b9%e3%83%88%e3%81%a8%e5%8f%ac%e5%96%9a%e7%8d%a3%ef%bd%9e%e7%a5%ad%ef%bd%9e'>バカとテストと召喚獣～祭～</a>
+<a class='btn' href='search_all.html?q=%e3%83%90%e3%82%ab%e3%81%a8%e3%83%86%e3%82%b9%e3%83%88%e3%81%a8%e5%8f%ac%e5%96%9a%e7%8d%a3%e3%81%ab%e3%81%a3%ef%bc%81'>バカとテストと召喚獣にっ！</a>
+<a class='btn' href='search_all.html?q=%e3%83%90%e3%82%ad'>バキ</a>
+<a class='btn' href='search_all.html?q=%e3%83%90%e3%82%ad+%e5%a4%a7%e6%93%82%e5%8f%b0%e8%b3%bd%e7%b7%a8'>バキ 大擂台賽編</a>
+<a class='btn' href='search_all.html?q=%e3%81%b0%e3%81%8f%e3%81%82%e3%81%ad2+%e5%bc%9f%e3%81%84%e3%81%a3%e3%81%b1%e3%81%84%e3%81%97%e3%81%bc%e3%81%a3%e3%81%a1%e3%82%83%e3%81%86%e3%81%9e%ef%bc%81'>ばくあね2 弟いっぱいしぼっちゃうぞ！</a>
+<a class='btn' href='search_all.html?q=%e3%81%b0%e3%81%8f%e3%81%8a%e3%82%93!!'>ばくおん!!</a>
+<a class='btn' href='search_all.html?q=%e3%83%90%e3%82%af%e3%83%86%e3%83%b3!!'>バクテン!!</a>
+<a class='btn' href='search_all.html?q=%e3%83%90%e3%82%af%e3%83%9e%e3%83%b3%e3%80%82'>バクマン。</a>
+<a class='btn' href='search_all.html?q=%e3%83%90%e3%82%af%e3%83%9e%e3%83%b3%e3%80%823'>バクマン。3</a>
+<a class='btn' href='search_all.html?q=%e3%83%8f%e3%82%af%e3%83%a1%e3%82%a4%e3%81%a8%e3%83%9f%e3%82%b3%e3%83%81'>ハクメイとミコチ</a>
+<a class='btn' href='search_all.html?q=%e3%81%af%e3%81%90%e3%82%8c%e5%8b%87%e8%80%85%e3%81%ae%e9%ac%bc%e7%95%9c%e7%be%8e%e5%ad%a6'>はぐれ勇者の鬼畜美学</a>
+<a class='btn' href='search_all.html?q=%e3%83%91%e3%82%af%e3%83%ad%e3%83%9f'>パクロミ</a>
+<a class='btn' href='search_all.html?q=%e3%83%8f%e3%82%b3%e3%83%85%e3%83%a1%ef%bd%9e%e4%ba%a4%e7%95%aa%e5%a5%b3%e5%ad%90%e3%81%ae%e9%80%86%e8%a5%b2%ef%bd%9e+ED'>ハコヅメ～交番女子の逆襲～ ED</a>
+<a class='btn' href='search_all.html?q=%e3%83%8f%e3%82%b3%e3%83%85%e3%83%a1%ef%bd%9e%e4%ba%a4%e7%95%aa%e5%a5%b3%e5%ad%90%e3%81%ae%e9%80%86%e8%a5%b2%ef%bd%9e+OP'>ハコヅメ～交番女子の逆襲～ OP</a>
+<a class='btn' href='search_all.html?q=%e3%83%8f%e3%82%b3%e3%83%8b%e3%83%af%e3%83%aa%e3%83%aa%e3%82%a3'>ハコニワリリィ</a>
+<a class='btn' href='search_all.html?q=%e3%81%af%e3%81%98%e3%82%81%e3%81%ae%e4%b8%80%e6%ad%a9'>はじめの一歩</a>
+<a class='btn' href='search_all.html?q=%e3%81%af%e3%81%98%e3%82%81%e3%81%ae%e4%b8%80%e6%ad%a9+New+Challenger'>はじめの一歩 New Challenger</a>
+<a class='btn' href='search_all.html?q=%e3%81%af%e3%81%97%e3%83%a1%e3%83%ad'>はしメロ</a>
+<a class='btn' href='search_all.html?q=%e3%83%8f%e3%82%b8%e3%83%a9%e3%83%96+-+Maiking%ef%bc%8aLovers+-+_OP'>ハジラブ - Maiking＊Lovers - _OP</a>
+<a class='btn' href='search_all.html?q=%e3%83%90%e3%82%b8%e3%83%aa%e3%82%b9%e3%82%af+%ef%bd%9e%e7%94%b2%e8%b3%80%e5%bf%8d%e6%b3%95%e5%b8%96%ef%bd%9e'>バジリスク ～甲賀忍法帖～</a>
+<a class='btn' href='search_all.html?q=%e3%83%90%e3%82%b8%e3%83%aa%e3%82%b9%e3%82%af+%ef%bd%9e%e6%a1%9c%e8%8a%b1%e5%bf%8d%e6%b3%95%e5%b8%96%ef%bd%9e'>バジリスク ～桜花忍法帖～</a>
+<a class='btn' href='search_all.html?q=%e3%83%90%e3%82%b8%e3%83%aa%e3%82%b9%e3%82%af+%e3%80%9c%e7%94%b2%e8%b3%80%e5%bf%8d%e6%b3%95%e5%b8%96%e3%80%9c'>バジリスク 〜甲賀忍法帖〜</a>
+<a class='btn' href='search_all.html?q=%e3%83%90%e3%82%b8%e3%83%aa%e3%82%b9%e3%82%af%e7%94%b2%e8%b3%80%e5%bf%8d%e6%b3%95%e5%b8%96'>バジリスク甲賀忍法帖</a>
+<a class='btn' href='search_all.html?q=%e3%83%90%e3%82%b9%e3%82%ab%e3%83%83%e3%82%b7%e3%83%a5!'>バスカッシュ!</a>
+<a class='btn' href='search_all.html?q=%e3%83%90%e3%82%b9%e3%82%ab%e3%83%83%e3%82%b7%e3%83%a5%ef%bc%81'>バスカッシュ！</a>
+<a class='btn' href='search_all.html?q=%e3%81%b1%e3%81%99%e3%81%a6%e3%82%8b%e3%83%81%e3%83%a3%e3%82%a4%e3%83%a0+Continue'>ぱすてるチャイム Continue</a>
+<a class='btn' href='search_all.html?q=%e3%81%b1%e3%81%99%e3%81%a6%e3%82%8b%e3%83%a1%e3%83%a2%e3%83%aa%e3%83%bc%e3%82%ba'>ぱすてるメモリーズ</a>
+<a class='btn' href='search_all.html?q=%e3%83%91%e3%82%ba%e3%83%89%e3%83%a9Z'>パズドラZ</a>
+<a class='btn' href='search_all.html?q=%e3%83%8f%e3%82%ba%e3%83%ac%e6%9e%a0%e3%81%ae%e3%80%90%e7%8a%b6%e6%85%8b%e7%95%b0%e5%b8%b8%e3%82%b9%e3%82%ad%e3%83%ab'>ハズレ枠の【状態異常スキル</a>
+<a class='btn' href='search_all.html?q=%e3%83%90%e3%82%b9%e6%b1%9f(CV%ef%bc%9a%e6%96%89%e8%97%a4%e8%b2%b4%e7%be%8e%e5%ad%90)'>バス江(CV：斉藤貴美子)</a>
+<a class='btn' href='search_all.html?q=%e3%83%90%e3%82%b9%e6%b1%9f(CV%ef%bc%9a%e6%96%89%e8%97%a4%e8%b2%b4%e7%be%8e%e5%ad%90)+with+%e3%82%bf%e3%83%84%e5%85%84(CV%ef%bc%9a%e8%90%bd%e5%90%88%e7%a6%8f%e5%97%a3)'>バス江(CV：斉藤貴美子) with タツ兄(CV：落合福嗣)</a>
+<a class='btn' href='search_all.html?q=%e3%83%90%e3%82%bf%e3%83%95%e3%83%a9%e3%82%a4%e3%82%b7%e3%83%bc%e3%82%ab%e3%83%bc+Butterfly+Seeker'>バタフライシーカー Butterfly Seeker</a>
+<a class='btn' href='search_all.html?q=%e3%83%90%e3%82%bf%e3%83%95%e3%83%a9%e3%82%a4%e3%82%b7%e3%83%bc%e3%82%ab%e3%83%bc_OP'>バタフライシーカー_OP</a>
+<a class='btn' href='search_all.html?q=%e3%81%af%e3%81%9f%e3%82%89%e3%81%8f%e7%b4%b0%e8%83%9e'>はたらく細胞</a>
+<a class='btn' href='search_all.html?q=%e3%81%af%e3%81%9f%e3%82%89%e3%81%8f%e7%b4%b0%e8%83%9e%e3%80%80%ef%bc%a5%ef%bc%a4'>はたらく細胞　ＥＤ</a>
+<a class='btn' href='search_all.html?q=%e3%81%af%e3%81%9f%e3%82%89%e3%81%8f%e7%b4%b0%e8%83%9e!!'>はたらく細胞!!</a>
+<a class='btn' href='search_all.html?q=%e3%81%af%e3%81%9f%e3%82%89%e3%81%8f%e7%b4%b0%e8%83%9eBLACK'>はたらく細胞BLACK</a>
+<a class='btn' href='search_all.html?q=%e3%81%af%e3%81%9f%e3%82%89%e3%81%8f%e9%ad%94%e7%8e%8b%e3%81%95%e3%81%be!'>はたらく魔王さま!</a>
+<a class='btn' href='search_all.html?q=%e3%81%af%e3%81%9f%e3%82%89%e3%81%8f%e9%ad%94%e7%8e%8b%e3%81%95%e3%81%be%ef%bc%81+ED1'>はたらく魔王さま！ ED1</a>
+<a class='btn' href='search_all.html?q=%e3%81%af%e3%81%9f%e3%82%89%e3%81%8f%e9%ad%94%e7%8e%8b%e3%81%95%e3%81%be!!'>はたらく魔王さま!!</a>
+<a class='btn' href='search_all.html?q=%e3%83%8f%e3%83%81feat.%e5%88%9d%e9%9f%b3%e3%83%9f%e3%82%af(%e3%83%8b%e3%82%b3%e3%82%ab%e3%83%a9)'>ハチfeat.初音ミク(ニコカラ)</a>
+<a class='btn' href='search_all.html?q=%e3%83%8f%e3%83%81P%ef%bc%bfGUMI'>ハチP＿GUMI</a>
+<a class='btn' href='search_all.html?q=%e3%83%8f%e3%83%81P%ef%bc%bf%e5%88%9d%e9%9f%b3%e3%83%9f%e3%82%af'>ハチP＿初音ミク</a>
+<a class='btn' href='search_all.html?q=%e3%83%91%e3%83%81%e3%82%b9%e3%83%ad+%e3%82%b5%e3%82%af%e3%83%a9%e5%a4%a7%e6%88%a63%7e%e5%b7%b4%e9%87%8c%e3%81%af%e7%87%83%e3%81%88%e3%81%a6%e3%81%84%e3%82%8b%e3%81%8b%7e'>パチスロ サクラ大戦3~巴里は燃えているか~</a>
+<a class='btn' href='search_all.html?q=%e3%83%91%e3%83%81%e3%82%b9%e3%83%adANEMONE+%e4%ba%a4%e9%9f%bf%e8%a9%a9%e7%af%87%e3%82%a8%e3%82%a6%e3%83%ac%e3%82%ab%e3%82%bb%e3%83%96%e3%83%b3+HI-EVOLUTION%e3%83%bbFLOW'>パチスロANEMONE 交響詩篇エウレカセブン HI-EVOLUTION・FLOW</a>
+<a class='btn' href='search_all.html?q=%e3%83%91%e3%83%81%e3%83%b3%e3%82%b3+%e3%82%81%e3%81%9e%e3%82%93%e4%b8%80%e5%88%bb%ef%bc%92+%e6%8c%bf%e5%85%a5%e6%ad%8c'>パチンコ めぞん一刻２ 挿入歌</a>
+<a class='btn' href='search_all.html?q=%e3%81%b1%e3%81%a1%e3%82%93%e3%81%93%e3%82%ad%e3%83%b3%e8%82%89%e3%83%9e%e3%83%b3+%e5%a4%a2%e3%81%ae%e8%b6%85%e4%ba%ba%e3%82%bf%e3%83%83%e3%82%b0%e7%b7%a8%e3%83%bb%e4%b8%b2%e7%94%b0%e3%82%a2%e3%82%ad%e3%83%a9'>ぱちんこキン肉マン 夢の超人タッグ編・串田アキラ</a>
+<a class='btn' href='search_all.html?q=%e3%83%8f%e3%83%83%e3%82%ab%e3%83%89%e3%83%bc%e3%83%ab+THE+%e3%81%82%e3%81%ab%e3%82%81%ef%bd%9e%e3%81%97%e3%82%87%e3%82%93'>ハッカドール THE あにめ～しょん</a>
+<a class='btn' href='search_all.html?q=%e3%83%90%e3%83%83%e3%82%af%e3%83%bb%e3%82%a2%e3%83%ad%e3%82%a6'>バック・アロウ</a>
+<a class='btn' href='search_all.html?q=%e3%81%b0%e3%81%a3%e3%81%a9%e3%81%8c%e3%83%bc%e3%82%8b'>ばっどがーる</a>
+<a class='btn' href='search_all.html?q=%e3%81%b0%e3%81%a3%e3%81%a9%e3%81%8c%e3%83%bc%e3%82%8b_%e3%82%a2%e3%83%8b%e3%83%a1%e3%83%95%e3%83%ab%e7%b7%a8%e9%9b%86ver5%e3%83%91%e3%83%bc%e3%83%88%e5%88%86%e3%81%91'>ばっどがーる_アニメフル編集ver5パート分け</a>
+<a class='btn' href='search_all.html?q=%e3%81%b0%e3%81%a3%e3%81%a9%e3%81%8c%e3%83%bc%e3%82%8b4%e3%83%91%e3%83%bc%e3%83%88%e5%88%86%e3%81%91'>ばっどがーる4パート分け</a>
+<a class='btn' href='search_all.html?q=%e3%83%8f%e3%83%83%e3%83%94%e3%83%bc%e3%82%b7%e3%83%a5%e3%82%ac%e3%83%bc%e3%83%a9%e3%82%a4%e3%83%95'>ハッピーシュガーライフ</a>
+<a class='btn' href='search_all.html?q=%e3%81%af%e3%81%a3%e3%81%b4%e3%81%83%e3%82%bb%e3%83%96%e3%83%b3+%ef%bd%9e%e3%81%96%e3%83%bb%e3%83%86%e3%83%ac%e3%83%93%e3%81%be%e3%82%93%e3%81%8c%ef%bd%9e'>はっぴぃセブン ～ざ・テレビまんが～</a>
+<a class='btn' href='search_all.html?q=%e3%81%af%e3%81%a3%e3%81%b4%e3%81%83%e3%83%97%e3%83%aa%e3%83%b3%e3%82%bb%e3%82%b9Another+Fairytale'>はっぴぃプリンセスAnother Fairytale</a>
+<a class='btn' href='search_all.html?q=%e3%83%8f%e3%83%83%e3%83%9d%e3%83%b3%e3%82%a2%e3%82%b7'>ハッポンアシ</a>
+<a class='btn' href='search_all.html?q=%e3%81%af%e3%81%a4%e3%82%86%e3%81%8d%e3%81%95%e3%81%8f%e3%82%89'>はつゆきさくら</a>
+<a class='btn' href='search_all.html?q=%e3%83%90%e3%83%87%e3%82%a3%e3%83%bb%e3%82%b3%e3%83%b3%e3%83%97%e3%83%ac%e3%83%83%e3%82%af%e3%82%b9'>バディ・コンプレックス</a>
+<a class='btn' href='search_all.html?q=%e3%83%90%e3%83%87%e3%82%a3%e3%83%bb%e3%82%b3%e3%83%b3%e3%83%97%e3%83%ac%e3%83%83%e3%82%af%e3%82%b9%e3%80%80%ef%bc%af%ef%bc%b0'>バディ・コンプレックス　ＯＰ</a>
+<a class='btn' href='search_all.html?q=%e3%83%90%e3%83%87%e3%82%a3%e3%83%bb%e3%82%b3%e3%83%b3%e3%83%97%e3%83%ac%e3%83%83%e3%82%af%e3%82%b9+%e6%88%a6%e5%a0%b4%e3%81%ae%e3%82%ab%e3%83%83%e3%83%97%e3%83%aa%e3%83%b3%e3%82%b0'>バディ・コンプレックス 戦場のカップリング</a>
+<a class='btn' href='search_all.html?q=%e3%83%91%e3%83%88%e3%83%aa%e3%83%81%e3%82%a7%e3%83%95%ef%bc%bf%e9%8f%a1%e9%9f%b3%e3%83%aa%e3%83%b3'>パトリチェフ＿鏡音リン</a>
+<a class='btn' href='search_all.html?q=%e3%83%90%e3%83%88%e3%83%ab%e3%82%a2%e3%82%b9%e3%83%aa%e3%83%bc%e3%83%86%e3%82%b9+%e5%a4%a7%e9%81%8b%e5%8b%95%e4%bc%9a+ReSTART!'>バトルアスリーテス 大運動会 ReSTART!</a>
+<a class='btn' href='search_all.html?q=%e3%83%90%e3%83%88%e3%83%ab%e3%82%a2%e3%82%b9%e3%83%aa%e3%83%bc%e3%83%86%e3%82%b9%e5%a4%a7%e9%81%8b%e5%8b%95%e4%bc%9a'>バトルアスリーテス大運動会</a>
+<a class='btn' href='search_all.html?q=%e3%83%90%e3%83%88%e3%83%ab%e3%82%a2%e3%82%b9%e3%83%aa%e3%83%bc%e3%83%86%e3%82%b9%e5%a4%a7%e9%81%8b%e5%8b%95%e4%bc%9a+ReSTART!'>バトルアスリーテス大運動会 ReSTART!</a>
+<a class='btn' href='search_all.html?q=%e3%83%90%e3%83%88%e3%83%ab%e3%82%b9%e3%83%94%e3%83%aa%e3%83%83%e3%83%84+%e3%83%96%e3%83%ac%e3%82%a4%e3%83%b4'>バトルスピリッツ ブレイヴ</a>
+<a class='btn' href='search_all.html?q=%e3%83%90%e3%83%88%e3%83%ab%e3%82%b9%e3%83%94%e3%83%aa%e3%83%83%e3%83%84+%e5%b0%91%e5%b9%b4%e6%bf%80%e8%a6%87%e3%83%80%e3%83%b3'>バトルスピリッツ 少年激覇ダン</a>
+<a class='btn' href='search_all.html?q=%e3%83%90%e3%83%88%e3%83%ab%e3%82%b9%e3%83%94%e3%83%aa%e3%83%83%e3%83%84%e7%83%88%e7%81%ab%e9%ad%82'>バトルスピリッツ烈火魂</a>
+<a class='btn' href='search_all.html?q=%e3%83%91%e3%83%8a%e3%82%bd%e3%83%8b%e3%83%83%e3%82%afCM%e3%82%bd%e3%83%b3%e3%82%b0%e3%82%ab%e3%83%90%e3%83%bc'>パナソニックCMソングカバー</a>
+<a class='btn' href='search_all.html?q=%e3%83%8f%e3%83%8a%e3%83%93%e3%81%a1%e3%82%83%e3%82%93%e3%81%af%e9%81%85%e3%82%8c%e3%81%8c%e3%81%a1'>ハナビちゃんは遅れがち</a>
+<a class='btn' href='search_all.html?q=%e3%83%8f%e3%83%8a%e3%83%92%e3%83%a1%ef%bc%8a%e3%82%a2%e3%83%96%e3%82%bd%e3%83%aa%e3%83%a5%e3%83%bc%e3%83%88%ef%bc%81_ED'>ハナヒメ＊アブソリュート！_ED</a>
+<a class='btn' href='search_all.html?q=%e3%81%af%e3%81%aa%e3%81%be%e3%82%8b%e5%b9%bc%e7%a8%9a%e5%9c%92'>はなまる幼稚園</a>
+<a class='btn' href='search_all.html?q=%e3%83%8f%e3%83%8a%e3%83%a4%e3%83%9e%e3%82%bf'>ハナヤマタ</a>
+<a class='btn' href='search_all.html?q=%e3%83%8f%e3%83%8b%e3%83%bc%e3%83%ac%e3%83%a2%e3%83%b3%e3%82%bd%e3%83%bc%e3%83%80'>ハニーレモンソーダ</a>
+<a class='btn' href='search_all.html?q=%e3%81%af%e3%81%ab%e3%83%87%e3%83%93!+%7eHoney+%26+Devil%7e'>はにデビ! ~Honey &amp; Devil~</a>
+<a class='btn' href='search_all.html?q=%e3%81%af%e3%81%ab%e3%83%87%e3%83%93%ef%bc%81+Honey%26Devil_OP'>はにデビ！ Honey&amp;Devil_OP</a>
+<a class='btn' href='search_all.html?q=%e3%81%b1%e3%81%ab%e3%81%bd%e3%81%ab%e3%81%a0%e3%81%a3%e3%81%97%e3%82%85'>ぱにぽにだっしゅ</a>
+<a class='btn' href='search_all.html?q=%e3%81%b1%e3%81%ab%e3%81%bd%e3%81%ab%e3%81%a0%e3%81%a3%e3%81%97%e3%82%85!'>ぱにぽにだっしゅ!</a>
+<a class='btn' href='search_all.html?q=%e3%81%b1%e3%81%ab%e3%81%bd%e3%81%ab%e3%81%a0%e3%81%a3%e3%81%97%e3%82%85%ef%bc%81'>ぱにぽにだっしゅ！</a>
+<a class='btn' href='search_all.html?q=%e3%81%af%e3%81%ad%e3%83%90%e3%83%89!'>はねバド!</a>
+<a class='btn' href='search_all.html?q=%e3%81%af%e3%81%ad%e3%83%90%e3%83%89%ef%bc%81'>はねバド！</a>
+<a class='btn' href='search_all.html?q=%e3%81%af%e3%81%ad%e3%83%90%e3%83%89%ef%bc%81%e3%80%80%ef%bc%a5%ef%bc%a4'>はねバド！　ＥＤ</a>
+<a class='btn' href='search_all.html?q=%e3%81%af%e3%81%ad%e3%83%90%e3%83%89%ef%bc%81%e3%80%80%ef%bc%af%ef%bc%b0'>はねバド！　ＯＰ</a>
+<a class='btn' href='search_all.html?q=%e3%83%91%e3%83%91%e3%81%ae%e3%81%84%e3%81%86%e3%81%93%e3%81%a8%e3%82%92%e8%81%9e%e3%81%8d%e3%81%aa%e3%81%95%e3%81%84!'>パパのいうことを聞きなさい!</a>
+<a class='btn' href='search_all.html?q=%e3%83%91%e3%83%91%e3%81%ae%e3%81%84%e3%81%86%e3%81%93%e3%81%a8%e3%82%92%e8%81%9e%e3%81%8d%e3%81%aa%e3%81%95%e3%81%84%ef%bc%81'>パパのいうことを聞きなさい！</a>
+<a class='btn' href='search_all.html?q=%e3%83%91%e3%83%91%e3%83%91%e3%81%ae%e3%83%81%e3%83%a7%e3%82%a4%e3%83%8a%e3%81%ae%e3%81%86%e3%81%9f-%e6%b0%b4%e5%9e%a3%e6%b4%8b%e5%ad%90%e3%80%81%e3%83%95%e3%82%a9%e3%83%bc%e3%83%a1%e3%82%a4%e3%83%84'>パパパのチョイナのうた-水垣洋子、フォーメイツ</a>
+<a class='btn' href='search_all.html?q=%e3%83%90%e3%83%90%e3%83%b3%e3%83%90%e3%83%90%e3%83%b3%e3%83%90%e3%83%b3%e3%83%90%e3%83%b3%e3%83%91%e3%82%a4%e3%82%a2'>ババンババンバンバンパイア</a>
+<a class='btn' href='search_all.html?q=%e3%83%90%e3%83%90%e3%83%b3%e3%83%90%e3%83%90%e3%83%b3%e3%83%90%e3%83%b3%e3%83%90%e3%83%b3%e3%83%91%e3%82%a4%e3%83%a4'>ババンババンバンバンパイヤ</a>
+<a class='btn' href='search_all.html?q=%e3%81%af%e3%81%b4%e3%81%ad%e3%81%99!'>はぴねす!</a>
+<a class='btn' href='search_all.html?q=%e3%81%af%e3%81%b4%e3%81%ad%e3%81%99%ef%bc%81'>はぴねす！</a>
+<a class='btn' href='search_all.html?q=%e3%81%af%e3%81%b4%e3%81%ad%e3%81%99!%e3%81%a7%e3%82%89%e3%81%a3%e3%81%8f%e3%81%99'>はぴねす!でらっくす</a>
+<a class='btn' href='search_all.html?q=%e3%81%af%e3%81%b4%e3%81%ad%e3%81%99%ef%bc%81%e3%82%8a%e3%82%89%e3%81%a3%e3%81%8f%e3%81%99'>はぴねす！りらっくす</a>
+<a class='btn' href='search_all.html?q=%e3%83%8f%e3%83%94%e3%83%8d%e3%82%b9%e3%83%81%e3%83%a3%e3%83%bc%e3%82%b8%e3%83%97%e3%83%aa%e3%82%ad%e3%83%a5%e3%82%a2'>ハピネスチャージプリキュア</a>
+<a class='btn' href='search_all.html?q=%e3%83%8f%e3%83%94%e3%83%8d%e3%82%b9%e3%83%81%e3%83%a3%e3%83%bc%e3%82%b8%e3%83%97%e3%83%aa%e3%82%ad%e3%83%a5%e3%82%a2!'>ハピネスチャージプリキュア!</a>
+<a class='btn' href='search_all.html?q=%e3%83%8f%e3%83%94%e3%83%a1%e3%82%a2+-Fragmentation+Dream-'>ハピメア -Fragmentation Dream-</a>
+<a class='btn' href='search_all.html?q=%e3%83%90%e3%83%93%e3%83%ab%ef%bc%92%e4%b8%96'>バビル２世</a>
+<a class='btn' href='search_all.html?q=%e3%83%90%e3%83%93%e3%83%ad%e3%83%b3'>バビロン</a>
+<a class='btn' href='search_all.html?q=%e3%83%90%e3%83%96%e3%83%ab'>バブル</a>
+<a class='btn' href='search_all.html?q=%e3%83%8f%e3%83%9e%e3%83%88%e3%83%a9'>ハマトラ</a>
+<a class='btn' href='search_all.html?q=%e3%83%8f%e3%83%9f%e3%83%80%e3%82%b7%e3%82%af%e3%83%aa%e3%82%a8%e3%82%a4%e3%83%86%e3%82%a3%e3%83%96%e5%87%b8'>ハミダシクリエイティブ凸</a>
+<a class='btn' href='search_all.html?q=%e3%83%90%e3%83%9f%e3%83%a5%e3%83%bc%e3%83%80%e3%83%88%e3%83%a9%e3%82%a4%e3%82%a2%e3%83%b3%e3%82%b0%e3%83%ab+%7e%e3%82%ab%e3%83%a9%e3%83%95%e3%83%ab%e3%83%bb%e3%83%91%e3%82%b9%e3%83%88%e3%83%a9%e3%83%bc%e3%83%ac%7e'>バミューダトライアングル ~カラフル・パストラーレ~</a>
+<a class='btn' href='search_all.html?q=%e3%83%90%e3%83%9f%e3%83%a5%e3%83%bc%e3%83%80%e3%83%88%e3%83%a9%e3%82%a4%e3%82%a2%e3%83%b3%e3%82%b0%e3%83%ab%ef%bd%9e%e3%82%ab%e3%83%a9%e3%83%95%e3%83%ab%e3%83%bb%e3%83%91%e3%82%b9%e3%83%88%e3%83%a9%e3%83%bc%e3%83%ac%ef%bd%9e'>バミューダトライアングル～カラフル・パストラーレ～</a>
+<a class='btn' href='search_all.html?q=%e3%83%8f%e3%83%9f%e3%83%b3%e3%82%b0%e3%83%90%e3%83%bc%e3%83%89'>ハミングバード</a>
+<a class='btn' href='search_all.html?q=%e3%81%af%e3%82%80%e3%81%af%e3%82%80%e3%82%bd%e3%83%95%e3%83%88'>はむはむソフト</a>
+<a class='btn' href='search_all.html?q=%e3%83%8f%e3%83%a0%e5%a4%aa%e9%83%8e%e3%81%ae%e3%81%8a%e3%81%9f%e3%82%93%e3%81%98%e3%82%87%e3%81%86%e3%81%b3+%e3%80%9c%e3%83%9e%e3%83%9e%e3%82%92%e3%81%9f%e3%81%9a%e3%81%ad%e3%81%a6%e4%b8%89%e5%8d%83%e3%81%a6%e3%81%a1%e3%81%a6%e3%81%a1%e3%80%9c'>ハム太郎のおたんじょうび 〜ママをたずねて三千てちてち〜</a>
+<a class='btn' href='search_all.html?q=%e3%81%af%e3%82%81%e3%81%a4%e3%81%ae%e3%81%8a%e3%81%86%e3%81%93%e3%81%8f+ED'>はめつのおうこく ED</a>
+<a class='btn' href='search_all.html?q=%e3%81%af%e3%82%81%e3%81%a4%e3%81%ae%e3%81%8a%e3%81%86%e3%81%93%e3%81%8f+OP'>はめつのおうこく OP</a>
+<a class='btn' href='search_all.html?q=%e3%83%8f%e3%83%a4%e3%83%86%e3%81%ae%e3%81%94%e3%81%a8%e3%81%8f%ef%bc%81'>ハヤテのごとく！</a>
+<a class='btn' href='search_all.html?q=%e3%83%8f%e3%83%a4%e3%83%86%e3%81%ae%e3%81%94%e3%81%a8%e3%81%8f!+CAN%27T+TAKE+MY+EYES+OFF+YOU'>ハヤテのごとく! CAN&#39;T TAKE MY EYES OFF YOU</a>
+<a class='btn' href='search_all.html?q=%e3%83%8f%e3%83%a4%e3%83%86%e3%81%ae%e3%81%94%e3%81%a8%e3%81%8f!+Cuties'>ハヤテのごとく! Cuties</a>
+<a class='btn' href='search_all.html?q=%e3%83%8f%e3%83%a4%e3%83%86%e3%81%ae%e3%81%94%e3%81%a8%e3%81%8f!+HEAVEN+IS+A+PLACE+ON+EARTH'>ハヤテのごとく! HEAVEN IS A PLACE ON EARTH</a>
+<a class='btn' href='search_all.html?q=%e3%83%8f%e3%83%a4%e3%83%86%e3%81%ae%e3%81%94%e3%81%a8%e3%81%8f!!'>ハヤテのごとく!!</a>
+<a class='btn' href='search_all.html?q=%e3%83%8f%e3%83%a4%e3%83%86%e3%81%ae%e3%81%94%e3%81%a8%e3%81%8f%ef%bc%81%ef%bc%81'>ハヤテのごとく！！</a>
+<a class='btn' href='search_all.html?q=%e3%83%8f%e3%83%a4%e3%83%86%e3%81%ae%e3%81%94%e3%81%a8%e3%81%8f!!+2nd+season'>ハヤテのごとく!! 2nd season</a>
+<a class='btn' href='search_all.html?q=%e3%83%8f%e3%83%a4%e3%83%86%e3%81%ae%e3%81%94%e3%81%a8%e3%81%8f%e3%83%bb%e9%81%a0%e8%97%a4%e6%ad%a3%e6%98%8e(%e3%83%8b%e3%82%b3%e3%82%ab%e3%83%a9)'>ハヤテのごとく・遠藤正明(ニコカラ)</a>
+<a class='btn' href='search_all.html?q=%e3%83%8f%e3%83%a4%e3%83%96%e3%82%b5'>ハヤブサ</a>
+<a class='btn' href='search_all.html?q=%e3%81%b0%e3%82%89%e3%81%8b%e3%82%82%e3%82%93'>ばらかもん</a>
+<a class='btn' href='search_all.html?q=%e3%81%b1%e3%82%89%e3%81%a0%e3%81%84%e3%81%99%e3%81%8a%ef%bd%9e%e3%81%97%e3%82%83%e3%82%93'>ぱらだいすお～しゃん</a>
+<a class='btn' href='search_all.html?q=%e3%83%91%e3%83%a9%e3%83%9b%e3%82%b9'>パラホス</a>
+<a class='btn' href='search_all.html?q=%e3%83%90%e3%83%a9%e3%83%a9%e3%82%a4%e3%82%ab%ef%bc%8f%e6%9c%88%e5%b3%b6%e3%81%8d%e3%82%89%e3%82%8a'>バラライカ／月島きらり</a>
+<a class='btn' href='search_all.html?q=%e3%81%af%e3%82%8a%e3%83%bc'>はりー</a>
+<a class='btn' href='search_all.html?q=%e3%83%91%e3%83%aa%e3%82%a4'>パリイ</a>
+<a class='btn' href='search_all.html?q=%e3%83%90%e3%83%aa%e3%83%90%e3%83%aa%e6%9c%80%e5%bc%b7No.1%ef%bc%8fFEEL+SO+BAD'>バリバリ最強No.1／FEEL SO BAD</a>
+<a class='btn' href='search_all.html?q=%e3%83%91%e3%83%aa%e3%83%94%e5%ad%94%e6%98%8e'>パリピ孔明</a>
+<a class='btn' href='search_all.html?q=%e3%83%91%e3%83%aa%e3%83%94%e5%ad%94%e6%98%8e+ED'>パリピ孔明 ED</a>
+<a class='btn' href='search_all.html?q=%e3%83%91%e3%83%aa%e3%83%94%e5%ad%94%e6%98%8e+OP'>パリピ孔明 OP</a>
+<a class='btn' href='search_all.html?q=%e3%83%91%e3%83%aa%e3%83%94%e5%ad%94%e6%98%8e+Road+to+Summer+Sonia'>パリピ孔明 Road to Summer Sonia</a>
+<a class='btn' href='search_all.html?q=%e3%83%8f%e3%83%ab'>ハル</a>
+<a class='btn' href='search_all.html?q=%e3%83%90%e3%83%ab%e3%83%bc%e3%83%b3'>バルーン</a>
+<a class='btn' href='search_all.html?q=%e3%81%af%e3%82%8b%e3%81%8b%e3%81%9c%e6%88%a6%e9%9a%8aV%e3%83%95%e3%82%a9%e3%83%bc%e3%82%b9'>はるかぜ戦隊Vフォース</a>
+<a class='btn' href='search_all.html?q=%e3%83%8f%e3%83%ab%e3%82%ab%e3%83%8a%e3%82%bd%e3%83%a9_OP'>ハルカナソラ_OP</a>
+<a class='btn' href='search_all.html?q=%e3%81%af%e3%82%8b%e3%81%8b%e3%81%aa%e3%83%ac%e3%82%b7%e3%83%bc%e3%83%96'>はるかなレシーブ</a>
+<a class='btn' href='search_all.html?q=%e3%83%8f%e3%83%ab%e3%83%81%e3%82%ab%ef%bd%9e%e3%83%8f%e3%83%ab%e3%82%bf%e3%81%a8%e3%83%81%e3%82%ab%e3%81%af%e9%9d%92%e6%98%a5%e3%81%99%e3%82%8b%ef%bd%9e'>ハルチカ～ハルタとチカは青春する～</a>
+<a class='btn' href='search_all.html?q=%e3%81%af%e3%82%8b%e3%81%af%e3%82%8d!'>はるはろ!</a>
+<a class='btn' href='search_all.html?q=%e3%83%91%e3%83%ab%e3%83%95%e3%82%a7'>パルフェ</a>
+<a class='btn' href='search_all.html?q=%e3%81%af%e3%82%8b%e3%81%be%e3%81%8d%e3%81%94%e3%81%af%e3%82%93'>はるまきごはん</a>
+<a class='btn' href='search_all.html?q=%e3%83%8f%e3%83%ab%e3%83%a2%e3%83%8b%e3%82%a2%ef%bc%8f++++RYTHEMNARUTO+'>ハルモニア／    RYTHEMNARUTO </a>
+<a class='btn' href='search_all.html?q=%e3%83%8f%e3%83%ac%e3%82%a4%e3%82%b7%e3%83%a7%e3%83%b3%ef%bc%8f+LARK+SKYBEAUTY'>ハレイション／ LARK SKYBEAUTY</a>
+<a class='btn' href='search_all.html?q=%e3%83%91%e3%83%ac%e3%83%bc%e3%83%89%e2%99%a5%e3%83%91%e3%83%ac%e3%83%bc%e3%83%89'>パレード♥パレード</a>
+<a class='btn' href='search_all.html?q=%e3%81%b1%e3%82%8c%e3%81%a3%e3%81%a8'>ぱれっと</a>
+<a class='btn' href='search_all.html?q=%e3%81%b1%e3%82%8c%e3%81%a3%e3%81%a8+%e3%82%af%e3%82%aa%e3%83%aa%e3%82%a2'>ぱれっと クオリア</a>
+<a class='btn' href='search_all.html?q=%e3%81%b1%e3%82%8c%e3%81%a3%e3%81%a8%e3%82%af%e3%82%aa%e3%83%aa%e3%82%a2'>ぱれっとクオリア</a>
+<a class='btn' href='search_all.html?q=%e3%83%90%e3%83%ac%e3%83%83%e3%83%88%e3%82%bd%e3%82%a6%e3%83%ab+-%e5%bc%be%e9%ad%82-'>バレットソウル -弾魂-</a>
+<a class='btn' href='search_all.html?q=%e3%83%91%e3%83%ac%e3%83%89%e3%82%a5%e3%83%ac%e3%83%bc%e3%83%8c'>パレドゥレーヌ</a>
+<a class='btn' href='search_all.html?q=%e3%83%90%e3%83%ac%e3%83%b3%e3%82%bf%e3%82%a4%e3%83%b3%e3%83%bb%e3%82%ad%e3%83%83%e3%82%b9%ef%bc%8f%e6%a4%8e%e5%90%8d%e7%9c%9f%e6%98%bc%ef%bc%88CV.%e7%9f%b3%e8%a6%8b%e8%88%9e%e8%8f%9c%e9%a6%99%ef%bc%89'>バレンタイン・キッス／椎名真昼（CV.石見舞菜香）</a>
+<a class='btn' href='search_all.html?q=%e3%83%8f%e3%83%ad%e3%83%bc!!+%e3%81%8d%e3%82%93%e3%81%84%e3%82%8d%e3%83%a2%e3%82%b6%e3%82%a4%e3%82%af'>ハロー!! きんいろモザイク</a>
+<a class='btn' href='search_all.html?q=%e3%83%8f%e3%83%ad%e3%83%bc!!%e3%81%8d%e3%82%93%e3%81%84%e3%82%8d%e3%83%a2%e3%82%b6%e3%82%a4%e3%82%af'>ハロー!!きんいろモザイク</a>
+<a class='btn' href='search_all.html?q=%e3%83%8f%e3%83%ad%e3%83%bc!!%e3%81%8d%e3%82%93%e3%81%84%e3%82%8d%e3%83%a2%e3%82%b6%e3%82%a4%e3%82%af+10%e8%a9%b1OP'>ハロー!!きんいろモザイク 10話OP</a>
+<a class='btn' href='search_all.html?q=%e3%83%8f%e3%83%ad%e3%83%bc%e3%83%bb%e3%83%ac%e3%83%87%e3%82%a3!'>ハロー・レディ!</a>
+<a class='btn' href='search_all.html?q=%e3%83%91%e3%83%af%e3%83%95%e3%83%ab%e3%83%97%e3%83%ad%e9%87%8e%e7%90%832024-2025%e3%83%bb%e8%97%a4%e5%8e%9f%e7%be%8e%e6%85%b6'>パワフルプロ野球2024-2025・藤原美慶</a>
+<a class='btn' href='search_all.html?q=%e3%83%91%e3%83%af%e3%83%97%e3%83%ad%e3%83%81%e3%83%a3%e3%83%b3%e3%83%94%e3%82%aa%e3%83%b3%e3%82%b7%e3%83%83%e3%83%97%e3%82%b92017'>パワプロチャンピオンシップス2017</a>
+<a class='btn' href='search_all.html?q=%e3%81%af%e3%82%93%e3%81%a0%e3%81%8f%e3%82%93'>はんだくん</a>
+<a class='btn' href='search_all.html?q=%e3%83%91%e3%83%b3%e3%83%81%e3%83%a9%e3%82%a4%e3%83%b3'>パンチライン</a>
+<a class='btn' href='search_all.html?q=%e3%83%8f%e3%83%b3%e3%83%89%e3%82%b7%e3%82%a7%e3%82%a4%e3%82%ab%e3%83%bc'>ハンドシェイカー</a>
+<a class='btn' href='search_all.html?q=%e3%83%90%e3%83%b3%e3%83%89%e3%83%aa%ef%bc%81+%e3%82%ac%e3%83%bc%e3%83%ab%e3%82%ba%e3%83%90%e3%83%b3%e3%83%89%e3%83%91%e3%83%bc%e3%83%86%e3%82%a3%ef%bc%81'>バンドリ！ ガールズバンドパーティ！</a>
+<a class='btn' href='search_all.html?q=%e3%83%90%e3%83%b3%e3%83%89%e3%83%aa!+%e3%82%ac%e3%83%bc%e3%83%ab%e3%82%ba%e3%83%90%e3%83%b3%e3%83%89%e3%83%91%e3%83%bc%e3%83%86%e3%82%a3!+for+Nintendo+Switch'>バンドリ! ガールズバンドパーティ! for Nintendo Switch</a>
+<a class='btn' href='search_all.html?q=%e3%83%90%e3%83%b3%e3%83%89%e3%83%aa!+%e3%82%ac%e3%83%bc%e3%83%ab%e3%82%ba%e3%83%90%e3%83%b3%e3%83%89%e3%83%91%e3%83%bc%e3%83%86%e3%82%a3!%c3%97%e3%83%8a%e3%82%be%e3%83%88%e3%82%ad%e8%a1%97%e6%ad%a9%e3%81%8d%e3%82%b2%e3%83%bc%e3%83%a0%e3%80%8c%e6%8e%a2%e3%81%97%e5%87%ba%e3%81%9b!+%e3%83%a9%e3%83%b3%e3%83%80%e3%83%a0%e3%82%b9%e3%82%bf%e3%83%bc!%e3%80%8d'>バンドリ! ガールズバンドパーティ!&#215;ナゾトキ街歩きゲーム「探し出せ! ランダムスター!」</a>
+<a class='btn' href='search_all.html?q=%e3%83%90%e3%83%b3%e3%83%89%e3%83%aa%ef%bc%81+%e3%82%86%e3%82%81%e2%88%9e%e3%81%bf%e3%81%9f'>バンドリ！ ゆめ∞みた</a>
+<a class='btn' href='search_all.html?q=%e3%83%90%e3%83%b3%e3%83%89%e3%83%aa!%e3%82%ac%e3%83%bc%e3%83%ab%e3%82%ba%e3%83%90%e3%83%b3%e3%83%89%e3%83%91%e3%83%bc%e3%83%86%e3%82%a3'>バンドリ!ガールズバンドパーティ</a>
+<a class='btn' href='search_all.html?q=%e3%83%91%e3%83%b3%e3%83%89%e3%83%aa%e3%82%b9%e3%83%88P'>パンドリストP</a>
+<a class='btn' href='search_all.html?q=%e3%83%90%e3%83%b3%e3%83%89%e3%83%ab%e7%89%88%e3%83%90%e3%83%b3%e3%83%90%e3%83%b3'>バンドル版バンバン</a>
+<a class='btn' href='search_all.html?q=%e3%83%8f%e3%83%b3%e3%83%89%e3%83%ac%e3%83%83%e3%83%89'>ハンドレッド</a>
+<a class='btn' href='search_all.html?q=%e3%83%8f%e3%83%b3%e3%83%90%e3%83%bc%e3%82%ac%e3%83%bc%e3%81%a1%e3%82%83%e3%82%93%e7%b5%b5%e6%97%a5%e8%a8%98'>ハンバーガーちゃん絵日記</a>
+<a class='btn' href='search_all.html?q=%e3%83%90%e3%83%b3%e3%83%96%e3%83%bc%e3%83%96%e3%83%ac%e3%83%bc%e3%83%89'>バンブーブレード</a>
+<a class='btn' href='search_all.html?q=%e3%83%91%e3%83%b3%e3%83%97%e3%82%ad%e3%83%b3%e3%83%bb%e3%82%b7%e3%82%b6%e3%83%bc%e3%82%ba+'>パンプキン・シザーズ </a>
+<a class='btn' href='search_all.html?q=%e3%83%8f%e3%83%b3%e3%83%96%e3%83%ac%e3%83%83%e3%83%80%e3%83%bc%e3%82%ba'>ハンブレッダーズ</a>
+<a class='btn' href='search_all.html?q=%e3%81%af%e8%a1%8c'>は行</a></div>
+  </div>
+
+  <script>
+    (function(){
+      const list=document.querySelectorAll('.list-は a');
+      const el=document.getElementById('count-list-は');
+      if(el){ el.textContent='表示件数: '+list.length; }
+    })();
+  </script>
+</div>
+</div>
+</body></html>
