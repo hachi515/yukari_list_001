@@ -1,4 +1,4 @@
-﻿/* ===== app.js（ES5/IE対応：DOMContentLoaded後に初期化） ===== */
+﻿/* ===== app.js（ES5/IE対応） ===== */
 var DEFAULT_PRIO = 999;
 
 /* NFKCもどき：全角→半角、カタカナ→ひらがな、空白圧縮、小文字化 */
@@ -7,7 +7,7 @@ function canon(s){
   var out = '';
   for(var i=0;i<s.length;i++){
     var c = s.charCodeAt(i);
-    if(c===0x3000){ out+=' '; continue; }                                  // 全角スペース→半角
+    if(c===0x3000){ out+=' '; continue; }                 // 全角スペース→半角
     if(c>=0xFF01 && c<=0xFF5E){ out+=String.fromCharCode(c-0xFEE0); continue; } // 全角英数記号→半角
     if(c>=0x30A1 && c<=0x30F6){ out+=String.fromCharCode(c-0x60); continue; }   // カタカナ→ひらがな
     out += s.charAt(i);
@@ -17,24 +17,38 @@ function canon(s){
   return out;
 }
 /* 半角/全角スペースAND */
-function tokensAnd(v){
+function tokensAnd(v){ 
   var t = canon(v).split(/[ \u3000]+/);
   var a = []; for(var i=0;i<t.length;i++){ if(t[i]) a.push(t[i]); }
   return a;
 }
 /* クエリ取得（URLSearchParams未使用） */
 function qparam(name){
-  var q = window.location.search.replace(/^\?/,'');
+  var q = window.location.search.replace(/^\?/,''), i, kv;
   if(!q) return '';
   var parts = q.split('&');
-  for(var i=0;i<parts.length;i++){
-    var kv = parts[i].split('=');
+  for(i=0;i<parts.length;i++){
+    kv = parts[i].split('=');
     if(kv[0]===name){
       try{ return decodeURIComponent((kv[1]||'').replace(/\+/g,' ')); }catch(e){ return ''; }
     }
   }
   return '';
 }
+/* 外部PHP検索リンク化（青タイトルのみ） */
+(function(){
+  if(!document.querySelectorAll) return;
+  var as = document.querySelectorAll('a[data-q]');
+  for(var i=0;i<as.length;i++){
+    try{
+      var a = as[i];
+      var q = a.getAttribute('data-q')||'';
+      a.setAttribute('href', (window.SEARCH_BASE||'') + 'search.php?searchword=' + q);
+      a.setAttribute('target','_blank');
+      a.setAttribute('rel','noopener');
+    }catch(e){}
+  }
+})();
 
 /* 優先度ソート（可視カードのみ） */
 function reorderByPriority(listId){
@@ -66,21 +80,19 @@ function setInitialCount(listId){
 }
 
 /* インデックス（初回構築） */
-var __elsMap = {};  // listId -> NodeList cache
-var __keysMap = {};
+var __els=null, __keys=null;
 function ensureIndex(listId){
-  if(__elsMap[listId] && __keysMap[listId]) return;
+  if(__els && __keys) return;
   var list = document.getElementById(listId); if(!list) return;
   var nodes = list.getElementsByClassName('card');
-  var els=[], keys=[];
+  __els=[]; __keys=[];
   for(var i=0;i<nodes.length;i++){
-    els.push(nodes[i]);
-    keys.push(nodes[i].getAttribute('data-key')||'');
+    __els.push(nodes[i]);
+    __keys.push(nodes[i].getAttribute('data-key')||'');
   }
-  __elsMap[listId]=els; __keysMap[listId]=keys;
 }
 
-/* ★ボタン押下でのみ実行 */
+/* ★ボタン押下でのみ実行（onchange等では動かない） */
 function filterCardsAdv(listId, boxId, yearId){
   ensureIndex(listId);
   var list = document.getElementById(listId); if(!list) return;
@@ -88,8 +100,6 @@ function filterCardsAdv(listId, boxId, yearId){
   var y = ySel ? (ySel.value||'') : '';
   var box = document.getElementById(boxId);
   var tokens = tokensAnd(box ? (box.value||'') : '');
-
-  var __els = __elsMap[listId]||[], __keys = __keysMap[listId]||[];
 
   list.style.display='none';
   var vis = 0;
@@ -124,33 +134,3 @@ function filterCardsAdv(listId, boxId, yearId){
   reorderByPriority(listId);
   list.style.display='';
 }
-
-/* --- DOM 構築後に実行：青タイトルの外部リンク化／?q= の自動適用 --- */
-document.addEventListener('DOMContentLoaded', function(){
-  try{
-    var as = document.querySelectorAll('a[data-q]');
-    for(var i=0;i<as.length;i++){
-      var a = as[i];
-      var q = a.getAttribute('data-q')||'';
-      a.setAttribute('href', (window.SEARCH_BASE||'') + 'search.php?searchword=' + q);
-      a.setAttribute('target','_blank');
-      a.setAttribute('rel','noopener');
-    }
-  }catch(e){}
-
-  // list-all などで ?q= を渡されたら自動適用
-  var initQ = qparam('q');
-  if(initQ){
-    var box = document.querySelector('input[id^="q-"]');
-    if(box){ box.value = initQ; }
-    var list = document.querySelector('[id^="list-"]');
-    var yearSel = document.querySelector('select[id^="year-"]');
-    if(list && box){
-      // id を推定
-      var listId = list.id;
-      var boxId  = box.id;
-      var yearId = yearSel ? yearSel.id : '';
-      filterCardsAdv(listId, boxId, yearId);
-    }
-  }
-});
